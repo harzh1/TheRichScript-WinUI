@@ -1,0 +1,45 @@
+<ContentDialog
+    x:Class="TheRichScript_WinUI.Dialogs.AddDebtDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Record Debt / Loan"
+    PrimaryButtonText="Save Record"
+    CloseButtonText="Cancel"
+    CornerRadius="12"
+    DefaultButton="Primary">
+
+    <StackPanel Spacing="16" Width="400">
+        <!-- Type: Lent vs Borrowed -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Debt Classification" Style="{StaticResource StatLabelTextStyle}" />
+            <RadioButtons x:Name="TypeRadioButtons" SelectedIndex="0" MaxColumns="2">
+                <RadioButton Content="Lent to someone (Receivable)" Tag="LENT" IsChecked="True" />
+                <RadioButton Content="Borrowed from someone (Payable)" Tag="BORROWED" />
+            </RadioButtons>
+        </StackPanel>
+
+        <!-- Person Name -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Person / Contact Name" Style="{StaticResource StatLabelTextStyle}" />
+            <TextBox x:Name="PersonBox" PlaceholderText="e.g. John Doe, Sarah, Landlord" />
+        </StackPanel>
+
+        <!-- Amount -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Amount" Style="{StaticResource StatLabelTextStyle}" />
+            <NumberBox x:Name="AmountNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" PlaceholderText="0.00" />
+        </StackPanel>
+
+        <!-- Associated Account -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Associated Account / Asset" Style="{StaticResource StatLabelTextStyle}" />
+            <ComboBox x:Name="AssetComboBox" HorizontalAlignment="Stretch" DisplayMemberPath="DisplayNameWithBalance" SelectedValuePath="Id" />
+        </StackPanel>
+
+        <!-- Due Date -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Expected Due Date (Optional)" Style="{StaticResource StatLabelTextStyle}" />
+            <CalendarDatePicker x:Name="DatePicker" HorizontalAlignment="Stretch" />
+        </StackPanel>
+    </StackPanel>
+</ContentDialog>

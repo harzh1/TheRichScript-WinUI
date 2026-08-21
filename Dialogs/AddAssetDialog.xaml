@@ -1,0 +1,36 @@
+<ContentDialog
+    x:Class="TheRichScript_WinUI.Dialogs.AddAssetDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Add Account / Asset"
+    PrimaryButtonText="Save Asset"
+    CloseButtonText="Cancel"
+    CornerRadius="12"
+    DefaultButton="Primary">
+
+    <StackPanel Spacing="16" Width="400">
+        <!-- Asset Name -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Asset / Account Name" Style="{StaticResource StatLabelTextStyle}" />
+            <TextBox x:Name="NameBox" PlaceholderText="e.g. HDFC Salary Account, Zerodha Portfolio, Cash" />
+        </StackPanel>
+
+        <!-- Asset Type -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Asset Type" Style="{StaticResource StatLabelTextStyle}" />
+            <AutoSuggestBox x:Name="TypeBox" PlaceholderText="e.g. BANK, INVESTMENT, CRYPTO, REAL ESTATE, CASH" TextChanged="TypeBox_TextChanged" />
+        </StackPanel>
+
+        <!-- Initial Value / Balance -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Current Value / Balance" Style="{StaticResource StatLabelTextStyle}" />
+            <NumberBox x:Name="ValueNumberBox" Value="0" SpinButtonPlacementMode="Inline" />
+        </StackPanel>
+
+        <!-- Quantity (Optional) -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Quantity / Units (Optional)" Style="{StaticResource StatLabelTextStyle}" />
+            <NumberBox x:Name="QuantityNumberBox" Value="1" SpinButtonPlacementMode="Inline" />
+        </StackPanel>
+    </StackPanel>
+</ContentDialog>

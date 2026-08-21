@@ -1,0 +1,74 @@
+<ContentDialog
+    x:Class="TheRichScript_WinUI.Dialogs.AddPlanDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="New Plan or Quick Add Template"
+    PrimaryButtonText="Save"
+    CloseButtonText="Cancel"
+    CornerRadius="12"
+    DefaultButton="Primary">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="550">
+        <StackPanel Spacing="16" Width="400">
+            <!-- Plan Name -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Template / Plan Name" Style="{StaticResource StatLabelTextStyle}" />
+                <TextBox x:Name="NameBox" PlaceholderText="e.g. Coffee, Fuel, Netflix, House Rent" />
+            </StackPanel>
+
+            <!-- Plan Mode (Recurring vs Manual Quick Add) -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Plan Schedule Type" Style="{StaticResource StatLabelTextStyle}" />
+                <RadioButtons x:Name="ScheduleRadioButtons" SelectedIndex="0" MaxColumns="2" SelectionChanged="ScheduleRadioButtons_SelectionChanged">
+                    <RadioButton Content="Recurring (Auto-processed)" Tag="RECURRING" IsChecked="True" />
+                    <RadioButton Content="Quick Add Template" Tag="MANUAL" />
+                </RadioButtons>
+            </StackPanel>
+
+            <!-- Expense vs Income -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Flow Type" Style="{StaticResource StatLabelTextStyle}" />
+                <RadioButtons x:Name="TxTypeRadioButtons" SelectedIndex="0" MaxColumns="2">
+                    <RadioButton Content="Expense" Tag="EXPENSE" IsChecked="True" />
+                    <RadioButton Content="Income / Salary" Tag="INCOME" />
+                </RadioButtons>
+            </StackPanel>
+
+            <!-- Amount -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Amount" Style="{StaticResource StatLabelTextStyle}" />
+                <NumberBox x:Name="AmountNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" SmallChange="1" LargeChange="10" PlaceholderText="0.00" />
+            </StackPanel>
+
+            <!-- Category Selector (List of categories + Create New Category option) -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Category" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="CategoryComboBox" PlaceholderText="Choose a category..." HorizontalAlignment="Stretch" SelectionChanged="CategoryComboBox_SelectionChanged" />
+                <TextBox x:Name="NewCategoryTextBox" PlaceholderText="Enter new category name (e.g. GYM, BILLS)..." Visibility="Collapsed" />
+            </StackPanel>
+
+            <!-- Source Asset -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Account (Source Asset)" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="SourceAssetComboBox" HorizontalAlignment="Stretch" DisplayMemberPath="DisplayNameWithBalance" SelectedValuePath="Id" />
+            </StackPanel>
+
+            <!-- Frequency (for recurring) -->
+            <StackPanel x:Name="FrequencyPanel" Spacing="6">
+                <TextBlock Text="Frequency" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="FrequencyComboBox" HorizontalAlignment="Stretch" SelectedIndex="2">
+                    <ComboBoxItem Content="Daily" Tag="DAILY" />
+                    <ComboBoxItem Content="Weekly" Tag="WEEKLY" />
+                    <ComboBoxItem Content="Monthly" Tag="MONTHLY" />
+                    <ComboBoxItem Content="Yearly" Tag="YEARLY" />
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Next Due Date -->
+            <StackPanel x:Name="DueDatePanel" Spacing="6">
+                <TextBlock Text="Next Due Date" Style="{StaticResource StatLabelTextStyle}" />
+                <CalendarDatePicker x:Name="DatePicker" HorizontalAlignment="Stretch" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>

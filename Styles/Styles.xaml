@@ -1,0 +1,138 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Theme Dictionaries for NavigationView Backgrounds & ContentDialog Styles -->
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="ContentDialogBackground" Color="#242424" />
+            <SolidColorBrush x:Key="ContentDialogBorderBrush" Color="#383838" />
+            <SolidColorBrush x:Key="ContentDialogSmokeFill" Color="#99000000" />
+            <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#202020" />
+            <SolidColorBrush x:Key="NavigationViewTopPaneBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="NavigationViewContentGridBorderBrush" Color="Transparent" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="ContentDialogBackground" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ContentDialogBorderBrush" Color="#E5E5E5" />
+            <SolidColorBrush x:Key="ContentDialogSmokeFill" Color="#4D000000" />
+            <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#F3F3F3" />
+            <SolidColorBrush x:Key="NavigationViewTopPaneBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="NavigationViewContentGridBorderBrush" Color="Transparent" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Default">
+            <SolidColorBrush x:Key="ContentDialogBackground" Color="#242424" />
+            <SolidColorBrush x:Key="ContentDialogBorderBrush" Color="#383838" />
+            <SolidColorBrush x:Key="ContentDialogSmokeFill" Color="#99000000" />
+            <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#202020" />
+            <SolidColorBrush x:Key="NavigationViewTopPaneBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="NavigationViewContentGridBorderBrush" Color="Transparent" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
+    <!-- Fluent Theme-Aligned Brushes (Pure Windows Aesthetics) -->
+    <StaticResource x:Key="IncomeGreenBrush" ResourceKey="TextFillColorPrimaryBrush" />
+    <StaticResource x:Key="IncomeGreenSubtleBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
+    <StaticResource x:Key="ExpenseRedBrush" ResourceKey="TextFillColorPrimaryBrush" />
+    <StaticResource x:Key="ExpenseRedSubtleBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
+    <StaticResource x:Key="TransferBlueBrush" ResourceKey="TextFillColorPrimaryBrush" />
+    <StaticResource x:Key="TransferBlueSubtleBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
+    <StaticResource x:Key="AccentPurpleBrush" ResourceKey="AccentFillColorDefaultBrush" />
+    <StaticResource x:Key="AccentPurpleSubtleBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
+
+    <!-- Fluent Card Style -->
+    <Style x:Key="FluentCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="20" />
+    </Style>
+
+    <!-- Fluent Subtle Card Style -->
+    <Style x:Key="FluentSubtleCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="14" />
+    </Style>
+
+    <!-- Stat Value Text -->
+    <Style x:Key="StatValueTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="28" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontFamily" Value="Segoe UI Variable Display" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+    </Style>
+
+    <!-- Stat Label Text -->
+    <Style x:Key="StatLabelTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+
+    <!-- Section Header Text -->
+    <Style x:Key="SectionHeaderTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontFamily" Value="Segoe UI Variable Display" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+    </Style>
+
+    <!-- Page Header Text -->
+    <Style x:Key="PageHeaderTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="26" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontFamily" Value="Segoe UI Variable Display" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+    </Style>
+
+    <!-- Seamless NavigationView Style -->
+    <Style TargetType="NavigationView">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- Compact Action Button Styles -->
+    <Style x:Key="SmallHeaderAccentButtonStyle" TargetType="Button" BasedOn="{StaticResource AccentButtonStyle}">
+        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="CornerRadius" Value="6" />
+    </Style>
+
+    <Style x:Key="SmallHeaderButtonStyle" TargetType="Button">
+        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="CornerRadius" Value="6" />
+    </Style>
+
+    <Style x:Key="SmallHeaderIconButton" TargetType="Button">
+        <Setter Property="Padding" Value="6,4" />
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="MinWidth" Value="28" />
+        <Setter Property="CornerRadius" Value="6" />
+    </Style>
+
+    <!-- ContentDialog Rounded Corners & Solid Opaque Background Styling -->
+    <CornerRadius x:Key="OverlayCornerRadius">12</CornerRadius>
+    <CornerRadius x:Key="ContentDialogCornerRadius">12</CornerRadius>
+
+    <Style TargetType="ContentDialog">
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Background" Value="{ThemeResource ContentDialogBackground}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource ContentDialogBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+</ResourceDictionary>

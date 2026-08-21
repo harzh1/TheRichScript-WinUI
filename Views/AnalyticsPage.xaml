@@ -1,0 +1,278 @@
+<Page
+    x:Class="TheRichScript_WinUI.Views.AnalyticsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:TheRichScript_WinUI.Models"
+    xmlns:controls="using:TheRichScript_WinUI.Controls"
+    xmlns:vm="using:TheRichScript_WinUI.ViewModels"
+    mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16,24,24">
+        <StackPanel Spacing="16" MaxWidth="1400" HorizontalAlignment="Stretch">
+
+            <!-- 1. Header Row (Title on Left, Dynamic Period Selector on Right) -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Financial Analytics" Style="{StaticResource PageHeaderTextStyle}" FontSize="22" VerticalAlignment="Center" />
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <DropDownButton x:Name="MonthPickerDropDown" Style="{StaticResource SmallHeaderButtonStyle}" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <FontIcon Glyph="&#xE787;" FontSize="11" />
+                            <TextBlock Text="{x:Bind ViewModel.FormattedSelectedMonth, Mode=OneWay}" FontSize="12" />
+                        </StackPanel>
+                        <DropDownButton.Flyout>
+                            <Flyout Placement="BottomEdgeAlignedRight">
+                                <StackPanel Spacing="10" Width="220" Padding="4">
+                                    <!-- Year Navigation Row -->
+                                    <Grid>
+                                        <Button Padding="6,4" Background="Transparent" BorderThickness="0" Command="{x:Bind ViewModel.PreviousYearCommand}" HorizontalAlignment="Left">
+                                            <FontIcon Glyph="&#xE76B;" FontSize="10" />
+                                        </Button>
+                                        <TextBlock Text="{x:Bind ViewModel.PickerYear, Mode=OneWay}" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <Button Padding="6,4" Background="Transparent" BorderThickness="0" Command="{x:Bind ViewModel.NextYearCommand}" HorizontalAlignment="Right">
+                                            <FontIcon Glyph="&#xE76C;" FontSize="10" />
+                                        </Button>
+                                    </Grid>
+
+                                    <!-- 4x3 Month Buttons Grid -->
+                                    <Grid ColumnSpacing="6" RowSpacing="6">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Button Grid.Row="0" Grid.Column="0" Content="Jan" HorizontalAlignment="Stretch" Padding="4,6" FontSize="12" Click="MonthButton_Click" Tag="1" />
+                                        <Button Grid.Row="0" Grid.Column="1" Content="Feb" HorizontalAlignment="Stretch" Padding="4,6" FontSize="12" Click="MonthButton_Click" Tag="2" />
+                                        <Button Grid.Row="0" Grid.Column="2" Content="Mar" HorizontalAlignment="Stretch" Padding="4,6" FontSize="12" Click="MonthButton_Click" Tag="3" />
+
+                                        <Button Grid.Row="1" Grid.Column="0" Content="Apr" HorizontalAlignment="Stretch" Padding="4,6" FontSize="12" Click="MonthButton_Click" Tag="4" />
+                                        <Button Grid.Row="1" Grid.Column="1" Content="May" HorizontalAlignment="Stretch" Padding="4,6" FontSize="12" Click="MonthButton_Click" Tag="5" />
+                                        <Button Grid.Row="1" Grid.Column="2" Content="Jun" HorizontalAlignment="Stretch" Padding="4,6" FontSize="12" Click="MonthButton_Click" Tag="6" />
+
+                                        <Button Grid.Row="2" Grid.Column="0" Content="Jul" HorizontalAlignment="Stretch" Padding="4,6" FontSize="12" Click="MonthButton_Click" Tag="7" />
+                                        <Button Grid.Row="2" Grid.Column="1" Content="Aug" HorizontalAlignment="Stretch" Padding="4,6" FontSize="12" Click="MonthButton_Click" Tag="8" />
+                                        <Button Grid.Row="2" Grid.Column="2" Content="Sep" HorizontalAlignment="Stretch" Padding="4,6" FontSize="12" Click="MonthButton_Click" Tag="9" />
+
+                                        <Button Grid.Row="3" Grid.Column="0" Content="Oct" HorizontalAlignment="Stretch" Padding="4,6" FontSize="12" Click="MonthButton_Click" Tag="10" />
+                                        <Button Grid.Row="3" Grid.Column="1" Content="Nov" HorizontalAlignment="Stretch" Padding="4,6" FontSize="12" Click="MonthButton_Click" Tag="11" />
+                                        <Button Grid.Row="3" Grid.Column="2" Content="Dec" HorizontalAlignment="Stretch" Padding="4,6" FontSize="12" Click="MonthButton_Click" Tag="12" />
+                                    </Grid>
+
+                                    <!-- Current Month Quick Shortcut -->
+                                    <Button Content="Current Month" HorizontalAlignment="Stretch" Padding="4,4" FontSize="11" Click="CurrentMonthButton_Click" />
+                                </StackPanel>
+                            </Flyout>
+                        </DropDownButton.Flyout>
+                    </DropDownButton>
+                    <Button Style="{StaticResource SmallHeaderIconButton}" Command="{x:Bind ViewModel.LoadAnalyticsDataCommand}" ToolTipService.ToolTip="Refresh Analytics">
+                        <FontIcon Glyph="&#xE72C;" FontSize="12" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Loading Indicator -->
+            <ProgressBar IsIndeterminate="True" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+            <!-- 2. Essential KPI Metric Cards: 4 Focused Cards in 1 Row -->
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Month Income -->
+                <Border Grid.Column="0" Style="{StaticResource FluentCardStyle}" Padding="14,12">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="MONTH INCOME" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
+                        <TextBlock Text="{x:Bind ViewModel.AnalyticsData.MonthIncome, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Month Expense -->
+                <Border Grid.Column="1" Style="{StaticResource FluentCardStyle}" Padding="14,12">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="MONTH EXPENSES" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
+                        <TextBlock Text="{x:Bind ViewModel.AnalyticsData.MonthExpense, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Month Net Savings -->
+                <Border Grid.Column="2" Style="{StaticResource FluentCardStyle}" Padding="14,12">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="NET MONTHLY SAVINGS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
+                        <TextBlock Text="{x:Bind ViewModel.AnalyticsData.MonthNetSavings, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Savings Rate % -->
+                <Border Grid.Column="3" Style="{StaticResource FluentCardStyle}" Padding="14,12">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="SAVINGS RATE" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
+                        <TextBlock Text="{x:Bind ViewModel.FormattedSavingsRate, Mode=OneWay}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- 3. Dynamic 6-Month Income vs Expense Trend Bar Chart -->
+            <Border Style="{StaticResource FluentCardStyle}" Padding="18,16">
+                <StackPanel Spacing="14">
+                    <!-- Chart Header & Legend -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="6-Month Income vs Expense Trend" Style="{StaticResource SectionHeaderTextStyle}" FontSize="15" VerticalAlignment="Center" />
+
+                        <!-- Legend -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <Border Width="10" Height="10" CornerRadius="2" Background="#34D399" />
+                                <TextBlock Text="Income" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <Border Width="10" Height="10" CornerRadius="2" Background="#F87171" />
+                                <TextBlock Text="Expense" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Chart Empty State -->
+                    <TextBlock Text="No trend data available for the past 6 months." Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" Margin="0,12" Visibility="{x:Bind ViewModel.HasMonthlyTrends, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}" />
+
+                    <!-- Dynamic Chart Container -->
+                    <Grid Height="210" Margin="0,6,0,0" Visibility="{x:Bind ViewModel.HasMonthlyTrends, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Y-Axis Labels -->
+                        <Grid Grid.Column="0" Margin="0,0,10,44">
+                            <TextBlock Text="{x:Bind ViewModel.MaxTrendAmount, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Top" />
+                            <TextBlock Text="{x:Bind ViewModel.MidTrendAmount, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            <TextBlock Text="0" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+                        </Grid>
+
+                        <!-- Chart Body (Gridlines + Bars) -->
+                        <Grid Grid.Column="1">
+                            <!-- Background Reference Gridlines -->
+                            <Grid Margin="0,6,0,44">
+                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" VerticalAlignment="Top" />
+                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" VerticalAlignment="Center" />
+                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" VerticalAlignment="Bottom" />
+                            </Grid>
+
+                            <!-- 6 Month Grouped Columns via UniformGridPanel -->
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.MonthlyTrends, Mode=OneWay}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <controls:UniformGridPanel Columns="6" ColumnSpacing="12" HorizontalAlignment="Stretch" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="models:MonthlyTrendItem">
+                                        <Grid ToolTipService.ToolTip="{x:Bind ChartTooltip}">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="150" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Grouped Vertical Bars (Aligns to Bottom of Row 0) -->
+                                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                                <!-- Income Bar -->
+                                                <Border Width="16" Height="{x:Bind IncomeBarHeight}" CornerRadius="3,3,0,0" VerticalAlignment="Bottom">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="#5EEAD4" Offset="0.0" />
+                                                            <GradientStop Color="#10B981" Offset="1.0" />
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                </Border>
+
+                                                <!-- Expense Bar -->
+                                                <Border Width="16" Height="{x:Bind ExpenseBarHeight}" CornerRadius="3,3,0,0" VerticalAlignment="Bottom">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="#FCA5A5" Offset="0.0" />
+                                                            <GradientStop Color="#EF4444" Offset="1.0" />
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                </Border>
+                                            </StackPanel>
+
+                                            <!-- Month Label -->
+                                            <TextBlock Grid.Row="1" Text="{x:Bind Label}" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,6,0,2" />
+
+                                            <!-- Net Savings Badge -->
+                                            <Border Grid.Row="2" CornerRadius="3" Padding="4,1" HorizontalAlignment="Center" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                                <TextBlock Text="{x:Bind FormattedNetSavings}" FontSize="9" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- 4. Category Spending Distribution -->
+            <Border Style="{StaticResource FluentCardStyle}" Padding="16,14">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Monthly Spending by Category" Style="{StaticResource SectionHeaderTextStyle}" FontSize="15" />
+
+                    <TextBlock Text="No category expenses recorded for the selected month." Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,6" FontSize="12" Visibility="{x:Bind ViewModel.CategoryBreakdown.Count, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}" />
+
+                    <ListView ItemsSource="{x:Bind ViewModel.CategoryBreakdown, Mode=OneWay}" SelectionMode="None">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="models:CategorySpendingSummary">
+                                <Grid Padding="8,6" ColumnSpacing="14" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="3*" />
+                                        <ColumnDefinition Width="1.2*" />
+                                        <ColumnDefinition Width="1.2*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Category Name -->
+                                    <TextBlock Text="{x:Bind CategoryName}" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+
+                                    <!-- Progress Bar -->
+                                    <ProgressBar Grid.Column="1" Value="{x:Bind PercentageOfTotal}" Maximum="100" Height="4" CornerRadius="2" VerticalAlignment="Center" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+
+                                    <!-- Percentage -->
+                                    <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                        <Run Text="{x:Bind PercentageOfTotal, Converter={StaticResource PercentTextConverter}}" />
+                                    </TextBlock>
+
+                                    <!-- Amount -->
+                                    <TextBlock Grid.Column="3" Text="{x:Bind Amount, Converter={StaticResource CurrencyConverter}}" FontWeight="Bold" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

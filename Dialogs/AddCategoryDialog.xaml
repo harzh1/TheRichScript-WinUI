@@ -1,0 +1,30 @@
+<ContentDialog
+    x:Class="TheRichScript_WinUI.Dialogs.AddCategoryDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Category &amp; Budget Limit"
+    PrimaryButtonText="Save Category"
+    CloseButtonText="Cancel"
+    CornerRadius="12"
+    DefaultButton="Primary">
+
+    <StackPanel Spacing="16" Width="380">
+        <!-- Category Name -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Category Name" Style="{StaticResource StatLabelTextStyle}" />
+            <TextBox x:Name="NameBox" PlaceholderText="e.g. GROCERIES, DINE OUT, ENTERTAINMENT" />
+        </StackPanel>
+
+        <!-- Monthly Limit -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Monthly Budget Limit (Optional, 0 for none)" Style="{StaticResource StatLabelTextStyle}" />
+            <NumberBox x:Name="MonthlyLimitNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" />
+        </StackPanel>
+
+        <!-- Yearly Limit -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Yearly Budget Limit (Optional, 0 for none)" Style="{StaticResource StatLabelTextStyle}" />
+            <NumberBox x:Name="YearlyLimitNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" />
+        </StackPanel>
+    </StackPanel>
+</ContentDialog>

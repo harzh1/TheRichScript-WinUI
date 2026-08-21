@@ -1,0 +1,86 @@
+<ContentDialog
+    x:Class="TheRichScript_WinUI.Dialogs.AddGoalDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="New Financial Goal"
+    PrimaryButtonText="Save Goal"
+    CloseButtonText="Cancel"
+    CornerRadius="12"
+    DefaultButton="Primary">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="550">
+        <StackPanel Spacing="14" Width="400">
+            <!-- Goal Name -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Goal Name" Style="{StaticResource StatLabelTextStyle}" />
+                <TextBox x:Name="NameBox" PlaceholderText="e.g. Emergency Fund, New Car, Tokyo Vacation" />
+            </StackPanel>
+
+            <!-- Target Amount -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Target Amount" Style="{StaticResource StatLabelTextStyle}" />
+                <NumberBox x:Name="TargetAmountNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" PlaceholderText="0.00" />
+            </StackPanel>
+
+            <!-- Target Completion Date -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Target Date" Style="{StaticResource StatLabelTextStyle}" />
+                <CalendarDatePicker x:Name="DatePicker" HorizontalAlignment="Stretch" />
+            </StackPanel>
+
+            <!-- Initial Deposit -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Initial Deposit (Optional)" Style="{StaticResource StatLabelTextStyle}" />
+                <NumberBox x:Name="InitialDepositNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" />
+            </StackPanel>
+
+            <!-- Funding Asset -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Source Account (For Deposit &amp; Recurring)" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="AssetComboBox" HorizontalAlignment="Stretch" DisplayMemberPath="DisplayNameWithBalance" SelectedValuePath="Id" />
+            </StackPanel>
+
+            <!-- Recurring Auto-Funding (Optional) -->
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Auto-Fund Amount" Style="{StaticResource StatLabelTextStyle}" />
+                    <NumberBox x:Name="RecurringAmountNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Text="Frequency" Style="{StaticResource StatLabelTextStyle}" />
+                    <ComboBox x:Name="FrequencyComboBox" HorizontalAlignment="Stretch" SelectedIndex="2">
+                        <ComboBoxItem Content="Daily" Tag="DAILY" />
+                        <ComboBoxItem Content="Weekly" Tag="WEEKLY" />
+                        <ComboBoxItem Content="Monthly" Tag="MONTHLY" />
+                        <ComboBoxItem Content="Yearly" Tag="YEARLY" />
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+
+            <!-- Image Attachments (Multi-image Slideshow Support) -->
+            <StackPanel Spacing="6">
+                <Grid>
+                    <TextBlock Text="Goal Inspiration Photos (Slideshow)" Style="{StaticResource StatLabelTextStyle}" />
+                    <Button HorizontalAlignment="Right" Padding="8,3" Click="BrowseImages_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon Glyph="&#xEB9F;" FontSize="11" />
+                            <TextBlock Text="Add Photos" FontSize="11" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                    <StackPanel x:Name="ImageThumbnailsPanel" Orientation="Horizontal" Spacing="8" MinHeight="40">
+                        <TextBlock x:Name="NoImagesText" Text="No photos selected (optional)" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="11" VerticalAlignment="Center" />
+                    </StackPanel>
+                </ScrollViewer>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>

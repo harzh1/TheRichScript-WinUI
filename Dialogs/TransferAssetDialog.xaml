@@ -1,0 +1,42 @@
+<ContentDialog
+    x:Class="TheRichScript_WinUI.Dialogs.TransferAssetDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Transfer Funds"
+    PrimaryButtonText="Transfer"
+    CloseButtonText="Cancel"
+    CornerRadius="12"
+    DefaultButton="Primary">
+
+    <StackPanel Spacing="16" Width="400">
+        <!-- From Asset -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="From Account (Source)" Style="{StaticResource StatLabelTextStyle}" />
+            <ComboBox x:Name="FromAssetComboBox" HorizontalAlignment="Stretch" DisplayMemberPath="DisplayNameWithBalance" SelectedValuePath="Id" />
+        </StackPanel>
+
+        <!-- To Asset -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="To Account (Destination)" Style="{StaticResource StatLabelTextStyle}" />
+            <ComboBox x:Name="ToAssetComboBox" HorizontalAlignment="Stretch" DisplayMemberPath="DisplayNameWithBalance" SelectedValuePath="Id" />
+        </StackPanel>
+
+        <!-- Amount -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Transfer Amount" Style="{StaticResource StatLabelTextStyle}" />
+            <NumberBox x:Name="AmountNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" PlaceholderText="0.00" />
+        </StackPanel>
+
+        <!-- Description -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Note / Reason" Style="{StaticResource StatLabelTextStyle}" />
+            <TextBox x:Name="DescriptionBox" PlaceholderText="e.g. Savings transfer, ATM withdrawal" />
+        </StackPanel>
+
+        <!-- Date -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Date" Style="{StaticResource StatLabelTextStyle}" />
+            <CalendarDatePicker x:Name="DatePicker" HorizontalAlignment="Stretch" />
+        </StackPanel>
+    </StackPanel>
+</ContentDialog>
