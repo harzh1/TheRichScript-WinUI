@@ -1,0 +1,201 @@
+<Page
+    x:Class="TheRichScript_WinUI.Views.BudgetsPlansPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:TheRichScript_WinUI.Models"
+    xmlns:controls="using:TheRichScript_WinUI.Controls"
+    xmlns:vm="using:TheRichScript_WinUI.ViewModels"
+    mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16,24,24">
+        <StackPanel Spacing="16" MaxWidth="1400" HorizontalAlignment="Stretch">
+
+            <!-- 1. Header Row (Title on Left, Actions on Right) -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Budgets &amp; Recurring Plans" Style="{StaticResource PageHeaderTextStyle}" FontSize="22" VerticalAlignment="Center" />
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <Button Style="{StaticResource SmallHeaderAccentButtonStyle}" Click="AddPlan_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <FontIcon Glyph="&#xE710;" FontSize="11" />
+                            <TextBlock Text="New Recurring Plan" FontSize="12" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource SmallHeaderButtonStyle}" Click="AddQuickAdd_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <FontIcon Glyph="&#xE945;" FontSize="11" />
+                            <TextBlock Text="New Template" FontSize="12" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource SmallHeaderIconButton}" Command="{x:Bind ViewModel.LoadPlansCommand}" ToolTipService.ToolTip="Refresh Plans">
+                        <FontIcon Glyph="&#xE72C;" FontSize="12" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Loading Indicator -->
+            <ProgressBar IsIndeterminate="True" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+            <!-- 2. Summary KPI Metric Cards: 4 Compact Cards in 1 Row -->
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Monthly Commitments / Subscriptions Outflow -->
+                <Border Grid.Column="0" Style="{StaticResource FluentCardStyle}" Padding="14,12">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="MONTHLY OUTFLOWS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
+                        <TextBlock Text="{x:Bind ViewModel.TotalMonthlyCommitments, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Monthly Recurring Inflow -->
+                <Border Grid.Column="1" Style="{StaticResource FluentCardStyle}" Padding="14,12">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="MONTHLY INFLOWS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
+                        <TextBlock Text="{x:Bind ViewModel.TotalRecurringIncome, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Net Recurring Cashflow -->
+                <Border Grid.Column="2" Style="{StaticResource FluentCardStyle}" Padding="14,12">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="NET RECURRING CASHFLOW" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
+                        <TextBlock Text="{x:Bind ViewModel.NetRecurringCashflow, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Total Active Plans Count -->
+                <Border Grid.Column="3" Style="{StaticResource FluentCardStyle}" Padding="14,12">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="ACTIVE PLANS &amp; TEMPLATES" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
+                        <TextBlock Text="{x:Bind ViewModel.ActivePlansCount, Mode=OneWay}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- 3. Quick Add Templates Section using StaggeredLayout -->
+            <Border Style="{StaticResource FluentCardStyle}" Padding="16,14">
+                <StackPanel Spacing="12">
+                    <Grid>
+                        <TextBlock Text="Quick Add Templates" Style="{StaticResource SectionHeaderTextStyle}" FontSize="15" VerticalAlignment="Center" />
+                        <HyperlinkButton Content="+ New Template" Click="AddQuickAdd_Click" HorizontalAlignment="Right" Padding="4,0" FontSize="12" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <TextBlock Text="No Quick Add templates yet." Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" Visibility="{x:Bind ViewModel.ManualPlans.Count, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}" />
+
+                    <!-- StaggeredLayout for Quick Add Templates -->
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.ManualPlans, Mode=OneWay}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <controls:StaggeredPanel ColumnSpacing="12" RowSpacing="12" DesiredColumnWidth="240" MaxColumns="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:PlannedExpense">
+                                <Border Style="{StaticResource FluentSubtleCardStyle}" Padding="14,12" CornerRadius="8">
+                                    <StackPanel Spacing="8">
+                                        <Grid>
+                                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                <TextBlock Text="{x:Bind Category}" FontSize="9" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            </Border>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="2" VerticalAlignment="Center">
+                                                <Button Padding="4" Background="Transparent" BorderThickness="0" Click="EditPlan_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Edit Template">
+                                                    <FontIcon Glyph="&#xE70F;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                </Button>
+                                                <Button Padding="4" Background="Transparent" BorderThickness="0" Click="DeletePlan_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Delete Template">
+                                                    <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{x:Bind Amount, Converter={StaticResource CurrencyConverter}}" FontSize="17" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- 4. Recurring Plans & Subscriptions Section -->
+            <Border Style="{StaticResource FluentCardStyle}" Padding="16,14">
+                <StackPanel Spacing="12">
+                    <Grid>
+                        <TextBlock Text="Recurring Plans &amp; Subscriptions" Style="{StaticResource SectionHeaderTextStyle}" FontSize="15" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <TextBlock Text="No recurring plans yet." Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" Visibility="{x:Bind ViewModel.RecurringPlans.Count, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}" />
+
+                    <ListView ItemsSource="{x:Bind ViewModel.RecurringPlans, Mode=OneWay}" SelectionMode="None">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="models:PlannedExpense">
+                                <Grid Padding="6,8" ColumnSpacing="14" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="1.2*" />
+                                        <ColumnDefinition Width="1.5*" />
+                                        <ColumnDefinition Width="1.2*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Plan Glyph -->
+                                    <Border Grid.Column="0" Width="28" Height="28" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
+                                        <FontIcon Glyph="{x:Bind TxType, Converter={StaticResource TypeToGlyphConverter}}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+
+                                    <!-- Name & Category -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                        <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                        <Border HorizontalAlignment="Left" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="5,1">
+                                            <TextBlock Text="{x:Bind Category}" FontSize="9" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- Frequency Badge -->
+                                    <Border Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2">
+                                        <TextBlock Text="{x:Bind DisplayFrequency}" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                    </Border>
+
+                                    <!-- Next Due Date -->
+                                    <StackPanel Grid.Column="3" VerticalAlignment="Center" Spacing="1">
+                                        <TextBlock Text="Next Due" FontSize="9" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                        <TextBlock Text="{x:Bind NextDueDate, Converter={StaticResource DateTimeFormatConverter}}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                    </StackPanel>
+
+                                    <!-- Amount -->
+                                    <TextBlock Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="SemiBold" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}">
+                                        <Run Text="{x:Bind Amount, Converter={StaticResource CurrencyConverter}}" />
+                                    </TextBlock>
+
+                                    <!-- Actions: Edit & Delete -->
+                                    <StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+                                        <Button Background="Transparent" BorderThickness="0" Padding="4" Click="EditPlan_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Edit Plan">
+                                            <FontIcon Glyph="&#xE70F;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </Button>
+                                        <Button Background="Transparent" BorderThickness="0" Padding="4" Click="DeletePlan_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Delete Plan">
+                                            <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

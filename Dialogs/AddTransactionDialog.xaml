@@ -1,0 +1,75 @@
+<ContentDialog
+    x:Class="TheRichScript_WinUI.Dialogs.AddTransactionDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:TheRichScript_WinUI.Models"
+    Title="New Transaction"
+    PrimaryButtonText="Add Transaction"
+    CloseButtonText="Cancel"
+    CornerRadius="12"
+    DefaultButton="Primary">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="550">
+        <StackPanel Spacing="16" Width="400">
+            <!-- Type Selector (Income / Expense) -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Transaction Type" Style="{StaticResource StatLabelTextStyle}" />
+                <RadioButtons x:Name="TypeRadioButtons" SelectedIndex="0" MaxColumns="2" SelectionChanged="TypeRadioButtons_SelectionChanged">
+                    <RadioButton Content="Expense" Tag="EXPENSE" IsChecked="True" />
+                    <RadioButton Content="Income" Tag="INCOME" />
+                </RadioButtons>
+            </StackPanel>
+
+            <!-- Amount Input -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Amount" Style="{StaticResource StatLabelTextStyle}" />
+                <NumberBox x:Name="AmountNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" SmallChange="1" LargeChange="10" PlaceholderText="0.00" />
+            </StackPanel>
+
+            <!-- Asset Selector -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Account / Asset" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="AssetComboBox" HorizontalAlignment="Stretch" DisplayMemberPath="DisplayNameWithBalance" SelectedValuePath="Id" />
+            </StackPanel>
+
+            <!-- Category Selector (For Expenses: List of categories + Create New Category option) -->
+            <StackPanel x:Name="CategoryPanel" Spacing="6">
+                <TextBlock Text="Category" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="CategoryComboBox" PlaceholderText="Choose a category..." HorizontalAlignment="Stretch" SelectionChanged="CategoryComboBox_SelectionChanged" />
+                <TextBox x:Name="NewCategoryTextBox" PlaceholderText="Enter new category name (e.g. ELECTRONICS, GIFTS)..." Visibility="Collapsed" />
+            </StackPanel>
+
+            <!-- Income Source Selector (For Income: List of streams + Create New option) -->
+            <StackPanel x:Name="IncomeSourcePanel" Spacing="6" Visibility="Collapsed">
+                <TextBlock Text="Income Stream / Source" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="IncomeSourceComboBox" PlaceholderText="Choose an income source..." HorizontalAlignment="Stretch" SelectionChanged="IncomeSourceComboBox_SelectionChanged" />
+                <TextBox x:Name="NewIncomeSourceTextBox" PlaceholderText="Enter new income stream name (e.g. Freelance, Dividends)..." Visibility="Collapsed" />
+            </StackPanel>
+
+            <!-- Description -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Description (Optional)" Style="{StaticResource StatLabelTextStyle}" />
+                <TextBox x:Name="DescriptionBox" PlaceholderText="Optional notes or merchant name" />
+            </StackPanel>
+
+            <!-- Date Picker -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Date" Style="{StaticResource StatLabelTextStyle}" />
+                <CalendarDatePicker x:Name="DatePicker" HorizontalAlignment="Stretch" />
+            </StackPanel>
+
+            <!-- Receipt File Attachment -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Receipt Image (Optional)" Style="{StaticResource StatLabelTextStyle}" />
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="ReceiptPathBox" IsReadOnly="True" PlaceholderText="No file selected" />
+                    <Button Grid.Column="1" Content="Browse" Click="BrowseReceipt_Click" />
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>

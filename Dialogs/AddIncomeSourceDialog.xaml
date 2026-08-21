@@ -1,0 +1,88 @@
+<ContentDialog
+    x:Class="TheRichScript_WinUI.Dialogs.AddIncomeSourceDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:TheRichScript_WinUI.Models"
+    Title="Add Income Source"
+    PrimaryButtonText="Save Income Source"
+    CloseButtonText="Cancel"
+    CornerRadius="12"
+    DefaultButton="Primary">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="540">
+        <StackPanel Spacing="14" Width="400">
+            <!-- Name -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Income Stream Name" Style="{StaticResource StatLabelTextStyle}" />
+                <TextBox x:Name="NameBox" PlaceholderText="e.g. Primary Job, Real Estate Rental, Freelance, Dividends" />
+            </StackPanel>
+
+            <!-- Classification: Active vs Passive -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Income Classification" Style="{StaticResource StatLabelTextStyle}" />
+                <RadioButtons x:Name="TypeRadioButtons" SelectedIndex="0" MaxColumns="2">
+                    <RadioButton Content="Active (Earned from work/time)" Tag="ACTIVE" IsChecked="True" />
+                    <RadioButton Content="Passive (Investments, rent, royalties)" Tag="PASSIVE" />
+                </RadioButtons>
+            </StackPanel>
+
+            <!-- Predictability: Fixed vs Variable -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Predictability" Style="{StaticResource StatLabelTextStyle}" />
+                <RadioButtons x:Name="NatureRadioButtons" SelectedIndex="0" MaxColumns="2">
+                    <RadioButton Content="Fixed / Recurring (Regular inflow)" Tag="FIXED" IsChecked="True" />
+                    <RadioButton Content="Variable / Irregular (Fluctuates)" Tag="VARIABLE" />
+                </RadioButtons>
+            </StackPanel>
+
+            <!-- Expected Inflow Amount & Frequency Grid -->
+            <Grid ColumnSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.4*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="Expected Inflow" Style="{StaticResource StatLabelTextStyle}" />
+                    <NumberBox x:Name="ExpectedAmountBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" SmallChange="1" LargeChange="10" PlaceholderText="0.00" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Text="Frequency" Style="{StaticResource StatLabelTextStyle}" />
+                    <ComboBox x:Name="FrequencyComboBox" HorizontalAlignment="Stretch" SelectedIndex="2">
+                        <ComboBoxItem Content="Daily" Tag="DAILY" />
+                        <ComboBoxItem Content="Weekly" Tag="WEEKLY" />
+                        <ComboBoxItem Content="Monthly" Tag="MONTHLY" />
+                        <ComboBoxItem Content="Yearly" Tag="YEARLY" />
+                        <ComboBoxItem Content="Flexible" Tag="FLEXIBLE" />
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+
+            <!-- Default Destination Account -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Default Receiving Account (Asset)" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="DefaultAssetComboBox" HorizontalAlignment="Stretch" DisplayMemberPath="DisplayNameWithBalance" SelectedValuePath="Id" PlaceholderText="Select deposit account..." />
+            </StackPanel>
+
+            <!-- Description -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Description / Notes (Optional)" Style="{StaticResource StatLabelTextStyle}" />
+                <TextBox x:Name="DescriptionBox" PlaceholderText="Employer, contract details, tenant info, etc." TextWrapping="Wrap" MaxHeight="80" />
+            </StackPanel>
+
+            <!-- Icon / Logo Image Upload -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Stream Icon / Logo Image (Optional)" Style="{StaticResource StatLabelTextStyle}" />
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="IconPathBox" IsReadOnly="True" PlaceholderText="No image selected" />
+                    <Button Grid.Column="1" Content="Browse" Click="BrowseIcon_Click" />
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>

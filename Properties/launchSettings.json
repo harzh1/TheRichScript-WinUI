@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "TheRichScript.WinUI (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "TheRichScript.WinUI (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

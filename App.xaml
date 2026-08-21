@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application
+    x:Class="TheRichScript_WinUI.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:TheRichScript_WinUI.Converters"
+    xmlns:local="using:TheRichScript_WinUI">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="ms-appx:///Styles/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Global Converters -->
+            <converters:CurrencyConverter x:Key="CurrencyConverter" />
+            <converters:AmountColorConverter x:Key="AmountColorConverter" />
+            <converters:DateTimeFormatConverter x:Key="DateTimeFormatConverter" />
+            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+            <converters:ProgressColorConverter x:Key="ProgressColorConverter" />
+            <converters:TypeToGlyphConverter x:Key="TypeToGlyphConverter" />
+            <converters:TypeToBadgeTextConverter x:Key="TypeToBadgeTextConverter" />
+            <converters:TypeToForegroundConverter x:Key="TypeToForegroundConverter" />
+            <converters:TypeToBackgroundConverter x:Key="TypeToBackgroundConverter" />
+            <converters:PinToGlyphConverter x:Key="PinToGlyphConverter" />
+            <converters:PercentTextConverter x:Key="PercentTextConverter" />
+            <converters:NotNullToBoolConverter x:Key="NotNullToBoolConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

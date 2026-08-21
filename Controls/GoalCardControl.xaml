@@ -1,0 +1,152 @@
+<UserControl
+    x:Class="TheRichScript_WinUI.Controls.GoalCardControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Border Style="{StaticResource FluentCardStyle}" Padding="0" CornerRadius="10">
+        <StackPanel>
+            <!-- 1. Header Banner (When Goal Has Images) -->
+            <Grid x:Name="ImageBannerGrid" Height="130" Visibility="Collapsed">
+                <Image x:Name="SlideshowImage" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                <!-- Gradient Overlay for Contrast -->
+                <Border>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#50000000" Offset="0.0" />
+                            <GradientStop Color="#10000000" Offset="0.4" />
+                            <GradientStop Color="#D9000000" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+
+                <!-- Top-Left Completed Badge -->
+                <Border x:Name="CompletedBadgeImage" Background="#107C41" CornerRadius="4" Padding="7,3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12,10,0,0" Visibility="Collapsed">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <FontIcon Glyph="&#xE73E;" FontSize="10" Foreground="White" />
+                        <TextBlock Text="Completed" FontSize="10" FontWeight="SemiBold" Foreground="White" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Top-Right Actions -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" Spacing="4">
+                    <Button x:Name="PinButtonImage" Padding="5" Background="#70000000" BorderThickness="0" CornerRadius="6" Click="PinButton_Click" ToolTipService.ToolTip="Toggle Pinned">
+                        <FontIcon x:Name="PinIconImage" Glyph="&#xE718;" FontSize="11" Foreground="White" />
+                    </Button>
+                    <Button x:Name="DeleteButtonImage" Padding="5" Background="#70000000" BorderThickness="0" CornerRadius="6" Click="DeleteButton_Click" ToolTipService.ToolTip="Delete Goal">
+                        <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="White" />
+                    </Button>
+                </StackPanel>
+
+                <!-- Bottom Goal Title & Dots -->
+                <Grid VerticalAlignment="Bottom" Margin="14,0,14,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock x:Name="GoalNameTextImage"
+                               FontWeight="Bold"
+                               FontSize="16"
+                               Foreground="White"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" />
+
+                    <StackPanel x:Name="DotsIndicatorPanel"
+                                Grid.Column="1"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Spacing="4"
+                                Margin="8,0,0,0" />
+                </Grid>
+            </Grid>
+
+            <!-- 2. Header (When Goal Has NO Images) -->
+            <Grid x:Name="NoImageHeaderGrid" Padding="16,14,14,6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Goal Icon Badge -->
+                <Border Grid.Column="0" Width="36" Height="36" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <FontIcon Glyph="&#xE706;" FontSize="16" Foreground="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+
+                <!-- Goal Title & Label -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                    <TextBlock x:Name="GoalNameTextNoImg"
+                               FontWeight="Bold"
+                               FontSize="15"
+                               Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                               TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="FINANCIAL GOAL"
+                               FontSize="9"
+                               FontWeight="SemiBold"
+                               Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                </StackPanel>
+
+                <!-- Top Right Actions & Badges -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                    <Border x:Name="CompletedBadgeNoImg" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="4" Padding="6,2" Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon Glyph="&#xE73E;" FontSize="10" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                            <TextBlock Text="Completed" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Button x:Name="PinButtonNoImg" Padding="5" Background="Transparent" BorderThickness="0" CornerRadius="6" Click="PinButton_Click" ToolTipService.ToolTip="Toggle Pinned">
+                        <FontIcon x:Name="PinIconNoImg" Glyph="&#xE718;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </Button>
+                    <Button x:Name="DeleteButtonNoImg" Padding="5" Background="Transparent" BorderThickness="0" CornerRadius="6" Click="DeleteButton_Click" ToolTipService.ToolTip="Delete Goal">
+                        <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- 3. Card Content Body -->
+            <StackPanel Spacing="10" Padding="16,8,16,14">
+                <!-- Target Amounts Row -->
+                <Grid Margin="0,2,0,0">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Current Saved" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock x:Name="CurrentAmountText" FontSize="18" FontWeight="Bold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    </StackPanel>
+                    <StackPanel HorizontalAlignment="Right" Spacing="2" VerticalAlignment="Center">
+                        <TextBlock Text="Target Amount" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Right" />
+                        <TextBlock x:Name="TargetAmountText" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- Progress Bar -->
+                <ProgressBar x:Name="GoalProgressBar" Maximum="100" Height="6" CornerRadius="3" Foreground="{ThemeResource AccentFillColorDefaultBrush}" Background="{ThemeResource SubtleFillColorSecondaryBrush}" />
+
+                <!-- Progress Meta Row -->
+                <Grid>
+                    <TextBlock x:Name="ProgressPercentageText" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock x:Name="ExpectedDateText" FontSize="11" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                </Grid>
+
+                <!-- Recurring Auto-Funding Info (Compact) -->
+                <Border x:Name="AutoFundingBorder" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="7,3" HorizontalAlignment="Left" Visibility="Collapsed">
+                    <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                        <FontIcon Glyph="&#xE823;" FontSize="10" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                        <TextBlock x:Name="AutoFundingText" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Deposit Funds Action Button -->
+                <Button x:Name="DepositFundsButton" Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Stretch" Margin="0,4,0,0" Padding="10,6" Click="DepositFundsButton_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                        <FontIcon Glyph="&#xE710;" FontSize="11" />
+                        <TextBlock Text="Deposit Funds" FontSize="12" FontWeight="SemiBold" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

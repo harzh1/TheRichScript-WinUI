@@ -1,0 +1,61 @@
+<ContentDialog
+    x:Class="TheRichScript_WinUI.Dialogs.AvatarPreviewDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Profile Photo"
+    PrimaryButtonText="Change Photo"
+    CloseButtonText="Close"
+    CornerRadius="12"
+    DefaultButton="Close">
+
+    <StackPanel Spacing="16" Width="500">
+        <!-- 480x480 High Resolution Circular Preview Frame -->
+        <Border
+            Width="480"
+            Height="480"
+            CornerRadius="240"
+            Background="#1E1E1E"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="2"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+
+            <Grid>
+                <!-- Fallback Initials when loading/null -->
+                <TextBlock
+                    x:Name="FallbackInitials"
+                    FontSize="120"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Visibility="Collapsed" />
+
+                <!-- High-Res Avatar Image -->
+                <PersonPicture
+                    x:Name="AvatarPersonPicture"
+                    Width="480"
+                    Height="480"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <!-- User Information Banner -->
+        <StackPanel Spacing="2" HorizontalAlignment="Center" Margin="0,4,0,0">
+            <TextBlock
+                x:Name="UserNameTextBlock"
+                FontWeight="SemiBold"
+                FontSize="18"
+                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                HorizontalAlignment="Center" />
+            <TextBlock
+                x:Name="UserEmailTextBlock"
+                FontSize="13"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                HorizontalAlignment="Center" />
+        </StackPanel>
+    </StackPanel>
+</ContentDialog>

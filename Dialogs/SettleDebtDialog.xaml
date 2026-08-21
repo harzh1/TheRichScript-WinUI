@@ -1,0 +1,26 @@
+<ContentDialog
+    x:Class="TheRichScript_WinUI.Dialogs.SettleDebtDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Settle Debt"
+    PrimaryButtonText="Record Settlement"
+    CloseButtonText="Cancel"
+    CornerRadius="12"
+    DefaultButton="Primary">
+
+    <StackPanel Spacing="16" Width="380">
+        <TextBlock x:Name="DebtInfoText" Text="Settle debt" Style="{StaticResource StatLabelTextStyle}" />
+
+        <!-- Account / Asset -->
+        <StackPanel Spacing="6">
+            <TextBlock x:Name="AssetLabel" Text="Receiving / Paying Account" Style="{StaticResource StatLabelTextStyle}" />
+            <ComboBox x:Name="AssetComboBox" HorizontalAlignment="Stretch" DisplayMemberPath="DisplayNameWithBalance" SelectedValuePath="Id" />
+        </StackPanel>
+
+        <!-- Settlement Amount -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Settlement Amount" Style="{StaticResource StatLabelTextStyle}" />
+            <NumberBox x:Name="AmountNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" PlaceholderText="0.00" />
+        </StackPanel>
+    </StackPanel>
+</ContentDialog>
