@@ -113,12 +113,6 @@
             </NavigationView.MenuItems>
 
             <NavigationView.FooterMenuItems>
-                <NavigationViewItem Content="Sync Recurring" Tag="SyncRecurring" ToolTipService.ToolTip="Trigger Server Cron Now">
-                    <NavigationViewItem.Icon>
-                        <ImageIcon Source="ms-appx:///Assets/Icons/nav_sync.png" Width="20" Height="20" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-
                 <NavigationViewItem Content="Settings" Tag="Settings">
                     <NavigationViewItem.Icon>
                         <ImageIcon Source="ms-appx:///Assets/Icons/nav_settings.png" Width="20" Height="20" />

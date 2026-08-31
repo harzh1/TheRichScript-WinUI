@@ -23,7 +23,27 @@ public partial class TransactionsViewModel : ObservableObject
     private List<Transaction> _allTransactions = new();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowEndOfTransactions))]
     private bool isLoading;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowEndOfTransactions))]
+    private bool isLoadingMore;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowEndOfTransactions))]
+    private bool hasMoreTransactions;
+
+    public bool ShowEndOfTransactions => !HasMoreTransactions && FilteredTransactions.Count > 0 && !IsLoading && !IsLoadingMore;
+
+    [ObservableProperty]
+    private int currentPage = 1;
+
+    [ObservableProperty]
+    private int pageSize = 30;
+
+    [ObservableProperty]
+    private int totalCount;
 
     [ObservableProperty]
     private ObservableCollection<Transaction> filteredTransactions = new();
@@ -80,27 +100,25 @@ public partial class TransactionsViewModel : ObservableObject
         CurrencySymbol = _settingsService.Settings.CurrencySymbol;
         _settingsService.CurrencyChanged += _ => CurrencySymbol = _settingsService.Settings.CurrencySymbol;
         _dataCacheService.DataUpdated += OnDataUpdated;
+
+        LoadCategories();
     }
 
     private void OnDataUpdated(DataCacheType types)
     {
-        if (types.HasFlag(DataCacheType.Transactions) ||
-            types.HasFlag(DataCacheType.Categories) ||
-            types.HasFlag(DataCacheType.Assets))
+        if (types.HasFlag(DataCacheType.Categories))
         {
-            ApplyCachedData();
+            LoadCategories();
+        }
+
+        if (types.HasFlag(DataCacheType.Transactions))
+        {
+            _ = LoadTransactionsAsync(resetPage: true);
         }
     }
 
-    private void ApplyCachedData()
+    private void LoadCategories()
     {
-        var assets = _dataCacheService.CachedAssets ?? new List<Asset>();
-        var assetsMap = new Dictionary<string, string>();
-        foreach (var asset in assets)
-        {
-            assetsMap[asset.Id] = asset.Name;
-        }
-
         var cats = _dataCacheService.CachedCategories;
         if (cats != null)
         {
@@ -111,52 +129,88 @@ public partial class TransactionsViewModel : ObservableObject
                 Categories.Add(cat.Name);
             }
         }
+    }
 
-        var txs = _dataCacheService.CachedTransactions;
-        if (txs != null)
+    private void PopulateAccountDisplays(IEnumerable<Transaction> txs)
+    {
+        var assets = _dataCacheService.CachedAssets ?? new List<Asset>();
+        var assetsMap = new Dictionary<string, string>();
+        foreach (var asset in assets)
         {
-            foreach (var tx in txs)
+            assetsMap[asset.Id] = asset.Name;
+        }
+
+        foreach (var tx in txs)
+        {
+            var fromName = !string.IsNullOrEmpty(tx.AssetId) && assetsMap.TryGetValue(tx.AssetId, out var fName) ? fName : "Account";
+            if (tx.IsTransfer && !string.IsNullOrEmpty(tx.ToAssetId))
             {
-                var fromName = !string.IsNullOrEmpty(tx.AssetId) && assetsMap.TryGetValue(tx.AssetId, out var fName) ? fName : "Account";
-                if (tx.IsTransfer && !string.IsNullOrEmpty(tx.ToAssetId))
-                {
-                    var toName = assetsMap.TryGetValue(tx.ToAssetId, out var tName) ? tName : "Account";
-                    tx.AccountDisplay = $"{fromName} → {toName}";
-                }
-                else
-                {
-                    tx.AccountDisplay = fromName;
-                }
+                var toName = assetsMap.TryGetValue(tx.ToAssetId, out var tName) ? tName : "Account";
+                tx.AccountDisplay = $"{fromName} → {toName}";
             }
-            _allTransactions = new List<Transaction>(txs);
-            ApplyFilters();
+            else
+            {
+                tx.AccountDisplay = fromName;
+            }
         }
     }
 
     [RelayCommand]
-    public async Task LoadTransactionsAsync()
+    public async Task LoadTransactionsAsync(bool resetPage = true)
     {
-        if (_dataCacheService.CachedTransactions != null)
-        {
-            ApplyCachedData();
-            IsLoading = false;
-
-            // Silently revalidate in background
-            _ = _dataCacheService.RevalidateAsync(DataCacheType.Transactions | DataCacheType.Categories | DataCacheType.Assets);
-            return;
-        }
-
         if (IsLoading) return;
         IsLoading = true;
 
+        if (resetPage)
+        {
+            CurrentPage = 1;
+            HasMoreTransactions = true;
+        }
+
         try
         {
-            var txTask = _dataCacheService.GetTransactionsAsync();
-            var catTask = _dataCacheService.GetCategoriesAsync();
-            var assetTask = _dataCacheService.GetAssetsAsync();
+            LoadCategories();
 
-            await Task.WhenAll(txTask, catTask, assetTask);
-            ApplyCachedData();
+            var res = await _transactionService.GetTransactionsAsync(
+                category: SelectedCategory,
+                type: SelectedType,
+                startDate: StartDate?.UtcDateTime,
+                endDate: EndDate?.UtcDateTime,
+                page: CurrentPage,
+                limit: PageSize,
+                search: SearchText);
+
+            if (res.Success && res.Data != null)
+            {
+                PopulateAccountDisplays(res.Data);
+
+                if (resetPage)
+                {
+                    FilteredTransactions.Clear();
+                }
+
+                foreach (var tx in res.Data)
+                {
+                    FilteredTransactions.Add(tx);
+                }
+
+                if (res.Meta != null)
+                {
+                    TotalCount = res.Meta.Total;
+                    HasMoreTransactions = res.Meta.HasMore;
+                }
+                else
+                {
+                    HasMoreTransactions = res.Data.Count >= PageSize;
+                }
+
+                UpdateSummaryTotals();
+                OnPropertyChanged(nameof(ShowEndOfTransactions));
+            }
+            else if (!string.IsNullOrEmpty(res.Error))
+            {
+                await _dialogService.ShowErrorAsync(res.Error, "Error loading transactions");
+            }
         }
         catch (Exception ex)
         {
@@ -165,60 +219,81 @@ public partial class TransactionsViewModel : ObservableObject
         finally
         {
             IsLoading = false;
+            OnPropertyChanged(nameof(ShowEndOfTransactions));
         }
     }
 
-    partial void OnSelectedTypeChanged(string value) => ApplyFilters();
-    partial void OnSelectedCategoryChanged(string value) => ApplyFilters();
-    partial void OnSearchTextChanged(string value) => ApplyFilters();
-    partial void OnStartDateChanged(DateTimeOffset? value) => ApplyFilters();
-    partial void OnEndDateChanged(DateTimeOffset? value) => ApplyFilters();
-
-    private void ApplyFilters()
+    [RelayCommand]
+    public async Task LoadMoreTransactionsAsync()
     {
-        IEnumerable<Transaction> query = _allTransactions;
+        if (IsLoading || IsLoadingMore || !HasMoreTransactions) return;
+        IsLoadingMore = true;
 
-        if (!string.IsNullOrWhiteSpace(SelectedType) && SelectedType != "ALL")
+        var nextPage = CurrentPage + 1;
+
+        try
         {
-            query = query.Where(t => string.Equals(t.Type, SelectedType, StringComparison.OrdinalIgnoreCase));
-        }
+            var res = await _transactionService.GetTransactionsAsync(
+                category: SelectedCategory,
+                type: SelectedType,
+                startDate: StartDate?.UtcDateTime,
+                endDate: EndDate?.UtcDateTime,
+                page: nextPage,
+                limit: PageSize,
+                search: SearchText);
 
-        if (!string.IsNullOrWhiteSpace(SelectedCategory) && SelectedCategory != "ALL")
+            if (res.Success && res.Data != null)
+            {
+                PopulateAccountDisplays(res.Data);
+
+                foreach (var tx in res.Data)
+                {
+                    FilteredTransactions.Add(tx);
+                }
+
+                CurrentPage = nextPage;
+
+                if (res.Meta != null)
+                {
+                    TotalCount = res.Meta.Total;
+                    HasMoreTransactions = res.Meta.HasMore;
+                }
+                else
+                {
+                    HasMoreTransactions = res.Data.Count >= PageSize;
+                }
+
+                UpdateSummaryTotals();
+                OnPropertyChanged(nameof(ShowEndOfTransactions));
+            }
+            else
+            {
+                HasMoreTransactions = false;
+            }
+        }
+        catch
         {
-            query = query.Where(t => string.Equals(t.Category, SelectedCategory, StringComparison.OrdinalIgnoreCase));
+            HasMoreTransactions = false;
         }
-
-        if (StartDate.HasValue)
+        finally
         {
-            var startUtc = StartDate.Value.Date;
-            query = query.Where(t => t.Date.Date >= startUtc);
+            IsLoadingMore = false;
         }
+    }
 
-        if (EndDate.HasValue)
-        {
-            var endUtc = EndDate.Value.Date;
-            query = query.Where(t => t.Date.Date <= endUtc);
-        }
+    partial void OnSelectedTypeChanged(string value) => _ = LoadTransactionsAsync(resetPage: true);
+    partial void OnSelectedCategoryChanged(string value) => _ = LoadTransactionsAsync(resetPage: true);
+    partial void OnSearchTextChanged(string value) => _ = LoadTransactionsAsync(resetPage: true);
+    partial void OnStartDateChanged(DateTimeOffset? value) => _ = LoadTransactionsAsync(resetPage: true);
+    partial void OnEndDateChanged(DateTimeOffset? value) => _ = LoadTransactionsAsync(resetPage: true);
 
-        if (!string.IsNullOrWhiteSpace(SearchText))
-        {
-            var search = SearchText.Trim().ToLowerInvariant();
-            query = query.Where(t =>
-                (!string.IsNullOrEmpty(t.Description) && t.Description.ToLowerInvariant().Contains(search)) ||
-                (!string.IsNullOrEmpty(t.Category) && t.Category.ToLowerInvariant().Contains(search)) ||
-                t.Amount.ToString().Contains(search));
-        }
-
-        var list = query.ToList();
-
-        FilteredTransactions.Clear();
+    private void UpdateSummaryTotals()
+    {
         double inc = 0, exp = 0;
-
-        foreach (var item in list)
+        foreach (var tx in FilteredTransactions)
         {
-            FilteredTransactions.Add(item);
-            if (item.IsIncome) inc += item.Amount;
-            else if (item.IsExpense) exp += item.Amount;
+            if (tx.IsIncome) inc += tx.Amount;
+            else if (tx.IsExpense) exp += tx.Amount;
         }
 
         TotalIncome = inc;
@@ -247,8 +322,8 @@ public partial class TransactionsViewModel : ObservableObject
                 var response = await _transactionService.DeleteTransactionAsync(transaction.Id);
                 if (response.Success)
                 {
-                    _allTransactions.Remove(transaction);
-                    ApplyFilters();
+                    FilteredTransactions.Remove(transaction);
+                    UpdateSummaryTotals();
                     _dataCacheService.Invalidate(DataCacheType.Transactions | DataCacheType.Assets | DataCacheType.Analytics);
                     await _dialogService.ShowMessageAsync("Success", "Transaction deleted and asset balance reverted successfully.");
                 }

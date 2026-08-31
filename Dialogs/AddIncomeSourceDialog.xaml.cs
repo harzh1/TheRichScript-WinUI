@@ -16,25 +16,26 @@ public sealed partial class AddIncomeSourceDialog : ContentDialog
     public CreateIncomeSourceRequest? CreateResult { get; private set; }
     public UpdateIncomeSourceRequest? UpdateResult { get; private set; }
 
-    public AddIncomeSourceDialog(List<Asset> assets, IncomeSource? existingSource = null)
+    public AddIncomeSourceDialog(List<Asset>? assets, IncomeSource? existingSource = null)
     {
         InitializeComponent();
         RequestedTheme = (App.MainWindowInstance?.Content as FrameworkElement)?.RequestedTheme ?? ElementTheme.Default;
         _existingSource = existingSource;
 
-        DefaultAssetComboBox.ItemsSource = assets;
+        var assetList = assets ?? new List<Asset>();
+        DefaultAssetComboBox.ItemsSource = assetList;
 
         if (existingSource != null)
         {
             Title = "Edit Income Source";
-            NameBox.Text = existingSource.Name;
+            NameBox.Text = existingSource.Name ?? string.Empty;
 
-            TypeRadioButtons.SelectedIndex = existingSource.Type == "PASSIVE" ? 1 : 0;
+            TypeRadioButtons.SelectedIndex = string.Equals(existingSource.Type, "PASSIVE", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
             NatureRadioButtons.SelectedIndex = existingSource.IsFixed ? 0 : 1;
 
             ExpectedAmountBox.Value = existingSource.ExpectedAmount ?? 0;
 
-            var matchFreqIndex = existingSource.Frequency switch
+            var matchFreqIndex = (existingSource.Frequency ?? string.Empty).ToUpperInvariant() switch
             {
                 "DAILY" => 0,
                 "WEEKLY" => 1,
@@ -46,19 +47,19 @@ public sealed partial class AddIncomeSourceDialog : ContentDialog
 
             if (!string.IsNullOrEmpty(existingSource.DefaultAssetId))
             {
-                var matchAsset = assets.FirstOrDefault(a => a.Id == existingSource.DefaultAssetId);
+                var matchAsset = assetList.FirstOrDefault(a => a.Id == existingSource.DefaultAssetId);
                 if (matchAsset != null)
                 {
                     DefaultAssetComboBox.SelectedItem = matchAsset;
                 }
             }
 
-            DescriptionBox.Text = existingSource.Description ?? "";
-            IconPathBox.Text = existingSource.IconUrl ?? "";
+            DescriptionBox.Text = existingSource.Description ?? string.Empty;
+            IconPathBox.Text = existingSource.IconUrl ?? string.Empty;
         }
         else
         {
-            if (assets.Count > 0)
+            if (assetList.Count > 0)
             {
                 DefaultAssetComboBox.SelectedIndex = 0;
             }

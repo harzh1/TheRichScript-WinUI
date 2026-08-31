@@ -23,6 +23,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IDialogService _dialogService;
     private readonly INavigationService _navigationService;
     private readonly IBusyIndicatorService _busyIndicatorService;
+    private readonly IDataCacheService _dataCacheService;
 
     [ObservableProperty]
     private string firstName = string.Empty;
@@ -57,6 +58,24 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string newPassword = string.Empty;
 
+    public string AppVersion
+    {
+        get
+        {
+            try
+            {
+                var package = Windows.ApplicationModel.Package.Current;
+                var v = package.Id.Version;
+                return $"v{v.Major}.{v.Minor}.{v.Build}";
+            }
+            catch
+            {
+                var v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                return v != null ? $"v{v.Major}.{v.Minor}.{v.Build}" : "v0.1.3";
+            }
+        }
+    }
+
     [ObservableProperty]
     private string confirmPassword = string.Empty;
 
@@ -78,6 +97,12 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool isSyncing;
 
+    [ObservableProperty]
+    private bool isResettingData;
+
+    [ObservableProperty]
+    private bool isDeletingAccount;
+
     public List<string> AvailableCurrencies { get; } = new() { "INR", "USD", "EUR", "GBP", "JPY", "CAD", "AUD", "AED" };
     public List<string> AvailableThemes { get; } = new() { "Default", "Light", "Dark" };
 
@@ -87,7 +112,8 @@ public partial class SettingsViewModel : ObservableObject
         IAnalyticsService analyticsService,
         IDialogService dialogService,
         INavigationService navigationService,
-        IBusyIndicatorService busyIndicatorService)
+        IBusyIndicatorService busyIndicatorService,
+        IDataCacheService dataCacheService)
     {
         _authService = authService;
         _settingsService = settingsService;
@@ -95,6 +121,7 @@ public partial class SettingsViewModel : ObservableObject
         _dialogService = dialogService;
         _navigationService = navigationService;
         _busyIndicatorService = busyIndicatorService;
+        _dataCacheService = dataCacheService;
 
         _authService.UserStateChanged += user =>
         {
@@ -422,6 +449,7 @@ public partial class SettingsViewModel : ObservableObject
                 var response = await _analyticsService.TriggerCronJobsAsync();
                 if (response.Success)
                 {
+                    _dataCacheService.Invalidate(DataCacheType.All);
                     await _dialogService.ShowMessageAsync("Cron Jobs Executed", "Recurring plans and auto-funding schedules processed successfully.");
                 }
                 else
@@ -436,6 +464,117 @@ public partial class SettingsViewModel : ObservableObject
             finally
             {
                 IsSyncing = false;
+            }
+        }
+    }
+
+    [RelayCommand]
+    public async Task ResetDataAsync(XamlRoot? xamlRoot = null)
+    {
+        if (IsResettingData || IsDeletingAccount) return;
+
+        var dialog = new PasswordConfirmationDialog(
+            title: "Reset All Financial Data",
+            message: "This will permanently erase all your transactions, assets, debts, budgets, and savings goals. Your account profile, email, and password will remain active. Are you sure?",
+            primaryButtonText: "Reset All Data",
+            warningTitle: "Irreversible Action Warning",
+            warningMessage: "All recorded financial data across your workspace will be wiped permanently.");
+
+        if (xamlRoot != null)
+        {
+            dialog.XamlRoot = xamlRoot;
+        }
+        else if (App.MainWindowInstance?.Content?.XamlRoot != null)
+        {
+            dialog.XamlRoot = App.MainWindowInstance.Content.XamlRoot;
+        }
+
+        var result = await dialog.ShowAsync();
+        if (result != ContentDialogResult.Primary || string.IsNullOrWhiteSpace(dialog.ConfirmedPassword))
+        {
+            return;
+        }
+
+        IsResettingData = true;
+        using (_busyIndicatorService.BeginBusy("Resetting all financial records..."))
+        {
+            try
+            {
+                var response = await _authService.ResetAllDataAsync(dialog.ConfirmedPassword);
+                if (response.Success)
+                {
+                    await _dialogService.ShowMessageAsync(
+                        "Data Reset Complete",
+                        "All transactions, assets, budgets, debts, and goals have been successfully reset.");
+                }
+                else
+                {
+                    await _dialogService.ShowErrorAsync(response.Error ?? "Failed to reset data. Please check your password.");
+                }
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowErrorAsync(ex.Message, "Error Resetting Data");
+            }
+            finally
+            {
+                IsResettingData = false;
+            }
+        }
+    }
+
+    [RelayCommand]
+    public async Task DeleteAccountAsync(XamlRoot? xamlRoot = null)
+    {
+        if (IsResettingData || IsDeletingAccount) return;
+
+        var dialog = new PasswordConfirmationDialog(
+            title: "Delete Account Permanently",
+            message: "This will permanently delete your account, your profile, and all associated financial records from our cloud servers. You will be logged out and cannot recover this data. Are you sure you want to proceed?",
+            primaryButtonText: "Delete Account Forever",
+            warningTitle: "Critical Danger: Account Deletion",
+            warningMessage: "This will completely destroy your account and all cloud data. This action CANNOT be reversed.");
+
+        if (xamlRoot != null)
+        {
+            dialog.XamlRoot = xamlRoot;
+        }
+        else if (App.MainWindowInstance?.Content?.XamlRoot != null)
+        {
+            dialog.XamlRoot = App.MainWindowInstance.Content.XamlRoot;
+        }
+
+        var result = await dialog.ShowAsync();
+        if (result != ContentDialogResult.Primary || string.IsNullOrWhiteSpace(dialog.ConfirmedPassword))
+        {
+            return;
+        }
+
+        IsDeletingAccount = true;
+        using (_busyIndicatorService.BeginBusy("Permanently deleting account..."))
+        {
+            try
+            {
+                var response = await _authService.DeleteAccountAsync(dialog.ConfirmedPassword);
+                if (response.Success)
+                {
+                    await _dialogService.ShowMessageAsync(
+                        "Account Deleted",
+                        "Your account and all personal and financial data have been permanently removed.");
+                    _navigationService.NavigateRoot(typeof(Views.LoginPage));
+                }
+                else
+                {
+                    await _dialogService.ShowErrorAsync(response.Error ?? "Failed to delete account. Please check your password.");
+                }
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowErrorAsync(ex.Message, "Error Deleting Account");
+            }
+            finally
+            {
+                IsDeletingAccount = false;
             }
         }
     }

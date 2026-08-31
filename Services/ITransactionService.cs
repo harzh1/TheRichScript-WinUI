@@ -8,7 +8,7 @@ namespace TheRichScript_WinUI.Services;
 
 public interface ITransactionService
 {
-    Task<TransactionListResponse> GetTransactionsAsync(string? category = null, string? type = null, DateTime? startDate = null, DateTime? endDate = null, int page = 1, int limit = 100);
+    Task<TransactionListResponse> GetTransactionsAsync(string? category = null, string? type = null, DateTime? startDate = null, DateTime? endDate = null, int page = 1, int limit = 30, string? search = null);
     Task<ApiResponse<Transaction>> CreateTransactionAsync(CreateTransactionRequest request);
     Task<ApiResponse<object>> DeleteTransactionAsync(string id);
 }
@@ -22,13 +22,18 @@ public class TransactionService : ITransactionService
         _apiService = apiService;
     }
 
-    public async Task<TransactionListResponse> GetTransactionsAsync(string? category = null, string? type = null, DateTime? startDate = null, DateTime? endDate = null, int page = 1, int limit = 100)
+    public async Task<TransactionListResponse> GetTransactionsAsync(string? category = null, string? type = null, DateTime? startDate = null, DateTime? endDate = null, int page = 1, int limit = 30, string? search = null)
     {
         var queryParams = new List<string>
         {
             $"page={page}",
             $"limit={limit}"
         };
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            queryParams.Add($"search={Uri.EscapeDataString(search.Trim())}");
+        }
 
         if (!string.IsNullOrWhiteSpace(category) && category != "ALL")
         {
@@ -51,15 +56,11 @@ public class TransactionService : ITransactionService
         }
 
         var endpoint = $"transactions?{string.Join("&", queryParams)}";
-        var response = await _apiService.GetAsync<List<Transaction>>(endpoint);
+        var response = await _apiService.GetAsync<TransactionListResponse>(endpoint);
 
-        if (response.Success)
+        if (response.Success && response.Data != null)
         {
-            return new TransactionListResponse
-            {
-                Success = true,
-                Data = response.Data ?? new List<Transaction>()
-            };
+            return response.Data;
         }
 
         return new TransactionListResponse

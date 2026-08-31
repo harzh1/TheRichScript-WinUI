@@ -93,12 +93,6 @@ public sealed partial class ShellPage : Page
                 case "Categories":
                     navService.NavigateTo(typeof(CategoriesPage));
                     break;
-                case "SyncRecurring":
-                    if (ViewModel.TriggerSyncCommand.CanExecute(null))
-                    {
-                        ViewModel.TriggerSyncCommand.Execute(null);
-                    }
-                    break;
                 case "Settings":
                     navService.NavigateTo(typeof(SettingsPage));
                     break;

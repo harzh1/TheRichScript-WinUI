@@ -9,7 +9,7 @@
     xmlns:vm="using:TheRichScript_WinUI.ViewModels"
     mc:Ignorable="d">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16,24,24">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16,24,0">
         <StackPanel Spacing="16" MaxWidth="1400" HorizontalAlignment="Stretch">
 
             <!-- Compact Header Row (Title on Left, Actions on Right) -->

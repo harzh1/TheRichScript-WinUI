@@ -8,7 +8,7 @@
     xmlns:vm="using:TheRichScript_WinUI.ViewModels"
     mc:Ignorable="d">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16,24,24">
+    <ScrollViewer x:Name="MainScrollViewer" ViewChanged="MainScrollViewer_ViewChanged" VerticalScrollBarVisibility="Auto" Padding="24,16,24,0">
         <StackPanel Spacing="14" MaxWidth="1400" HorizontalAlignment="Stretch">
 
             <!-- Compact Header Row (Title on Left, Actions on Right) -->
@@ -167,6 +167,28 @@
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
+
+                    <!-- Bottom Loading Indicator when scrolling and fetching more pages -->
+                    <StackPanel
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Spacing="8"
+                        Padding="0,16"
+                        Visibility="{x:Bind ViewModel.IsLoadingMore, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ProgressRing Width="18" Height="18" IsActive="{x:Bind ViewModel.IsLoadingMore, Mode=OneWay}" Visibility="{x:Bind ViewModel.IsLoadingMore, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <TextBlock Text="Loading more transactions..." FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <!-- End of transactions data indicator -->
+                    <StackPanel
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Spacing="8"
+                        Margin="0,16,0,20"
+                        Visibility="{x:Bind ViewModel.ShowEndOfTransactions, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text="End of transactions data" FontSize="11" FontWeight="Medium" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
                 </StackPanel>
             </Border>
         </StackPanel>

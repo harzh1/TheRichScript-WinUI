@@ -18,9 +18,9 @@ public sealed partial class TransactionsPage : Page
 
     public TransactionsPage()
     {
-        InitializeComponent();
         ViewModel = App.GetService<TransactionsViewModel>();
         DataContext = ViewModel;
+        InitializeComponent();
 
         Loaded += TransactionsPage_Loaded;
     }
@@ -28,6 +28,21 @@ public sealed partial class TransactionsPage : Page
     private async void TransactionsPage_Loaded(object sender, RoutedEventArgs e)
     {
         await ViewModel.LoadTransactionsAsync();
+    }
+
+    private async void MainScrollViewer_ViewChanged(object sender, ScrollViewerViewChangedEventArgs e)
+    {
+        if (sender is ScrollViewer sv)
+        {
+            // When within 250px of the bottom, fetch the next page automatically
+            if (sv.VerticalOffset >= sv.ScrollableHeight - 250 && sv.ScrollableHeight > 0)
+            {
+                if (ViewModel.HasMoreTransactions && !ViewModel.IsLoading && !ViewModel.IsLoadingMore)
+                {
+                    await ViewModel.LoadMoreTransactionsAsync();
+                }
+            }
+        }
     }
 
     private async void AddTransaction_Click(object sender, RoutedEventArgs e)

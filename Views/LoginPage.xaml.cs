@@ -1,9 +1,6 @@
 using System;
-using System.Diagnostics;
-using System.IO;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using TheRichScript_WinUI.Services;
 using TheRichScript_WinUI.ViewModels;
 using Windows.System;
 
@@ -44,20 +41,5 @@ public sealed partial class LoginPage : Page
     {
         ViewModel.Email = EmailBox.Text;
         ViewModel.Password = PasswordBox.Password;
-    }
-
-    private void OpenLogsFolder_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        try
-        {
-            var folder = AppStorageHelper.GetAppDataFolder();
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "explorer.exe",
-                Arguments = $"\"{folder}\"",
-                UseShellExecute = true
-            });
-        }
-        catch { }
     }
 }

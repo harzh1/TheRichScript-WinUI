@@ -40,6 +40,10 @@ public class SettingsService : ISettingsService
                 if (loaded != null)
                 {
                     Settings = loaded;
+                    if (string.IsNullOrWhiteSpace(Settings.ApiBaseUrl) || Settings.ApiBaseUrl == "https://therichscript-backend.onrender.com/api")
+                    {
+                        Settings.ApiBaseUrl = AppSettings.DefaultProductionApiUrl;
+                    }
                     Settings.CurrencySymbol = GetCurrencySymbol(Settings.PreferredCurrency);
                     return;
                 }

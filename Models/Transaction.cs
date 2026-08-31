@@ -83,6 +83,9 @@ public class TransactionMeta
 
     [JsonPropertyName("totalPages")]
     public int TotalPages { get; set; }
+
+    [JsonPropertyName("hasMore")]
+    public bool HasMore { get; set; }
 }
 
 public class TransactionListResponse

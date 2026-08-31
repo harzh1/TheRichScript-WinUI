@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -34,27 +35,6 @@ public class MonthlyTrendItem
 
     [JsonIgnore]
     public double NetSavings => Income - Expense;
-
-    [JsonIgnore]
-    public double IncomeBarHeight { get; set; } = 4;
-
-    [JsonIgnore]
-    public double ExpenseBarHeight { get; set; } = 4;
-
-    [JsonIgnore]
-    public string FormattedIncome { get; set; } = string.Empty;
-
-    [JsonIgnore]
-    public string FormattedExpense { get; set; } = string.Empty;
-
-    [JsonIgnore]
-    public string FormattedNetSavings { get; set; } = string.Empty;
-
-    [JsonIgnore]
-    public bool IsPositiveNet => NetSavings >= 0;
-
-    [JsonIgnore]
-    public string ChartTooltip => $"{Label}\nIncome: {FormattedIncome}\nExpense: {FormattedExpense}\nNet: {FormattedNetSavings}";
 }
 
 public class DailySpendingItem
@@ -67,6 +47,32 @@ public class DailySpendingItem
 
     [JsonPropertyName("expense")]
     public double Expense { get; set; }
+
+    [JsonExtensionData]
+    public Dictionary<string, System.Text.Json.JsonElement>? CategoryExpenses { get; set; }
+
+    public double GetCategoryExpense(string categoryName)
+    {
+        if (CategoryExpenses != null && CategoryExpenses.TryGetValue(categoryName, out var element))
+        {
+            if (element.ValueKind == System.Text.Json.JsonValueKind.Number && element.TryGetDouble(out var val))
+            {
+                return val;
+            }
+        }
+        return 0;
+    }
+}
+
+public partial class DailySpendingCategoryFilter : CommunityToolkit.Mvvm.ComponentModel.ObservableObject
+{
+    public string Name { get; set; } = string.Empty;
+    public string ColorHex { get; set; } = "#F43F5E";
+    public Microsoft.UI.Xaml.Media.SolidColorBrush ColorBrush { get; set; } = new(Microsoft.UI.Colors.Gray);
+    public bool IsTotal { get; set; }
+
+    [CommunityToolkit.Mvvm.ComponentModel.ObservableProperty]
+    private bool isSelected;
 }
 
 public class AnalyticsSummary
@@ -108,14 +114,22 @@ public class CategorySpendingSummary
     public double Amount { get; set; }
     public double? MonthlyLimit { get; set; }
     public double PercentageOfTotal { get; set; }
+    public string ColorHex { get; set; } = "#6366F1";
+    public Microsoft.UI.Xaml.Media.SolidColorBrush ColorBrush { get; set; } = new(Microsoft.UI.Colors.Gray);
     public double PercentageOfLimit => MonthlyLimit.HasValue && MonthlyLimit.Value > 0 ? (Amount / MonthlyLimit.Value) * 100.0 : 0;
     public bool IsOverLimit => MonthlyLimit.HasValue && Amount > MonthlyLimit.Value;
-
-    [JsonIgnore]
-    public double RemainingBudget => MonthlyLimit.HasValue ? Math.Max(0, MonthlyLimit.Value - Amount) : 0;
 
     [JsonIgnore]
     public string StatusText => IsOverLimit 
         ? "OVER LIMIT" 
         : (PercentageOfLimit >= 80 ? "NEAR LIMIT" : "ON TRACK");
+}
+
+public class GoalProgressItem
+{
+    public string Name { get; set; } = string.Empty;
+    public double CurrentAmount { get; set; }
+    public double TargetAmount { get; set; }
+    public double ProgressPercentage { get; set; }
+    public double RemainingAmount { get; set; }
 }

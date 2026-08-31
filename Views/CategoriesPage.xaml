@@ -9,7 +9,7 @@
     xmlns:vm="using:TheRichScript_WinUI.ViewModels"
     mc:Ignorable="d">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16,24,24">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16,24,0">
         <StackPanel Spacing="16" MaxWidth="1400" HorizontalAlignment="Stretch">
 
             <!-- 1. Compact Header Row (Title on Left, Actions on Right) -->
@@ -47,34 +47,70 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Total Categories -->
-                <Border Grid.Column="0" Style="{StaticResource FluentCardStyle}" Padding="14,12">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="TOTAL CATEGORIES" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
-                        <TextBlock Text="{x:Bind ViewModel.TotalCategoriesCount, Mode=OneWay}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                <Border Grid.Column="0" Style="{StaticResource FluentCardStyle}" Padding="16,14">
+                    <StackPanel Spacing="6">
+                        <Grid ColumnSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="TOTAL CATEGORIES" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            <Border Grid.Column="1" Background="#1A6366F1" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xE8FD;" FontSize="11" Foreground="#6366F1" />
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="{x:Bind ViewModel.TotalCategoriesCount, Mode=OneWay}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#6366F1" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </Border>
 
                 <!-- Budgeted Categories Count -->
-                <Border Grid.Column="1" Style="{StaticResource FluentCardStyle}" Padding="14,12">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="BUDGETED CATEGORIES" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
-                        <TextBlock Text="{x:Bind ViewModel.BudgetedCategoriesCount, Mode=OneWay}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                <Border Grid.Column="1" Style="{StaticResource FluentCardStyle}" Padding="16,14">
+                    <StackPanel Spacing="6">
+                        <Grid ColumnSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="BUDGETED CATEGORIES" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            <Border Grid.Column="1" Background="#1A38BDF8" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xE809;" FontSize="11" Foreground="#38BDF8" />
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="{x:Bind ViewModel.BudgetedCategoriesCount, Mode=OneWay}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#38BDF8" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </Border>
 
                 <!-- Total Monthly Budget Cap -->
-                <Border Grid.Column="2" Style="{StaticResource FluentCardStyle}" Padding="14,12">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="TOTAL MONTHLY BUDGET CAP" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
-                        <TextBlock Text="{x:Bind ViewModel.TotalMonthlyBudgetCap, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                <Border Grid.Column="2" Style="{StaticResource FluentCardStyle}" Padding="16,14">
+                    <StackPanel Spacing="6">
+                        <Grid ColumnSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="TOTAL MONTHLY BUDGET CAP" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            <Border Grid.Column="1" Background="#1A10B981" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xEAFC;" FontSize="11" Foreground="#10B981" />
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="{x:Bind ViewModel.TotalMonthlyBudgetCap, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#10B981" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </Border>
 
                 <!-- Current Month Spending in Budgeted -->
-                <Border Grid.Column="3" Style="{StaticResource FluentCardStyle}" Padding="14,12">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="MONTH SPENDING IN BUDGETS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
-                        <TextBlock Text="{x:Bind ViewModel.CurrentMonthSpending, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                <Border Grid.Column="3" Style="{StaticResource FluentCardStyle}" Padding="16,14">
+                    <StackPanel Spacing="6">
+                        <Grid ColumnSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="MONTH SPENDING IN BUDGETS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            <Border Grid.Column="1" Background="#1AF43F5E" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xEF42;" FontSize="11" Foreground="#F43F5E" />
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="{x:Bind ViewModel.CurrentMonthSpending, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#F43F5E" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </Border>
             </Grid>

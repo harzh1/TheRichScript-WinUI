@@ -74,10 +74,19 @@ public class IncomeSource
     };
 
     [JsonIgnore]
-    public string TypeBadgeBackground => Type == "PASSIVE" ? "#2B1A40" : "#143026";
+    public string TypeBadgeBackground => Type == "PASSIVE" ? "#1A6366F1" : "#1A10B981";
 
     [JsonIgnore]
-    public string TypeBadgeForeground => Type == "PASSIVE" ? "#C084FC" : "#34D399";
+    public string TypeBadgeForeground => Type == "PASSIVE" ? "#6366F1" : "#10B981";
+
+    [JsonIgnore]
+    public string TypeIconGlyph => Type == "PASSIVE" ? "\uE8D4" : "\uEAFC";
+
+    [JsonIgnore]
+    public string TypeIconBackground => Type == "PASSIVE" ? "#1A6366F1" : "#1A10B981";
+
+    [JsonIgnore]
+    public string TypeIconForeground => Type == "PASSIVE" ? "#6366F1" : "#10B981";
 
     [JsonIgnore]
     public bool HasIcon => !string.IsNullOrWhiteSpace(IconUrl);

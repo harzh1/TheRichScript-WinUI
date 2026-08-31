@@ -49,8 +49,8 @@ public class CurrencyConverter : IValueConverter
 public class AmountColorConverter : IValueConverter
 {
     private static readonly SolidColorBrush IncomeBrush = new(Windows.UI.Color.FromArgb(255, 16, 185, 129)); // #10B981 Emerald Green
-    private static readonly SolidColorBrush ExpenseBrush = new(Windows.UI.Color.FromArgb(255, 239, 68, 68)); // #EF4444 Red
-    private static readonly SolidColorBrush TransferBrush = new(Windows.UI.Color.FromArgb(255, 59, 130, 246)); // #3B82F6 Blue
+    private static readonly SolidColorBrush ExpenseBrush = new(Windows.UI.Color.FromArgb(255, 244, 63, 94)); // #F43F5E Coral Rose
+    private static readonly SolidColorBrush TransferBrush = new(Windows.UI.Color.FromArgb(255, 56, 189, 248)); // #38BDF8 Sky Blue
 
     public object Convert(object? value, Type targetType, object? parameter, string language)
     {
@@ -110,8 +110,8 @@ public class TypeToBadgeTextConverter : IValueConverter
 public class TypeToForegroundConverter : IValueConverter
 {
     private static readonly SolidColorBrush IncomeBrush = new(Windows.UI.Color.FromArgb(255, 16, 185, 129)); // #10B981
-    private static readonly SolidColorBrush ExpenseBrush = new(Windows.UI.Color.FromArgb(255, 239, 68, 68)); // #EF4444
-    private static readonly SolidColorBrush TransferBrush = new(Windows.UI.Color.FromArgb(255, 59, 130, 246)); // #3B82F6
+    private static readonly SolidColorBrush ExpenseBrush = new(Windows.UI.Color.FromArgb(255, 244, 63, 94)); // #F43F5E
+    private static readonly SolidColorBrush TransferBrush = new(Windows.UI.Color.FromArgb(255, 56, 189, 248)); // #38BDF8
     private static readonly SolidColorBrush DefaultBrush = new(Windows.UI.Color.FromArgb(255, 107, 114, 128));
 
     public object Convert(object? value, Type targetType, object? parameter, string language)
@@ -133,9 +133,9 @@ public class TypeToForegroundConverter : IValueConverter
 
 public class TypeToBackgroundConverter : IValueConverter
 {
-    private static readonly SolidColorBrush IncomeBgBrush = new(Windows.UI.Color.FromArgb(38, 16, 185, 129)); // 15% opacity green
-    private static readonly SolidColorBrush ExpenseBgBrush = new(Windows.UI.Color.FromArgb(38, 239, 68, 68)); // 15% opacity red
-    private static readonly SolidColorBrush TransferBgBrush = new(Windows.UI.Color.FromArgb(38, 59, 130, 246)); // 15% opacity blue
+    private static readonly SolidColorBrush IncomeBgBrush = new(Windows.UI.Color.FromArgb(26, 16, 185, 129)); // #1A10B981 (10% tint)
+    private static readonly SolidColorBrush ExpenseBgBrush = new(Windows.UI.Color.FromArgb(26, 244, 63, 94)); // #1AF43F5E (10% tint)
+    private static readonly SolidColorBrush TransferBgBrush = new(Windows.UI.Color.FromArgb(26, 56, 189, 248)); // #1A38BDF8 (10% tint)
     private static readonly SolidColorBrush DefaultBgBrush = new(Windows.UI.Color.FromArgb(25, 128, 128, 128));
 
     public object Convert(object? value, Type targetType, object? parameter, string language)
@@ -263,6 +263,24 @@ public class BooleanToVisibilityConverter : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, string language)
     {
         return value is Visibility v && v == Visibility.Visible;
+    }
+}
+
+public class InverseBooleanToVisibilityConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, string language)
+    {
+        bool isVisible = false;
+        if (value is bool b) isVisible = b;
+        else if (value is int i) isVisible = i > 0;
+        else if (value != null) isVisible = true;
+
+        return isVisible ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        return value is Visibility v && v == Visibility.Collapsed;
     }
 }
 

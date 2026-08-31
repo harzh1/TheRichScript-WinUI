@@ -17,6 +17,7 @@
             <converters:AmountColorConverter x:Key="AmountColorConverter" />
             <converters:DateTimeFormatConverter x:Key="DateTimeFormatConverter" />
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
             <converters:ProgressColorConverter x:Key="ProgressColorConverter" />

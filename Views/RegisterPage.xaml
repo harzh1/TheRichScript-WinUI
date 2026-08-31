@@ -13,16 +13,16 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Width="460"
-                Margin="0,40"
+                Margin="0,40,0,0"
                 Style="{StaticResource FluentCardStyle}"
                 Padding="32,28">
 
                 <StackPanel Spacing="18">
                     <!-- Header -->
                     <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,0,0,4">
-                        <Border Width="44" Height="44" CornerRadius="10" Background="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Center">
-                            <TextBlock Text="RS" FontWeight="Bold" FontSize="18" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
+                        <Image Source="ms-appx:///Assets/Square150x150Logo.scale-200.png"
+                               Width="52" Height="52"
+                               HorizontalAlignment="Center" />
                         <TextBlock Text="Create Account" Style="{StaticResource PageHeaderTextStyle}" HorizontalAlignment="Center" />
                         <TextBlock Text="Start tracking your finances with native Windows speed" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" HorizontalAlignment="Center" />
                     </StackPanel>
@@ -100,9 +100,14 @@
                     </Button>
 
                     <!-- Back to Login -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
-                        <TextBlock Text="Already registered?" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
-                        <HyperlinkButton Content="Sign In" Command="{x:Bind ViewModel.NavigateToLoginCommand}" Padding="4,2" />
+                    <StackPanel Spacing="10" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
+                            <TextBlock Text="Already registered?" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                            <HyperlinkButton Content="Sign In" Command="{x:Bind ViewModel.NavigateToLoginCommand}" Padding="4,2" />
+                        </StackPanel>
+
+                        <!-- Company Brand -->
+                        <TextBlock Text="Crafted by Santara" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
                     </StackPanel>
                 </StackPanel>
             </Border>

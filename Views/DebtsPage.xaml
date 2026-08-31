@@ -9,7 +9,7 @@
     xmlns:vm="using:TheRichScript_WinUI.ViewModels"
     mc:Ignorable="d">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16,24,24">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16,24,0">
         <StackPanel Spacing="16" MaxWidth="1400" HorizontalAlignment="Stretch">
 
             <!-- 1. Header Row (Title on Left, Actions & Toggle on Right) -->
@@ -55,34 +55,70 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Money Lent -->
-                <Border Grid.Column="0" Style="{StaticResource FluentCardStyle}" Padding="14,12">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="MONEY LENT (RECEIVABLE)" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
-                        <TextBlock Text="{x:Bind ViewModel.TotalLentPending, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                <Border Grid.Column="0" Style="{StaticResource FluentCardStyle}" Padding="16,14">
+                    <StackPanel Spacing="6">
+                        <Grid ColumnSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="MONEY LENT (RECEIVABLE)" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            <Border Grid.Column="1" Background="#1A10B981" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xEAFC;" FontSize="11" Foreground="#10B981" />
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="{x:Bind ViewModel.TotalLentPending, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#10B981" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </Border>
 
                 <!-- Money Borrowed -->
-                <Border Grid.Column="1" Style="{StaticResource FluentCardStyle}" Padding="14,12">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="MONEY BORROWED (PAYABLE)" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
-                        <TextBlock Text="{x:Bind ViewModel.TotalBorrowedPending, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                <Border Grid.Column="1" Style="{StaticResource FluentCardStyle}" Padding="16,14">
+                    <StackPanel Spacing="6">
+                        <Grid ColumnSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="MONEY BORROWED (PAYABLE)" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            <Border Grid.Column="1" Background="#1AF43F5E" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xEF42;" FontSize="11" Foreground="#F43F5E" />
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="{x:Bind ViewModel.TotalBorrowedPending, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#F43F5E" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </Border>
 
                 <!-- Net Position -->
-                <Border Grid.Column="2" Style="{StaticResource FluentCardStyle}" Padding="14,12">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="NET RECEIVABLE POSITION" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
-                        <TextBlock Text="{x:Bind ViewModel.NetReceivable, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                <Border Grid.Column="2" Style="{StaticResource FluentCardStyle}" Padding="16,14">
+                    <StackPanel Spacing="6">
+                        <Grid ColumnSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="NET RECEIVABLE POSITION" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            <Border Grid.Column="1" Background="#1A38BDF8" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xE8D4;" FontSize="11" Foreground="#38BDF8" />
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="{x:Bind ViewModel.NetReceivable, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#38BDF8" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </Border>
 
                 <!-- Total Debt Records -->
-                <Border Grid.Column="3" Style="{StaticResource FluentCardStyle}" Padding="14,12">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="TOTAL LOAN CONTRACTS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" />
-                        <TextBlock Text="{x:Bind ViewModel.TotalDebtsCount, Mode=OneWay}" FontSize="20" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                <Border Grid.Column="3" Style="{StaticResource FluentCardStyle}" Padding="16,14">
+                    <StackPanel Spacing="6">
+                        <Grid ColumnSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="TOTAL LOAN CONTRACTS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            <Border Grid.Column="1" Background="#1AF59E0B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xE7C1;" FontSize="11" Foreground="#F59E0B" />
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="{x:Bind ViewModel.TotalDebtsCount, Mode=OneWay}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#F59E0B" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </Border>
             </Grid>

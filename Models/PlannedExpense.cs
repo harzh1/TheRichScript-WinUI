@@ -1,9 +1,10 @@
 using System;
 using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace TheRichScript_WinUI.Models;
 
-public class PlannedExpense
+public partial class PlannedExpense : ObservableObject
 {
     [JsonPropertyName("id")]
     public string Id { get; set; } = string.Empty;
@@ -11,23 +12,27 @@ public class PlannedExpense
     [JsonPropertyName("userId")]
     public string UserId { get; set; } = string.Empty;
 
-    [JsonPropertyName("assetId")]
-    public string AssetId { get; set; } = string.Empty;
+    [ObservableProperty]
+    [property: JsonPropertyName("assetId")]
+    private string? assetId = string.Empty;
 
     [JsonPropertyName("targetAssetId")]
     public string? TargetAssetId { get; set; }
 
-    [JsonPropertyName("name")]
-    public string Name { get; set; } = string.Empty;
+    [ObservableProperty]
+    [property: JsonPropertyName("name")]
+    private string name = string.Empty;
 
     [JsonPropertyName("categoryId")]
     public string CategoryId { get; set; } = string.Empty;
 
-    [JsonPropertyName("category")]
-    public string Category { get; set; } = string.Empty;
+    [ObservableProperty]
+    [property: JsonPropertyName("category")]
+    private string category = string.Empty;
 
-    [JsonPropertyName("amount")]
-    public double Amount { get; set; }
+    [ObservableProperty]
+    [property: JsonPropertyName("amount")]
+    private double amount;
 
     [JsonPropertyName("type")]
     public string Type { get; set; } = "RECURRING"; // MANUAL, RECURRING

@@ -13,17 +13,17 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Width="420"
-                Margin="0,30"
+                Margin="0,30,0,0"
                 Style="{StaticResource FluentCardStyle}"
                 Padding="32,28">
 
                 <StackPanel Spacing="20">
                     <!-- App Header -->
                     <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,0,0,4">
-                        <Border Width="48" Height="48" CornerRadius="12" Background="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Center">
-                            <TextBlock Text="RS" FontWeight="Bold" FontSize="20" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <TextBlock Text="The RichScript" Style="{StaticResource PageHeaderTextStyle}" HorizontalAlignment="Center" />
+                        <Image Source="ms-appx:///Assets/Square150x150Logo.scale-200.png"
+                               Width="56" Height="56"
+                               HorizontalAlignment="Center" />
+                        <TextBlock Text="RichScript" Style="{StaticResource PageHeaderTextStyle}" HorizontalAlignment="Center" />
                         <TextBlock Text="Sign in to your native finance workspace" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" HorizontalAlignment="Center" />
                     </StackPanel>
 
@@ -64,21 +64,16 @@
                     </Button>
 
                     <!-- Footer Navigation -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
-                        <TextBlock Text="Don't have an account?" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
-                        <HyperlinkButton Content="Create Account" Command="{x:Bind ViewModel.NavigateToRegisterCommand}" Padding="4,2" />
+                    <StackPanel Spacing="10" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
+                            <TextBlock Text="Don't have an account?" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                            <HyperlinkButton Content="Create Account" Command="{x:Bind ViewModel.NavigateToRegisterCommand}" Padding="4,2" />
+                        </StackPanel>
+
+                        <!-- Company Brand -->
+                        <TextBlock Text="Crafted by Santara" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
                     </StackPanel>
 
-                    <!-- Server / Diagnostics Expander -->
-                    <Expander Header="Server &amp; Logs Diagnostic" HorizontalAlignment="Stretch" Margin="0,4,0,0">
-                        <StackPanel Spacing="10" Padding="0,4">
-                            <StackPanel Spacing="4">
-                                <TextBlock Text="Backend Server Endpoint" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                <TextBox Text="{x:Bind ViewModel.ApiBaseUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="12" />
-                            </StackPanel>
-                            <HyperlinkButton Content="Open Logs Folder in Explorer" Click="OpenLogsFolder_Click" Padding="0" FontSize="12" />
-                        </StackPanel>
-                    </Expander>
                 </StackPanel>
             </Border>
         </ScrollViewer>

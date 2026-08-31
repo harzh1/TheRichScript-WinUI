@@ -282,7 +282,7 @@ public class ApiService : IApiService
             }
 
             // Deserialization strategy based on type and payload shape
-            if (typeof(T) == typeof(Models.AuthResponse))
+            if (typeof(T) == typeof(Models.AuthResponse) || typeof(T) == typeof(Models.TransactionListResponse))
             {
                 result.Data = JsonSerializer.Deserialize<T>(rawContent, JsonOptions);
             }

@@ -10,9 +10,9 @@ public sealed partial class SettingsPage : Page
 
     public SettingsPage()
     {
-        InitializeComponent();
         ViewModel = App.GetService<SettingsViewModel>();
         DataContext = ViewModel;
+        InitializeComponent();
 
         Loaded += (s, e) => ViewModel.LoadCurrentSettings();
     }
@@ -49,5 +49,15 @@ public sealed partial class SettingsPage : Page
             ViewModel.SelectedTheme = theme;
             ViewModel.SaveThemePreference();
         }
+    }
+
+    private async void ResetData_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.ResetDataAsync(this.XamlRoot);
+    }
+
+    private async void DeleteAccount_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.DeleteAccountAsync(this.XamlRoot);
     }
 }

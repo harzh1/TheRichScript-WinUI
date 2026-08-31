@@ -118,14 +118,10 @@ public partial class DashboardViewModel : ObservableObject
             }
         }
 
-        // 2. Available Assets
+        // 2. Available Assets - sync in-place without destructive Clear()
         if (_dataCacheService.CachedAssets != null)
         {
-            AvailableAssets.Clear();
-            foreach (var a in _dataCacheService.CachedAssets)
-            {
-                AvailableAssets.Add(a);
-            }
+            SyncAssetsCollection(AvailableAssets, _dataCacheService.CachedAssets);
         }
 
         // 3. Recent Transactions
@@ -151,13 +147,81 @@ public partial class DashboardViewModel : ObservableObject
             }
         }
 
-        // 5. Quick Add Templates (MANUAL plans)
+        // 5. Quick Add Templates (MANUAL plans) - sync in-place without destructive Clear()
         if (_dataCacheService.CachedPlans != null)
         {
-            QuickAddTemplates.Clear();
-            foreach (var plan in _dataCacheService.CachedPlans.Where(p => string.Equals(p.Type, "MANUAL", StringComparison.OrdinalIgnoreCase)))
+            SyncPlansCollection(QuickAddTemplates, _dataCacheService.CachedPlans, AvailableAssets);
+        }
+    }
+
+    private static void SyncAssetsCollection(ObservableCollection<Asset> target, System.Collections.Generic.IList<Asset> source)
+    {
+        for (int i = target.Count - 1; i >= 0; i--)
+        {
+            if (!source.Any(s => s.Id == target[i].Id))
             {
-                QuickAddTemplates.Add(plan);
+                target.RemoveAt(i);
+            }
+        }
+
+        for (int i = 0; i < source.Count; i++)
+        {
+            var src = source[i];
+            var existingIndex = -1;
+            for (int j = 0; j < target.Count; j++)
+            {
+                if (target[j].Id == src.Id) { existingIndex = j; break; }
+            }
+
+            if (existingIndex < 0)
+            {
+                target.Insert(Math.Min(i, target.Count), src);
+            }
+            else if (target[existingIndex].Value != src.Value || target[existingIndex].Name != src.Name)
+            {
+                target[existingIndex] = src;
+            }
+        }
+    }
+
+    private static void SyncPlansCollection(ObservableCollection<PlannedExpense> target, System.Collections.Generic.IList<PlannedExpense> source, ObservableCollection<Asset> availableAssets)
+    {
+        var defaultAssetId = availableAssets.FirstOrDefault()?.Id;
+        var manualPlans = source.Where(p => string.Equals(p.Type, "MANUAL", StringComparison.OrdinalIgnoreCase)).ToList();
+
+        for (int i = target.Count - 1; i >= 0; i--)
+        {
+            if (!manualPlans.Any(s => s.Id == target[i].Id))
+            {
+                target.RemoveAt(i);
+            }
+        }
+
+        for (int i = 0; i < manualPlans.Count; i++)
+        {
+            var src = manualPlans[i];
+            var existing = target.FirstOrDefault(t => t.Id == src.Id);
+
+            if (existing == null)
+            {
+                if (string.IsNullOrEmpty(src.AssetId) && !string.IsNullOrEmpty(defaultAssetId))
+                {
+                    src.AssetId = defaultAssetId;
+                }
+                target.Insert(Math.Min(i, target.Count), src);
+            }
+            else
+            {
+                existing.Name = src.Name;
+                existing.Category = src.Category;
+                existing.CategoryId = src.CategoryId;
+                existing.Type = src.Type;
+                existing.TxType = src.TxType;
+
+                if (string.IsNullOrEmpty(existing.AssetId))
+                {
+                    existing.AssetId = !string.IsNullOrEmpty(src.AssetId) ? src.AssetId : defaultAssetId;
+                }
             }
         }
     }
@@ -209,7 +273,7 @@ public partial class DashboardViewModel : ObservableObject
                     Amount = template.Amount,
                     Type = template.TxType ?? "EXPENSE",
                     Category = template.Category,
-                    AssetId = template.AssetId,
+                    AssetId = template.AssetId ?? string.Empty,
                     Date = DateTime.Now
                 };
 

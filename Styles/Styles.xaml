@@ -36,15 +36,17 @@
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 
-    <!-- Fluent Theme-Aligned Brushes (Pure Windows Aesthetics) -->
-    <StaticResource x:Key="IncomeGreenBrush" ResourceKey="TextFillColorPrimaryBrush" />
-    <StaticResource x:Key="IncomeGreenSubtleBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
-    <StaticResource x:Key="ExpenseRedBrush" ResourceKey="TextFillColorPrimaryBrush" />
-    <StaticResource x:Key="ExpenseRedSubtleBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
-    <StaticResource x:Key="TransferBlueBrush" ResourceKey="TextFillColorPrimaryBrush" />
-    <StaticResource x:Key="TransferBlueSubtleBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
-    <StaticResource x:Key="AccentPurpleBrush" ResourceKey="AccentFillColorDefaultBrush" />
-    <StaticResource x:Key="AccentPurpleSubtleBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
+    <!-- Fluent Theme-Aligned Brushes (Harmonized Modern Palette) -->
+    <SolidColorBrush x:Key="IncomeGreenBrush" Color="#10B981" />
+    <SolidColorBrush x:Key="IncomeGreenSubtleBrush" Color="#1A10B981" />
+    <SolidColorBrush x:Key="ExpenseRedBrush" Color="#F43F5E" />
+    <SolidColorBrush x:Key="ExpenseRedSubtleBrush" Color="#1AF43F5E" />
+    <SolidColorBrush x:Key="TransferBlueBrush" Color="#38BDF8" />
+    <SolidColorBrush x:Key="TransferBlueSubtleBrush" Color="#1A38BDF8" />
+    <SolidColorBrush x:Key="WarningAmberBrush" Color="#F59E0B" />
+    <SolidColorBrush x:Key="WarningAmberSubtleBrush" Color="#1AF59E0B" />
+    <SolidColorBrush x:Key="AccentPurpleBrush" Color="#6366F1" />
+    <SolidColorBrush x:Key="AccentPurpleSubtleBrush" Color="#1A6366F1" />
 
     <!-- Fluent Card Style -->
     <Style x:Key="FluentCardStyle" TargetType="Border">

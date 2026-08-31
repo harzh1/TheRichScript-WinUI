@@ -7,7 +7,7 @@
     xmlns:vm="using:TheRichScript_WinUI.ViewModels"
     mc:Ignorable="d">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20,24,28">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20,24,0">
         <StackPanel Spacing="16" MaxWidth="1400">
 
             <!-- Page Title -->
@@ -50,7 +50,7 @@
                                 CornerRadius="34"
                                 Background="#80000000"
                                 Visibility="{x:Bind ViewModel.IsUploadingAvatar, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <ProgressRing Width="24" Height="24" IsActive="{x:Bind ViewModel.IsUploadingAvatar, Mode=OneWay}" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <ProgressRing Width="24" Height="24" IsActive="{x:Bind ViewModel.IsUploadingAvatar, Mode=OneWay}" Visibility="{x:Bind ViewModel.IsUploadingAvatar, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                         </Grid>
                     </Button>
@@ -64,14 +64,14 @@
                         <TextBlock Text="{x:Bind ViewModel.Email, Mode=OneWay}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
 
-                    <!-- Photo Actions -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <!-- Photo & Account Actions -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                         <Button
                             Click="UploadAvatar_Click"
                             IsEnabled="{x:Bind ViewModel.IsUploadingAvatar, Mode=OneWay, Converter={StaticResource InverseBooleanConverter}}"
-                            Padding="14,8">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE898;" FontSize="14" />
+                            Padding="12,7">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE898;" FontSize="13" />
                                 <TextBlock Text="Upload Photo" FontSize="12" />
                             </StackPanel>
                         </Button>
@@ -79,10 +79,21 @@
                             Command="{x:Bind ViewModel.RemoveAvatarCommand}"
                             IsEnabled="{x:Bind ViewModel.IsUploadingAvatar, Mode=OneWay, Converter={StaticResource InverseBooleanConverter}}"
                             Visibility="{x:Bind ViewModel.HasAvatar, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            Padding="12,8">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE74D;" FontSize="14" Foreground="#EF4444" />
+                            Padding="10,7">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE74D;" FontSize="13" Foreground="#EF4444" />
                                 <TextBlock Text="Remove" FontSize="12" Foreground="#EF4444" />
+                            </StackPanel>
+                        </Button>
+                        <Button
+                            Command="{x:Bind ViewModel.LogoutCommand}"
+                            Padding="12,7"
+                            Background="#1AF43F5E"
+                            BorderBrush="#40F43F5E"
+                            ToolTipService.ToolTip="Sign out of your account">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE7E8;" FontSize="13" Foreground="#F43F5E" />
+                                <TextBlock Text="Sign Out" FontSize="12" Foreground="#F43F5E" FontWeight="SemiBold" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -206,7 +217,36 @@
                 </StackPanel>
             </Border>
 
-            <!-- Account Session Card -->
+            <!-- Automation & Data Sync Card -->
+            <Border Style="{StaticResource FluentCardStyle}" Padding="20,18" CornerRadius="8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Spacing="2" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="Recurring Schedules &amp; Automation" Style="{StaticResource SectionHeaderTextStyle}" FontSize="15" />
+                        <TextBlock Text="Manually trigger server-side recurring plans and auto-funding schedules right now" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                    </StackPanel>
+
+                    <Button
+                        Grid.Column="1"
+                        Command="{x:Bind ViewModel.RunCronJobsCommand}"
+                        IsEnabled="{x:Bind ViewModel.IsSyncing, Mode=OneWay, Converter={StaticResource InverseBooleanConverter}}"
+                        Padding="14,7"
+                        VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <ProgressRing Width="14" Height="14" IsActive="{x:Bind ViewModel.IsSyncing, Mode=OneWay}" Visibility="{x:Bind ViewModel.IsSyncing, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            <FontIcon Glyph="&#xE895;" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" Visibility="{x:Bind ViewModel.IsSyncing, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                            <TextBlock Text="Sync Recurring" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
+
+
+            <!-- About & Santara Branding Card -->
             <Border Style="{StaticResource FluentCardStyle}" Padding="20,16" CornerRadius="8">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -214,18 +254,89 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Spacing="2" VerticalAlignment="Center">
-                        <TextBlock Text="Sign Out" FontWeight="SemiBold" FontSize="14" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                        <TextBlock Text="Sign out from your account on this device" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                    <StackPanel Spacing="3" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <TextBlock Text="RichScript" FontWeight="SemiBold" FontSize="14" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,1">
+                                <TextBlock Text="{x:Bind ViewModel.AppVersion, Mode=OneWay}" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="Crafted by Santara • Native Windows Financial Workspace" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
 
-                    <Button Grid.Column="1" Command="{x:Bind ViewModel.LogoutCommand}" Padding="14,7" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE7E8;" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                            <TextBlock Text="Sign Out" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                        </StackPanel>
-                    </Button>
+                    <Border Grid.Column="1" Background="#1A10B981" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
+                        <TextBlock Text="Santara" FontSize="12" FontWeight="SemiBold" Foreground="#10B981" />
+                    </Border>
                 </Grid>
+            </Border>
+
+            <!-- Danger Zone Card -->
+            <Border Style="{StaticResource FluentCardStyle}" Padding="20,18" CornerRadius="8" BorderBrush="#40EF4444" BorderThickness="1" Margin="0,0,0,16">
+                <StackPanel Spacing="16">
+                    <StackPanel Spacing="2">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE7BA;" FontSize="15" Foreground="#EF4444" />
+                            <TextBlock Text="Danger Zone" Style="{StaticResource SectionHeaderTextStyle}" FontSize="15" Foreground="#EF4444" FontWeight="SemiBold" />
+                        </StackPanel>
+                        <TextBlock Text="Irreversible actions for your workspace data and account" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                    </StackPanel>
+
+                    <!-- Reset All Data -->
+                    <Grid Padding="0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Spacing="2" VerticalAlignment="Center" Margin="0,0,16,0">
+                            <TextBlock Text="Reset All Financial Data" FontWeight="SemiBold" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                            <TextBlock Text="Permanently erase all transactions, assets, budgets, debts, and goals while keeping your account active." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                        </StackPanel>
+
+                        <Button
+                            Grid.Column="1"
+                            Click="ResetData_Click"
+                            IsEnabled="{x:Bind ViewModel.IsResettingData, Mode=OneWay, Converter={StaticResource InverseBooleanConverter}}"
+                            Padding="14,7"
+                            VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ProgressRing Width="14" Height="14" IsActive="{x:Bind ViewModel.IsResettingData, Mode=OneWay}" Visibility="{x:Bind ViewModel.IsResettingData, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="#F59E0B" Visibility="{x:Bind ViewModel.IsResettingData, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                <TextBlock Text="Reset Data" Foreground="#F59E0B" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <MenuFlyoutSeparator />
+
+                    <!-- Delete Account -->
+                    <Grid Padding="0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Spacing="2" VerticalAlignment="Center" Margin="0,0,16,0">
+                            <TextBlock Text="Delete Account" FontWeight="SemiBold" FontSize="13" Foreground="#EF4444" />
+                            <TextBlock Text="Permanently delete your account, login credentials, and all personal &amp; financial cloud records." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                        </StackPanel>
+
+                        <Button
+                            Grid.Column="1"
+                            Click="DeleteAccount_Click"
+                            IsEnabled="{x:Bind ViewModel.IsDeletingAccount, Mode=OneWay, Converter={StaticResource InverseBooleanConverter}}"
+                            Padding="14,7"
+                            VerticalAlignment="Center"
+                            Background="#1AEF4444"
+                            BorderBrush="#40EF4444">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ProgressRing Width="14" Height="14" IsActive="{x:Bind ViewModel.IsDeletingAccount, Mode=OneWay}" Visibility="{x:Bind ViewModel.IsDeletingAccount, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <FontIcon Glyph="&#xE8FA;" FontSize="12" Foreground="#EF4444" Visibility="{x:Bind ViewModel.IsDeletingAccount, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                <TextBlock Text="Delete Account" Foreground="#EF4444" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
             </Border>
 
         </StackPanel>

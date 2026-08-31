@@ -8,29 +8,32 @@
     CornerRadius="12"
     DefaultButton="Primary">
 
-    <StackPanel Spacing="16" Width="400">
-        <!-- Asset Name -->
-        <StackPanel Spacing="6">
-            <TextBlock Text="Asset / Account Name" Style="{StaticResource StatLabelTextStyle}" />
-            <TextBox x:Name="NameBox" PlaceholderText="e.g. HDFC Salary Account, Zerodha Portfolio, Cash" />
-        </StackPanel>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="550">
+        <StackPanel Spacing="16" Width="400">
+            <!-- Asset Name -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Asset / Account Name" Style="{StaticResource StatLabelTextStyle}" />
+                <TextBox x:Name="NameBox" PlaceholderText="e.g. HDFC Salary Account, Zerodha Portfolio, Cash" />
+            </StackPanel>
 
-        <!-- Asset Type -->
-        <StackPanel Spacing="6">
-            <TextBlock Text="Asset Type" Style="{StaticResource StatLabelTextStyle}" />
-            <AutoSuggestBox x:Name="TypeBox" PlaceholderText="e.g. BANK, INVESTMENT, CRYPTO, REAL ESTATE, CASH" TextChanged="TypeBox_TextChanged" />
-        </StackPanel>
+            <!-- Asset Type (Dropdown with common types + Add New Type option) -->
+            <StackPanel x:Name="TypePanel" Spacing="6">
+                <TextBlock Text="Asset Type" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="TypeComboBox" PlaceholderText="Choose an asset type..." HorizontalAlignment="Stretch" SelectionChanged="TypeComboBox_SelectionChanged" />
+                <TextBox x:Name="NewTypeTextBox" PlaceholderText="Enter new asset type (e.g. STOCKS, COMMODITY)..." Visibility="Collapsed" />
+            </StackPanel>
 
-        <!-- Initial Value / Balance -->
-        <StackPanel Spacing="6">
-            <TextBlock Text="Current Value / Balance" Style="{StaticResource StatLabelTextStyle}" />
-            <NumberBox x:Name="ValueNumberBox" Value="0" SpinButtonPlacementMode="Inline" />
-        </StackPanel>
+            <!-- Initial Value / Balance -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Current Value / Balance" Style="{StaticResource StatLabelTextStyle}" />
+                <NumberBox x:Name="ValueNumberBox" PlaceholderText="0.00" SpinButtonPlacementMode="Inline" />
+            </StackPanel>
 
-        <!-- Quantity (Optional) -->
-        <StackPanel Spacing="6">
-            <TextBlock Text="Quantity / Units (Optional)" Style="{StaticResource StatLabelTextStyle}" />
-            <NumberBox x:Name="QuantityNumberBox" Value="1" SpinButtonPlacementMode="Inline" />
+            <!-- Quantity (Optional, Empty by default) -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Quantity / Units (Optional)" Style="{StaticResource StatLabelTextStyle}" />
+                <NumberBox x:Name="QuantityNumberBox" PlaceholderText="e.g. 10.5 (Optional)" SpinButtonPlacementMode="Inline" />
+            </StackPanel>
         </StackPanel>
-    </StackPanel>
+    </ScrollViewer>
 </ContentDialog>

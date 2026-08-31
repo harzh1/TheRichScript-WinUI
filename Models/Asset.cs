@@ -62,12 +62,13 @@ public class Asset
     public string TypeGlyph => (Type ?? string.Empty).ToUpperInvariant() switch
     {
         "BANK" or "SAVINGS" or "CHECKING" => "\uE825",
-        "INVESTMENT" or "STOCKS" or "MUTUAL FUNDS" or "EQUITY" => "\uEAFC",
+        "INVESTMENT" or "STOCKS" or "MUTUAL FUND" or "MUTUAL FUNDS" or "EQUITY" => "\uEAFC",
         "CRYPTO" or "CRYPTO CURRENCY" or "BITCOIN" => "\uE945",
         "CASH" or "LIQUID CASH" or "WALLET" => "\uE1D0",
         "REAL ESTATE" or "PROPERTY" or "LAND" => "\uE80F",
+        "METALS" or "METAL" or "GOLD" or "SILVER" or "PRECIOUS METAL" or "PRECIOUS METALS" => "\uE734",
         "RETIREMENT" or "EPF" or "PPF" or "PENSION" => "\uE819",
-        "VEHICLE" or "GOLD" or "PRECIOUS METAL" => "\uE734",
+        "VEHICLE" => "\uE806",
         _ => "\uE77B"
     };
 }

@@ -28,6 +28,7 @@ public partial class App : Application
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
         InitializeComponent();
+        Helpers.LiveChartsConfig.Configure();
         _serviceProvider = ConfigureServices();
     }
 

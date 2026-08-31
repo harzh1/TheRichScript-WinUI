@@ -22,6 +22,8 @@ public interface IAuthService
     Task<bool> UploadAvatarAsync(string filePath);
     Task<bool> RemoveAvatarAsync();
     Task<bool> UpdatePasswordAsync(string currentPassword, string newPassword);
+    Task<ApiResponse<object>> DeleteAccountAsync(string password);
+    Task<ApiResponse<object>> ResetAllDataAsync(string password);
     void Logout();
 }
 
@@ -213,6 +215,34 @@ public class AuthService : IAuthService
         };
         var response = await _apiService.PutAsync<object>("auth/password", request);
         return response.Success;
+    }
+
+    public async Task<ApiResponse<object>> DeleteAccountAsync(string password)
+    {
+        var response = await _apiService.DeleteAsync<object>("auth/account", new { password });
+        if (response.Success)
+        {
+            Logout();
+        }
+        return response;
+    }
+
+    public async Task<ApiResponse<object>> ResetAllDataAsync(string password)
+    {
+        var response = await _apiService.PostAsync<object>("user/reset-data", new { password });
+        if (response.Success)
+        {
+            try
+            {
+                var dataCacheService = App.GetService<IDataCacheService>();
+                dataCacheService?.ClearAll();
+            }
+            catch
+            {
+                // Ignore
+            }
+        }
+        return response;
     }
 
     public void Logout()

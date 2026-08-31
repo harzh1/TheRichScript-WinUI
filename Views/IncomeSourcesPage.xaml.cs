@@ -28,70 +28,34 @@ public sealed partial class IncomeSourcesPage : Page
 
     private async void AddIncomeSource_Click(object sender, RoutedEventArgs e)
     {
-        var dialogService = App.GetService<IDialogService>();
-        var incomeSourceService = App.GetService<IIncomeSourceService>();
-        var dataCache = App.GetService<IDataCacheService>();
-        var busy = App.GetService<IBusyIndicatorService>();
-
-        var dialog = new AddIncomeSourceDialog(ViewModel.AvailableAssets)
-        {
-            XamlRoot = this.XamlRoot
-        };
-
-        var result = await dialog.ShowAsync();
-        if (result == ContentDialogResult.Primary && dialog.CreateResult != null)
-        {
-            using (busy?.BeginBusy("Adding income source..."))
-            {
-                ViewModel.IsLoading = true;
-                try
-                {
-                    var response = await incomeSourceService.CreateIncomeSourceAsync(dialog.CreateResult);
-                    if (response.Success)
-                    {
-                        dataCache?.Invalidate(DataCacheType.IncomeSources);
-                        await ViewModel.LoadIncomeSourcesAsync();
-                    }
-                    else
-                    {
-                        await dialogService.ShowErrorAsync(response.Error ?? "Failed to add income source");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await dialogService.ShowErrorAsync($"Exception: {ex.Message}");
-                }
-                finally
-                {
-                    ViewModel.IsLoading = false;
-                }
-            }
-        }
-    }
-
-    private async void EditIncomeSource_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is Button btn && btn.Tag is IncomeSource source)
+        try
         {
             var dialogService = App.GetService<IDialogService>();
             var incomeSourceService = App.GetService<IIncomeSourceService>();
+            var assetService = App.GetService<IAssetService>();
             var dataCache = App.GetService<IDataCacheService>();
             var busy = App.GetService<IBusyIndicatorService>();
 
-            var dialog = new AddIncomeSourceDialog(ViewModel.AvailableAssets, source)
+            var assets = ViewModel.AvailableAssets;
+            if (assets == null || assets.Count == 0)
             {
-                XamlRoot = this.XamlRoot
+                assets = dataCache?.CachedAssets ?? (await assetService.GetAssetsAsync()).Data ?? new();
+            }
+
+            var dialog = new AddIncomeSourceDialog(assets)
+            {
+                XamlRoot = this.XamlRoot ?? (App.MainWindowInstance?.Content as FrameworkElement)?.XamlRoot
             };
 
             var result = await dialog.ShowAsync();
-            if (result == ContentDialogResult.Primary && dialog.UpdateResult != null)
+            if (result == ContentDialogResult.Primary && dialog.CreateResult != null)
             {
-                using (busy?.BeginBusy("Updating income source..."))
+                using (busy?.BeginBusy("Adding income source..."))
                 {
                     ViewModel.IsLoading = true;
                     try
                     {
-                        var response = await incomeSourceService.UpdateIncomeSourceAsync(source.Id, dialog.UpdateResult);
+                        var response = await incomeSourceService.CreateIncomeSourceAsync(dialog.CreateResult);
                         if (response.Success)
                         {
                             dataCache?.Invalidate(DataCacheType.IncomeSources);
@@ -99,7 +63,7 @@ public sealed partial class IncomeSourcesPage : Page
                         }
                         else
                         {
-                            await dialogService.ShowErrorAsync(response.Error ?? "Failed to update income source");
+                            await dialogService.ShowErrorAsync(response.Error ?? "Failed to add income source");
                         }
                     }
                     catch (Exception ex)
@@ -112,6 +76,75 @@ public sealed partial class IncomeSourcesPage : Page
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            var dialogService = App.GetService<IDialogService>();
+            await dialogService.ShowErrorAsync($"Unable to open dialog: {ex.Message}");
+        }
+    }
+
+    private async void EditIncomeSource_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var source = (sender as FrameworkElement)?.Tag as IncomeSource
+                      ?? (sender as FrameworkElement)?.DataContext as IncomeSource;
+
+            if (source != null)
+            {
+                var dialogService = App.GetService<IDialogService>();
+                var incomeSourceService = App.GetService<IIncomeSourceService>();
+                var assetService = App.GetService<IAssetService>();
+                var dataCache = App.GetService<IDataCacheService>();
+                var busy = App.GetService<IBusyIndicatorService>();
+
+                var assets = ViewModel.AvailableAssets;
+                if (assets == null || assets.Count == 0)
+                {
+                    assets = dataCache?.CachedAssets ?? (await assetService.GetAssetsAsync()).Data ?? new();
+                }
+
+                var dialog = new AddIncomeSourceDialog(assets, source)
+                {
+                    XamlRoot = this.XamlRoot ?? (App.MainWindowInstance?.Content as FrameworkElement)?.XamlRoot
+                };
+
+                var result = await dialog.ShowAsync();
+                if (result == ContentDialogResult.Primary && dialog.UpdateResult != null)
+                {
+                    using (busy?.BeginBusy("Updating income source..."))
+                    {
+                        ViewModel.IsLoading = true;
+                        try
+                        {
+                            var response = await incomeSourceService.UpdateIncomeSourceAsync(source.Id, dialog.UpdateResult);
+                            if (response.Success)
+                            {
+                                dataCache?.Invalidate(DataCacheType.IncomeSources);
+                                await ViewModel.LoadIncomeSourcesAsync();
+                            }
+                            else
+                            {
+                                await dialogService.ShowErrorAsync(response.Error ?? "Failed to update income source");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            await dialogService.ShowErrorAsync($"Exception: {ex.Message}");
+                        }
+                        finally
+                        {
+                            ViewModel.IsLoading = false;
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            var dialogService = App.GetService<IDialogService>();
+            await dialogService.ShowErrorAsync($"Unable to open edit dialog: {ex.Message}");
         }
     }
 }
