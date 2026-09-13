@@ -73,13 +73,23 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Country Code" Style="{StaticResource StatLabelTextStyle}" />
-                            <TextBox x:Name="CountryBox" Text="{x:Bind ViewModel.Country, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="IN" />
+                            <TextBlock Text="Country" Style="{StaticResource StatLabelTextStyle}" />
+                            <ComboBox x:Name="CountryComboBox"
+                                      ItemsSource="{x:Bind ViewModel.AvailableCountries}"
+                                      SelectedItem="{x:Bind ViewModel.SelectedCountry, Mode=TwoWay}"
+                                      DisplayMemberPath="DisplayName"
+                                      HorizontalAlignment="Stretch"
+                                      PlaceholderText="Select Country" />
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Spacing="6">
                             <TextBlock Text="Currency" Style="{StaticResource StatLabelTextStyle}" />
-                            <TextBox x:Name="CurrencyBox" Text="{x:Bind ViewModel.Currency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="INR" />
+                            <ComboBox x:Name="CurrencyComboBox"
+                                      ItemsSource="{x:Bind ViewModel.AvailableCurrencies}"
+                                      SelectedItem="{x:Bind ViewModel.SelectedCurrency, Mode=TwoWay}"
+                                      DisplayMemberPath="DisplayName"
+                                      HorizontalAlignment="Stretch"
+                                      PlaceholderText="Select Currency" />
                         </StackPanel>
                     </Grid>
 

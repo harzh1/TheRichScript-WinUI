@@ -159,10 +159,15 @@
                                         <Run Text="{x:Bind FormattedAmountPrefix}" /><Run Text="{x:Bind Amount, Converter={StaticResource CurrencyConverter}}" />
                                     </TextBlock>
 
-                                    <!-- 7. Actions Delete Button -->
-                                    <Button Grid.Column="6" Background="Transparent" BorderThickness="0" Padding="6" VerticalAlignment="Center" ToolTipService.ToolTip="Delete Transaction" Click="DeleteTx_Click" Tag="{x:Bind}">
-                                        <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                    </Button>
+                                    <!-- 7. Actions (Edit & Delete Buttons) -->
+                                    <StackPanel Grid.Column="6" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+                                        <Button Background="Transparent" BorderThickness="0" Padding="6" VerticalAlignment="Center" ToolTipService.ToolTip="Edit Transaction" Click="EditTx_Click" Tag="{x:Bind}">
+                                            <FontIcon Glyph="&#xE70F;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </Button>
+                                        <Button Background="Transparent" BorderThickness="0" Padding="6" VerticalAlignment="Center" ToolTipService.ToolTip="Delete Transaction" Click="DeleteTx_Click" Tag="{x:Bind}">
+                                            <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </Button>
+                                    </StackPanel>
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>

@@ -23,9 +23,23 @@ public sealed partial class GoalsPage : Page
         Loaded += GoalsPage_Loaded;
     }
 
+    public static Visibility ShowFilterEmptyState(int totalCount, int filteredCount, bool isLoading) =>
+        !isLoading && totalCount > 0 && filteredCount == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    public static Visibility ShowNoGoalsEmptyState(int totalCount, bool isLoading) =>
+        !isLoading && totalCount == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    public static Visibility ShowGoalsList(int filteredCount) =>
+        filteredCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+
     private async void GoalsPage_Loaded(object sender, RoutedEventArgs e)
     {
         await ViewModel.LoadGoalsAsync();
+    }
+
+    private void ClearFilter_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ClearFilterCommand.Execute(null);
     }
 
     private async void AddGoal_Click(object sender, RoutedEventArgs e)
@@ -107,6 +121,41 @@ public sealed partial class GoalsPage : Page
         if (goal != null)
         {
             await ViewModel.TogglePinCommand.ExecuteAsync(goal);
+        }
+    }
+
+    private async void GoalCard_EditGoalClicked(Goal goal)
+    {
+        if (goal == null) return;
+
+        var dataCache = App.GetService<IDataCacheService>();
+        var goalService = App.GetService<IGoalService>();
+        var dialogService = App.GetService<IDialogService>();
+        var busy = App.GetService<IBusyIndicatorService>();
+
+        List<Asset> assets = dataCache?.CachedAssets ?? (await App.GetService<IAssetService>().GetAssetsAsync()).Data ?? new();
+
+        var dialog = new AddGoalDialog(assets, goal)
+        {
+            XamlRoot = this.XamlRoot
+        };
+
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary && dialog.UpdateResult != null)
+        {
+            using (busy?.BeginBusy($"Updating goal '{goal.Name}'..."))
+            {
+                var updateResp = await goalService.UpdateGoalAsync(goal.Id, dialog.UpdateResult, dialog.ImageFilePaths);
+                if (updateResp.Success)
+                {
+                    dataCache?.Invalidate(DataCacheType.Goals);
+                    await ViewModel.LoadGoalsAsync();
+                }
+                else
+                {
+                    await dialogService.ShowErrorAsync(updateResp.Error ?? "Failed to update goal.");
+                }
+            }
         }
     }
 

@@ -27,7 +27,13 @@ public sealed partial class RegisterPage : Page
         ViewModel.LastName = LastNameBox.Text;
         ViewModel.Email = EmailBox.Text;
         ViewModel.Password = PasswordBox.Password;
-        ViewModel.Country = CountryBox.Text;
-        ViewModel.Currency = CurrencyBox.Text;
+        if (CountryComboBox.SelectedItem is TheRichScript_WinUI.Models.CountryInfo country)
+        {
+            ViewModel.SelectedCountry = country;
+        }
+        if (CurrencyComboBox.SelectedItem is TheRichScript_WinUI.Models.CurrencyInfo currency)
+        {
+            ViewModel.SelectedCurrency = currency;
+        }
     }
 }

@@ -26,10 +26,13 @@ public partial class RegisterViewModel : ObservableObject
     private string password = string.Empty;
 
     [ObservableProperty]
-    private string country = "IN";
+    private CountryInfo? selectedCountry;
 
     [ObservableProperty]
-    private string currency = "INR";
+    private CurrencyInfo? selectedCurrency;
+
+    public IReadOnlyList<CountryInfo> AvailableCountries => CountryCurrencyData.AllCountries;
+    public IReadOnlyList<CurrencyInfo> AvailableCurrencies => CountryCurrencyData.AllCurrencies;
 
     [ObservableProperty]
     private bool isLoading;
@@ -45,6 +48,22 @@ public partial class RegisterViewModel : ObservableObject
         _authService = authService;
         _navigationService = navigationService;
         _dataCacheService = dataCacheService;
+
+        // Default to India / INR
+        SelectedCountry = CountryCurrencyData.FindCountry("IN") ?? CountryCurrencyData.AllCountries.FirstOrDefault();
+        SelectedCurrency = CountryCurrencyData.FindCurrency("INR") ?? CountryCurrencyData.AllCurrencies.FirstOrDefault();
+    }
+
+    partial void OnSelectedCountryChanged(CountryInfo? value)
+    {
+        if (value != null && !string.IsNullOrWhiteSpace(value.DefaultCurrency))
+        {
+            var matchedCurrency = CountryCurrencyData.FindCurrency(value.DefaultCurrency);
+            if (matchedCurrency != null)
+            {
+                SelectedCurrency = matchedCurrency;
+            }
+        }
     }
 
     [RelayCommand]
@@ -80,8 +99,8 @@ public partial class RegisterViewModel : ObservableObject
                 LastName = string.IsNullOrWhiteSpace(LastName) ? null : LastName.Trim(),
                 Email = Email.Trim(),
                 Password = Password,
-                Country = Country,
-                Currency = Currency
+                Country = SelectedCountry?.Code ?? "IN",
+                Currency = SelectedCurrency?.Code ?? "INR"
             };
 
             var response = await _authService.RegisterAsync(req);

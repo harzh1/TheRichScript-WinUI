@@ -115,3 +115,16 @@ public class CreateTransactionRequest
     public DateTime Date { get; set; } = DateTime.Now;
     public string? ReceiptFilePath { get; set; }
 }
+
+public class UpdateTransactionRequest
+{
+    public string AssetId { get; set; } = string.Empty;
+    public string Type { get; set; } = "EXPENSE";
+    public double Amount { get; set; }
+    public string Category { get; set; } = string.Empty;
+    public string? IncomeSourceId { get; set; }
+    public string? IncomeSourceName { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public DateTime Date { get; set; } = DateTime.Now;
+    public string? ReceiptFilePath { get; set; }
+}

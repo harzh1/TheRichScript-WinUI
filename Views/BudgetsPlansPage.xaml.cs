@@ -29,17 +29,7 @@ public sealed partial class BudgetsPlansPage : Page
         await ViewModel.LoadPlansAsync();
     }
 
-    private async void AddPlan_Click(object sender, RoutedEventArgs e)
-    {
-        await OpenPlanDialogAsync("RECURRING");
-    }
-
-    private async void AddQuickAdd_Click(object sender, RoutedEventArgs e)
-    {
-        await OpenPlanDialogAsync("MANUAL");
-    }
-
-    private async Task OpenPlanDialogAsync(string defaultType)
+    private async void AddSubscription_Click(object sender, RoutedEventArgs e)
     {
         var dataCache = App.GetService<IDataCacheService>();
         var planService = App.GetService<IPlanService>();
@@ -49,7 +39,7 @@ public sealed partial class BudgetsPlansPage : Page
         List<Asset> assets = dataCache?.CachedAssets ?? (await App.GetService<IAssetService>().GetAssetsAsync()).Data ?? new();
         List<string> cats = dataCache?.CachedCategories?.Select(c => c.Name).ToList() ?? (await App.GetService<ICategoryService>().GetCategoriesAsync()).Data?.Select(c => c.Name).ToList() ?? new();
 
-        var dialog = new AddPlanDialog(assets, cats, defaultType: defaultType)
+        var dialog = new AddSubscriptionDialog(assets, cats)
         {
             XamlRoot = this.XamlRoot
         };
@@ -57,7 +47,7 @@ public sealed partial class BudgetsPlansPage : Page
         var result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary && dialog.Result != null)
         {
-            using (busy?.BeginBusy("Creating planned expense..."))
+            using (busy?.BeginBusy("Creating subscription..."))
             {
                 var createResp = await planService.CreatePlanAsync(dialog.Result);
                 if (createResp.Success)
@@ -67,13 +57,81 @@ public sealed partial class BudgetsPlansPage : Page
                 }
                 else
                 {
-                    await dialogService.ShowErrorAsync(createResp.Error ?? "Failed to create plan.");
+                    await dialogService.ShowErrorAsync(createResp.Error ?? "Failed to create subscription.");
                 }
             }
         }
     }
 
-    private async void EditPlan_Click(object sender, RoutedEventArgs e)
+    private async void AddRecurringPlan_Click(object sender, RoutedEventArgs e)
+    {
+        var dataCache = App.GetService<IDataCacheService>();
+        var planService = App.GetService<IPlanService>();
+        var dialogService = App.GetService<IDialogService>();
+        var busy = App.GetService<IBusyIndicatorService>();
+
+        List<Asset> assets = dataCache?.CachedAssets ?? (await App.GetService<IAssetService>().GetAssetsAsync()).Data ?? new();
+        List<string> cats = dataCache?.CachedCategories?.Select(c => c.Name).ToList() ?? (await App.GetService<ICategoryService>().GetCategoriesAsync()).Data?.Select(c => c.Name).ToList() ?? new();
+
+        var dialog = new AddRecurringPlanDialog(assets, cats)
+        {
+            XamlRoot = this.XamlRoot
+        };
+
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary && dialog.Result != null)
+        {
+            using (busy?.BeginBusy("Creating recurring plan..."))
+            {
+                var createResp = await planService.CreatePlanAsync(dialog.Result);
+                if (createResp.Success)
+                {
+                    dataCache?.Invalidate(DataCacheType.Plans);
+                    await ViewModel.LoadPlansAsync();
+                }
+                else
+                {
+                    await dialogService.ShowErrorAsync(createResp.Error ?? "Failed to create recurring plan.");
+                }
+            }
+        }
+    }
+
+    private async void AddQuickAdd_Click(object sender, RoutedEventArgs e)
+    {
+        var dataCache = App.GetService<IDataCacheService>();
+        var planService = App.GetService<IPlanService>();
+        var dialogService = App.GetService<IDialogService>();
+        var busy = App.GetService<IBusyIndicatorService>();
+
+        List<Asset> assets = dataCache?.CachedAssets ?? (await App.GetService<IAssetService>().GetAssetsAsync()).Data ?? new();
+        List<string> cats = dataCache?.CachedCategories?.Select(c => c.Name).ToList() ?? (await App.GetService<ICategoryService>().GetCategoriesAsync()).Data?.Select(c => c.Name).ToList() ?? new();
+
+        var dialog = new AddPlanDialog(assets, cats, defaultType: "MANUAL")
+        {
+            XamlRoot = this.XamlRoot
+        };
+
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary && dialog.Result != null)
+        {
+            using (busy?.BeginBusy("Creating template..."))
+            {
+                var createResp = await planService.CreatePlanAsync(dialog.Result);
+                if (createResp.Success)
+                {
+                    dataCache?.Invalidate(DataCacheType.Plans);
+                    await ViewModel.LoadPlansAsync();
+                }
+                else
+                {
+                    await dialogService.ShowErrorAsync(createResp.Error ?? "Failed to create template.");
+                }
+            }
+        }
+    }
+
+    private async void EditSubscription_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button btn && btn.Tag is PlannedExpense plan)
         {
@@ -85,7 +143,7 @@ public sealed partial class BudgetsPlansPage : Page
             List<Asset> assets = dataCache?.CachedAssets ?? (await App.GetService<IAssetService>().GetAssetsAsync()).Data ?? new();
             List<string> cats = dataCache?.CachedCategories?.Select(c => c.Name).ToList() ?? (await App.GetService<ICategoryService>().GetCategoriesAsync()).Data?.Select(c => c.Name).ToList() ?? new();
 
-            var dialog = new AddPlanDialog(assets, cats, existingPlan: plan)
+            var dialog = new AddSubscriptionDialog(assets, cats, existingPlan: plan)
             {
                 XamlRoot = this.XamlRoot
             };
@@ -93,15 +151,16 @@ public sealed partial class BudgetsPlansPage : Page
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary && dialog.Result != null)
             {
-                using (busy?.BeginBusy("Updating planned expense..."))
+                using (busy?.BeginBusy("Updating subscription..."))
                 {
                     var updateReq = new UpdatePlanRequest
                     {
                         Name = dialog.Result.Name,
                         Amount = dialog.Result.Amount,
                         AssetId = dialog.Result.AssetId,
+                        TargetAssetId = null,
                         Category = dialog.Result.Category,
-                        TxType = dialog.Result.TxType,
+                        TxType = "EXPENSE",
                         Frequency = dialog.Result.Frequency,
                         NextDueDate = dialog.Result.NextDueDate
                     };
@@ -114,7 +173,105 @@ public sealed partial class BudgetsPlansPage : Page
                     }
                     else
                     {
-                        await dialogService.ShowErrorAsync(updateResp.Error ?? "Failed to update plan.");
+                        await dialogService.ShowErrorAsync(updateResp.Error ?? "Failed to update subscription.");
+                    }
+                }
+            }
+        }
+    }
+
+    private async void EditRecurringPlan_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag is PlannedExpense plan)
+        {
+            var dataCache = App.GetService<IDataCacheService>();
+            var planService = App.GetService<IPlanService>();
+            var dialogService = App.GetService<IDialogService>();
+            var busy = App.GetService<IBusyIndicatorService>();
+
+            List<Asset> assets = dataCache?.CachedAssets ?? (await App.GetService<IAssetService>().GetAssetsAsync()).Data ?? new();
+            List<string> cats = dataCache?.CachedCategories?.Select(c => c.Name).ToList() ?? (await App.GetService<ICategoryService>().GetCategoriesAsync()).Data?.Select(c => c.Name).ToList() ?? new();
+
+            var dialog = new AddRecurringPlanDialog(assets, cats, existingPlan: plan)
+            {
+                XamlRoot = this.XamlRoot
+            };
+
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary && dialog.Result != null)
+            {
+                using (busy?.BeginBusy("Updating recurring plan..."))
+                {
+                    var updateReq = new UpdatePlanRequest
+                    {
+                        Name = dialog.Result.Name,
+                        Amount = dialog.Result.Amount,
+                        AssetId = dialog.Result.AssetId,
+                        TargetAssetId = dialog.Result.TargetAssetId,
+                        Category = dialog.Result.Category,
+                        TxType = "TRANSFER",
+                        Frequency = dialog.Result.Frequency,
+                        NextDueDate = dialog.Result.NextDueDate
+                    };
+
+                    var updateResp = await planService.UpdatePlanAsync(plan.Id, updateReq);
+                    if (updateResp.Success)
+                    {
+                        dataCache?.Invalidate(DataCacheType.Plans);
+                        await ViewModel.LoadPlansAsync();
+                    }
+                    else
+                    {
+                        await dialogService.ShowErrorAsync(updateResp.Error ?? "Failed to update recurring plan.");
+                    }
+                }
+            }
+        }
+    }
+
+    private async void EditTemplate_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag is PlannedExpense plan)
+        {
+            var dataCache = App.GetService<IDataCacheService>();
+            var planService = App.GetService<IPlanService>();
+            var dialogService = App.GetService<IDialogService>();
+            var busy = App.GetService<IBusyIndicatorService>();
+
+            List<Asset> assets = dataCache?.CachedAssets ?? (await App.GetService<IAssetService>().GetAssetsAsync()).Data ?? new();
+            List<string> cats = dataCache?.CachedCategories?.Select(c => c.Name).ToList() ?? (await App.GetService<ICategoryService>().GetCategoriesAsync()).Data?.Select(c => c.Name).ToList() ?? new();
+
+            var dialog = new AddPlanDialog(assets, cats, defaultType: "MANUAL", existingPlan: plan)
+            {
+                XamlRoot = this.XamlRoot
+            };
+
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary && dialog.Result != null)
+            {
+                using (busy?.BeginBusy("Updating template..."))
+                {
+                    var updateReq = new UpdatePlanRequest
+                    {
+                        Name = dialog.Result.Name,
+                        Amount = dialog.Result.Amount,
+                        AssetId = dialog.Result.AssetId,
+                        TargetAssetId = null,
+                        Category = dialog.Result.Category,
+                        TxType = dialog.Result.TxType,
+                        Frequency = null,
+                        NextDueDate = null
+                    };
+
+                    var updateResp = await planService.UpdatePlanAsync(plan.Id, updateReq);
+                    if (updateResp.Success)
+                    {
+                        dataCache?.Invalidate(DataCacheType.Plans);
+                        await ViewModel.LoadPlansAsync();
+                    }
+                    else
+                    {
+                        await dialogService.ShowErrorAsync(updateResp.Error ?? "Failed to update template.");
                     }
                 }
             }

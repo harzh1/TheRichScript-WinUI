@@ -12,12 +12,15 @@ public interface IAuthService
     User? CurrentUser { get; }
     bool IsAuthenticated { get; }
     string? Token { get; }
+    string? RefreshToken { get; }
 
     event Action<User?>? UserStateChanged;
+    event Action? SessionExpired;
 
     Task<bool> AutoLoginAsync();
     Task<AuthResponse> LoginAsync(string email, string password);
     Task<AuthResponse> RegisterAsync(RegisterRequest request);
+    Task<bool> RefreshTokenAsync();
     Task<bool> UpdateProfileAsync(UpdateProfileRequest request);
     Task<bool> UploadAvatarAsync(string filePath);
     Task<bool> RemoveAvatarAsync();
@@ -30,6 +33,7 @@ public interface IAuthService
 public class AuthSession
 {
     public string? Token { get; set; }
+    public string? RefreshToken { get; set; }
     public User? User { get; set; }
 }
 
@@ -39,17 +43,27 @@ public class AuthService : IAuthService
 
     private readonly IApiService _apiService;
     private readonly ISettingsService _settingsService;
+    private readonly System.Threading.SemaphoreSlim _refreshLock = new(1, 1);
 
     public User? CurrentUser { get; private set; }
     public string? Token { get; private set; }
+    public string? RefreshToken { get; private set; }
     public bool IsAuthenticated => !string.IsNullOrWhiteSpace(Token) && CurrentUser != null;
 
     public event Action<User?>? UserStateChanged;
+    public event Action? SessionExpired;
 
     public AuthService(IApiService apiService, ISettingsService settingsService)
     {
         _apiService = apiService;
         _settingsService = settingsService;
+        _apiService.SetTokenRefreshHandler(
+            async () => await RefreshTokenAsync(),
+            () =>
+            {
+                Logout();
+                SessionExpired?.Invoke();
+            });
     }
 
     public async Task<bool> AutoLoginAsync()
@@ -65,6 +79,7 @@ public class AuthService : IAuthService
                 if (session != null && !string.IsNullOrWhiteSpace(session.Token))
                 {
                     Token = session.Token;
+                    RefreshToken = session.RefreshToken;
                     CurrentUser = session.User;
                     _apiService.SetAuthToken(Token);
 
@@ -75,20 +90,47 @@ public class AuthService : IAuthService
                         if (response.Success && response.Data != null)
                         {
                             CurrentUser = response.Data;
-                            SaveSession(Token, CurrentUser);
+                            SaveSession(Token, RefreshToken, CurrentUser);
                             _settingsService.Settings.PreferredCurrency = CurrentUser.Currency;
                             _settingsService.SaveSettings();
+                            UserStateChanged?.Invoke(CurrentUser);
+                            return true;
+                        }
+                        else if (response.StatusCode == 401 || !response.Success)
+                        {
+                            // Access token might be expired. Verify with Refresh Token API!
+                            if (!string.IsNullOrWhiteSpace(RefreshToken))
+                            {
+                                var refreshed = await RefreshTokenAsync();
+                                if (refreshed)
+                                {
+                                    var retryMe = await _apiService.GetAsync<User>("auth/me");
+                                    if (retryMe.Success && retryMe.Data != null)
+                                    {
+                                        CurrentUser = retryMe.Data;
+                                        SaveSession(Token, RefreshToken, CurrentUser);
+                                        _settingsService.Settings.PreferredCurrency = CurrentUser.Currency;
+                                        _settingsService.SaveSettings();
+                                    }
+                                    UserStateChanged?.Invoke(CurrentUser);
+                                    return true;
+                                }
+                            }
+
+                            // Refresh token API failed, was rejected, or token is stale over 30 days
+                            Logout();
+                            SessionExpired?.Invoke();
+                            return false;
                         }
                     }
                     catch
                     {
                         // Use cached profile if network request fails
-                    }
-
-                    if (CurrentUser != null)
-                    {
-                        UserStateChanged?.Invoke(CurrentUser);
-                        return true;
+                        if (CurrentUser != null)
+                        {
+                            UserStateChanged?.Invoke(CurrentUser);
+                            return true;
+                        }
                     }
                 }
             }
@@ -102,6 +144,51 @@ public class AuthService : IAuthService
         return false;
     }
 
+    public async Task<bool> RefreshTokenAsync()
+    {
+        await _refreshLock.WaitAsync();
+        try
+        {
+            if (string.IsNullOrWhiteSpace(RefreshToken))
+            {
+                return false;
+            }
+
+            var request = new RefreshTokenRequest { RefreshToken = RefreshToken };
+            var response = await _apiService.PostAsync<RefreshTokenResponse>("auth/refresh-token", request);
+
+            if (response.Success && response.Data != null &&
+                (!string.IsNullOrWhiteSpace(response.Data.AccessToken) || !string.IsNullOrWhiteSpace(response.Data.Token)))
+            {
+                Token = response.Data.AccessToken ?? response.Data.Token;
+                if (!string.IsNullOrWhiteSpace(response.Data.RefreshToken))
+                {
+                    RefreshToken = response.Data.RefreshToken;
+                }
+                if (response.Data.User != null)
+                {
+                    CurrentUser = response.Data.User;
+                }
+
+                _apiService.SetAuthToken(Token);
+                SaveSession(Token, RefreshToken, CurrentUser);
+                UserStateChanged?.Invoke(CurrentUser);
+                return true;
+            }
+
+            // Backend verified that the refresh token is stale (>30 days), expired, or revoked
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
+        finally
+        {
+            _refreshLock.Release();
+        }
+    }
+
     public async Task<AuthResponse> LoginAsync(string email, string password)
     {
         var request = new LoginRequest { Email = email.Trim(), Password = password };
@@ -109,11 +196,12 @@ public class AuthService : IAuthService
 
         if (response.Success && response.Data != null && !string.IsNullOrWhiteSpace(response.Data.Token))
         {
-            Token = response.Data.Token;
+            Token = response.Data.AccessToken ?? response.Data.Token;
+            RefreshToken = response.Data.RefreshToken;
             CurrentUser = response.Data.User;
             _apiService.SetAuthToken(Token);
 
-            SaveSession(Token, CurrentUser);
+            SaveSession(Token, RefreshToken, CurrentUser);
             if (CurrentUser != null)
             {
                 _settingsService.Settings.PreferredCurrency = CurrentUser.Currency;
@@ -137,11 +225,12 @@ public class AuthService : IAuthService
 
         if (response.Success && response.Data != null && !string.IsNullOrWhiteSpace(response.Data.Token))
         {
-            Token = response.Data.Token;
+            Token = response.Data.AccessToken ?? response.Data.Token;
+            RefreshToken = response.Data.RefreshToken;
             CurrentUser = response.Data.User;
             _apiService.SetAuthToken(Token);
 
-            SaveSession(Token, CurrentUser);
+            SaveSession(Token, RefreshToken, CurrentUser);
             if (CurrentUser != null)
             {
                 _settingsService.Settings.PreferredCurrency = CurrentUser.Currency;
@@ -165,7 +254,7 @@ public class AuthService : IAuthService
         if (response.Success && response.Data != null)
         {
             CurrentUser = response.Data;
-            SaveSession(Token, CurrentUser);
+            SaveSession(Token, RefreshToken, CurrentUser);
             _settingsService.Settings.PreferredCurrency = CurrentUser.Currency;
             _settingsService.SaveSettings();
             UserStateChanged?.Invoke(CurrentUser);
@@ -186,7 +275,7 @@ public class AuthService : IAuthService
         if (response.Success && response.Data != null)
         {
             CurrentUser = response.Data;
-            SaveSession(Token, CurrentUser);
+            SaveSession(Token, RefreshToken, CurrentUser);
             UserStateChanged?.Invoke(CurrentUser);
             return true;
         }
@@ -199,7 +288,7 @@ public class AuthService : IAuthService
         if (response.Success && response.Data != null)
         {
             CurrentUser = response.Data;
-            SaveSession(Token, CurrentUser);
+            SaveSession(Token, RefreshToken, CurrentUser);
             UserStateChanged?.Invoke(CurrentUser);
             return true;
         }
@@ -247,9 +336,26 @@ public class AuthService : IAuthService
 
     public void Logout()
     {
+        var currentRefreshToken = RefreshToken;
         Token = null;
+        RefreshToken = null;
         CurrentUser = null;
         _apiService.SetAuthToken(null);
+
+        if (!string.IsNullOrWhiteSpace(currentRefreshToken))
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _apiService.PostAsync<object>("auth/logout", new { refreshToken = currentRefreshToken });
+                }
+                catch
+                {
+                    // Ignore
+                }
+            });
+        }
 
         try
         {
@@ -277,11 +383,11 @@ public class AuthService : IAuthService
         UserStateChanged?.Invoke(null);
     }
 
-    private void SaveSession(string? token, User? user)
+    private void SaveSession(string? token, string? refreshToken, User? user)
     {
         try
         {
-            var session = new AuthSession { Token = token, User = user };
+            var session = new AuthSession { Token = token, RefreshToken = refreshToken, User = user };
             var json = JsonSerializer.Serialize(session, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(SessionFilePath, json);
         }

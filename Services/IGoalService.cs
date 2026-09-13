@@ -128,7 +128,7 @@ public class GoalService : IGoalService
 
     public async Task<ApiResponse<object>> DeleteGoalAsync(string id, string? refundAssetId = null)
     {
-        object? body = !string.IsNullOrEmpty(refundAssetId) ? new DeleteGoalRequest { RefundAssetId = refundAssetId } : null;
+        object body = !string.IsNullOrEmpty(refundAssetId) ? new DeleteGoalRequest { RefundAssetId = refundAssetId } : new { };
         return await _apiService.DeleteAsync<object>($"goals/{id}", body);
     }
 }

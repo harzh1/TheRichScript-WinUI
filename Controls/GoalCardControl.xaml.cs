@@ -43,6 +43,7 @@ public sealed partial class GoalCardControl : UserControl
 
     public event Action<Goal>? DepositFundsClicked;
     public event Action<Goal>? TogglePinClicked;
+    public event Action<Goal>? EditGoalClicked;
     public event Action<Goal>? DeleteGoalClicked;
 
     public GoalCardControl()
@@ -70,53 +71,82 @@ public sealed partial class GoalCardControl : UserControl
         StopSlideshow();
     }
 
+    private string GetEffectiveCurrencySymbol()
+    {
+        if (!string.IsNullOrEmpty(CurrencySymbol) && CurrencySymbol != "₹")
+        {
+            return CurrencySymbol;
+        }
+
+        try
+        {
+            var settings = App.GetService<TheRichScript_WinUI.Services.ISettingsService>();
+            return settings?.Settings?.CurrencySymbol ?? CurrencySymbol ?? "₹";
+        }
+        catch
+        {
+            return CurrencySymbol ?? "₹";
+        }
+    }
+
     public void UpdateUI()
     {
         if (Goal == null) return;
 
+        var symbol = GetEffectiveCurrencySymbol();
         GoalNameTextImage.Text = Goal.Name;
         GoalNameTextNoImg.Text = Goal.Name;
-        CurrentAmountText.Text = $"{CurrencySymbol}{Goal.CurrentAmount:N2}";
-        TargetAmountText.Text = $"{CurrencySymbol}{Goal.TargetAmount:N2}";
+        CurrentAmountText.Text = $"{symbol}{Goal.CurrentAmount:N2}";
+        TargetAmountText.Text = $"{symbol}{Goal.TargetAmount:N2}";
         GoalProgressBar.Value = Goal.ProgressPercentage;
         ProgressPercentageText.Text = $"{Goal.ProgressPercentage:F0}% reached";
-        ExpectedDateText.Text = $"Target: {Goal.ExpectedDate:dd MMM yyyy}";
+        ExpectedDateText.Text = $"{Goal.ExpectedDate:dd MMM yyyy}";
 
-        // Pin Icons
+        if (Goal.IsCompleted)
+        {
+            RemainingAmountText.Text = "Target reached ✓";
+            if (Application.Current.Resources.TryGetValue("IncomeGreenBrush", out var greenBrush) && greenBrush is Brush gBrush)
+            {
+                RemainingAmountText.Foreground = gBrush;
+                GoalProgressBar.Foreground = gBrush;
+            }
+            CompletedBanner.Visibility = Visibility.Visible;
+            DepositFundsButton.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+            RemainingAmountText.Text = $"{symbol}{Goal.RemainingAmount:N2} remaining";
+            if (Application.Current.Resources.TryGetValue("TextFillColorSecondaryBrush", out var secBrush) && secBrush is Brush sBrush)
+            {
+                RemainingAmountText.Foreground = sBrush;
+            }
+            if (Application.Current.Resources.TryGetValue("AccentFillColorDefaultBrush", out var accBrush) && accBrush is Brush aBrush)
+            {
+                GoalProgressBar.Foreground = aBrush;
+            }
+            CompletedBanner.Visibility = Visibility.Collapsed;
+            DepositFundsButton.Visibility = Visibility.Visible;
+        }
+
+        // Pin Icons and Badges
         var pinGlyph = Goal.IsPinned ? "\uE840" : "\uE718";
         PinIconImage.Glyph = pinGlyph;
         PinIconNoImg.Glyph = pinGlyph;
+
+        var pinnedVis = Goal.IsPinned ? Visibility.Visible : Visibility.Collapsed;
+        PinnedBadgeImage.Visibility = pinnedVis;
+        PinnedBadgeNoImg.Visibility = pinnedVis;
 
         // Completed states
         var completedVis = Goal.IsCompleted ? Visibility.Visible : Visibility.Collapsed;
         CompletedBadgeImage.Visibility = completedVis;
         CompletedBadgeNoImg.Visibility = completedVis;
 
-        DepositFundsButton.IsEnabled = !Goal.IsCompleted;
-        if (Goal.IsCompleted)
-        {
-            DepositFundsButton.Content = new TextBlock { Text = "Goal Completed ✓", FontSize = 12, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold };
-        }
-        else
-        {
-            DepositFundsButton.Content = new StackPanel
-            {
-                Orientation = Orientation.Horizontal,
-                Spacing = 6,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Children =
-                {
-                    new FontIcon { Glyph = "\uE710", FontSize = 11 },
-                    new TextBlock { Text = "Deposit Funds", FontSize = 12, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold }
-                }
-            };
-        }
-
         // Auto-funding
         if (Goal.RecurringAmount.HasValue && Goal.RecurringAmount.Value > 0)
         {
             AutoFundingBorder.Visibility = Visibility.Visible;
-            AutoFundingText.Text = $"Auto: {CurrencySymbol}{Goal.RecurringAmount.Value:N2} / {Goal.RecurringFrequency?.ToLowerInvariant() ?? "month"}";
+            AutoFundingText.Text = $"Auto: {symbol}{Goal.RecurringAmount.Value:N2} / {Goal.RecurringFrequency?.ToLowerInvariant() ?? "month"}";
         }
         else
         {
@@ -219,6 +249,14 @@ public sealed partial class GoalCardControl : UserControl
         if (Goal != null)
         {
             TogglePinClicked?.Invoke(Goal);
+        }
+    }
+
+    private void EditButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (Goal != null)
+        {
+            EditGoalClicked?.Invoke(Goal);
         }
     }
 

@@ -1,0 +1,69 @@
+<ContentDialog
+    x:Class="TheRichScript_WinUI.Dialogs.AddRecurringPlanDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="New Recurring Plan"
+    PrimaryButtonText="Save"
+    CloseButtonText="Cancel"
+    CornerRadius="12"
+    DefaultButton="Primary">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="600">
+        <StackPanel Spacing="16" Width="420">
+            <!-- Subtitle -->
+            <TextBlock Text="Automate regular money transfers between accounts (e.g. Monthly Mutual Fund SIP, Emergency Savings, Investment deposits)."
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       FontSize="12"
+                       TextWrapping="Wrap" />
+
+            <!-- Plan Name -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Plan Name" Style="{StaticResource StatLabelTextStyle}" />
+                <TextBox x:Name="NameBox" PlaceholderText="e.g. Monthly SIP, Emergency Savings, PPF Transfer" />
+            </StackPanel>
+
+            <!-- Transfer Amount -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Transfer Amount" Style="{StaticResource StatLabelTextStyle}" />
+                <NumberBox x:Name="AmountNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" SmallChange="500" LargeChange="5000" PlaceholderText="0.00" />
+            </StackPanel>
+
+            <!-- Transfer From (Source Asset) -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Transfer From Account (Source)" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="FromAssetComboBox" HorizontalAlignment="Stretch" DisplayMemberPath="DisplayNameWithBalance" SelectedValuePath="Id" SelectionChanged="AssetComboBox_SelectionChanged" />
+            </StackPanel>
+
+            <!-- Transfer To (Destination Asset) -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Transfer To Account (Destination)" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="ToAssetComboBox" HorizontalAlignment="Stretch" DisplayMemberPath="DisplayNameWithBalance" SelectedValuePath="Id" SelectionChanged="AssetComboBox_SelectionChanged" />
+                <TextBlock x:Name="AssetValidationWarning" Text="Source and Destination accounts cannot be the same." Foreground="#F43F5E" FontSize="11" Visibility="Collapsed" />
+            </StackPanel>
+
+            <!-- Category Selector (Defaults to INVESTMENT or custom) -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Category" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="CategoryComboBox" PlaceholderText="Choose a category..." HorizontalAlignment="Stretch" SelectionChanged="CategoryComboBox_SelectionChanged" />
+                <TextBox x:Name="NewCategoryTextBox" PlaceholderText="Enter new category name (e.g. INVESTMENT, SAVINGS)..." Visibility="Collapsed" />
+            </StackPanel>
+
+            <!-- Frequency -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Transfer Frequency" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="FrequencyComboBox" HorizontalAlignment="Stretch" SelectedIndex="2">
+                    <ComboBoxItem Content="Daily" Tag="DAILY" />
+                    <ComboBoxItem Content="Weekly" Tag="WEEKLY" />
+                    <ComboBoxItem Content="Monthly" Tag="MONTHLY" />
+                    <ComboBoxItem Content="Yearly" Tag="YEARLY" />
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Next Due Date -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Next Transfer Date" Style="{StaticResource StatLabelTextStyle}" />
+                <CalendarDatePicker x:Name="DatePicker" HorizontalAlignment="Stretch" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>

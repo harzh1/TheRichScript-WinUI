@@ -125,15 +125,23 @@ public partial class App : Application
             var navService = GetService<INavigationService>();
             var dataCacheService = GetService<IDataCacheService>();
 
+            authService.SessionExpired += () =>
+            {
+                MainWindowInstance?.DispatcherQueue?.TryEnqueue(() =>
+                {
+                    navService.NavigateRoot(typeof(Views.LoginPage));
+                });
+            };
+
             var autoLoggedIn = await authService.AutoLoginAsync();
             if (autoLoggedIn)
             {
                 _ = dataCacheService.WarmUpAllDataAsync();
-                navService.NavigateRoot(typeof(ShellPage));
+                navService.NavigateRoot(typeof(Views.ShellPage));
             }
             else
             {
-                navService.NavigateRoot(typeof(LoginPage));
+                navService.NavigateRoot(typeof(Views.LoginPage));
             }
         }
         catch (Exception ex)

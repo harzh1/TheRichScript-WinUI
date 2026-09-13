@@ -10,6 +10,7 @@ public interface ITransactionService
 {
     Task<TransactionListResponse> GetTransactionsAsync(string? category = null, string? type = null, DateTime? startDate = null, DateTime? endDate = null, int page = 1, int limit = 30, string? search = null);
     Task<ApiResponse<Transaction>> CreateTransactionAsync(CreateTransactionRequest request);
+    Task<ApiResponse<Transaction>> UpdateTransactionAsync(string id, UpdateTransactionRequest request);
     Task<ApiResponse<object>> DeleteTransactionAsync(string id);
 }
 
@@ -115,6 +116,54 @@ public class TransactionService : ITransactionService
             };
 
             return await _apiService.PostAsync<Transaction>("transactions", body);
+        }
+    }
+
+    public async Task<ApiResponse<Transaction>> UpdateTransactionAsync(string id, UpdateTransactionRequest request)
+    {
+        if (!string.IsNullOrWhiteSpace(request.ReceiptFilePath))
+        {
+            var stringFields = new Dictionary<string, string>
+            {
+                { "assetId", request.AssetId },
+                { "type", request.Type.ToUpperInvariant() },
+                { "amount", request.Amount.ToString(CultureInfo.InvariantCulture) },
+                { "category", request.Category.ToUpperInvariant() },
+                { "description", request.Description },
+                { "date", request.Date.ToString("o") }
+            };
+
+            if (!string.IsNullOrWhiteSpace(request.IncomeSourceId))
+            {
+                stringFields["incomeSourceId"] = request.IncomeSourceId;
+            }
+            else if (!string.IsNullOrWhiteSpace(request.IncomeSourceName))
+            {
+                stringFields["incomeSource"] = request.IncomeSourceName;
+            }
+
+            var files = new List<(string, string)>
+            {
+                ("receipt", request.ReceiptFilePath)
+            };
+
+            return await _apiService.PutMultipartAsync<Transaction>($"transactions/{id}", stringFields, files);
+        }
+        else
+        {
+            var body = new
+            {
+                assetId = request.AssetId,
+                type = request.Type.ToUpperInvariant(),
+                amount = request.Amount,
+                category = request.Category.ToUpperInvariant(),
+                incomeSourceId = request.IncomeSourceId,
+                incomeSource = request.IncomeSourceName,
+                description = request.Description,
+                date = request.Date
+            };
+
+            return await _apiService.PutAsync<Transaction>($"transactions/{id}", body);
         }
     }
 

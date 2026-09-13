@@ -80,6 +80,44 @@ public sealed partial class TransactionsPage : Page
         }
     }
 
+    private async void EditTx_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag is Transaction tx)
+        {
+            var dataCache = App.GetService<IDataCacheService>();
+            var txService = App.GetService<ITransactionService>();
+            var dialogService = App.GetService<IDialogService>();
+            var busy = App.GetService<IBusyIndicatorService>();
+
+            List<Asset> assets = dataCache?.CachedAssets ?? (await App.GetService<IAssetService>().GetAssetsAsync()).Data ?? new();
+            List<string> cats = dataCache?.CachedCategories?.Select(c => c.Name).ToList() ?? (await App.GetService<ICategoryService>().GetCategoriesAsync()).Data?.Select(c => c.Name).ToList() ?? new();
+            List<IncomeSource> incomeSources = dataCache?.CachedIncomeSources ?? (await App.GetService<IIncomeSourceService>().GetIncomeSourcesAsync()).Data ?? new();
+
+            var dialog = new AddTransactionDialog(assets, cats, incomeSources, tx)
+            {
+                XamlRoot = this.XamlRoot
+            };
+
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary && dialog.UpdateResult != null)
+            {
+                using (busy?.BeginBusy("Updating transaction..."))
+                {
+                    var updateResp = await txService.UpdateTransactionAsync(tx.Id, dialog.UpdateResult);
+                    if (updateResp.Success)
+                    {
+                        dataCache?.Invalidate(DataCacheType.Transactions | DataCacheType.Assets | DataCacheType.Analytics);
+                        await ViewModel.LoadTransactionsAsync(resetPage: true);
+                    }
+                    else
+                    {
+                        await dialogService.ShowErrorAsync(updateResp.Error ?? "Failed to update transaction.");
+                    }
+                }
+            }
+        }
+    }
+
     private async void DeleteTx_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button btn && btn.Tag is Transaction tx)

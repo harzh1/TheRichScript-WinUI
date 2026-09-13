@@ -14,19 +14,23 @@ public sealed partial class AddTransactionDialog : ContentDialog
     private readonly List<Asset> _assets;
     private readonly List<string> _availableCategories;
     private readonly List<IncomeSource> _availableIncomeSources;
+    private readonly Transaction? _existingTransaction;
 
     private const string CreateNewCategoryOption = "+ Create New Category...";
     private const string CreateNewIncomeSourceOption = "+ Add New Income Source...";
 
     public CreateTransactionRequest? Result { get; private set; }
+    public UpdateTransactionRequest? UpdateResult { get; private set; }
+    public bool IsEditMode => _existingTransaction != null;
 
-    public AddTransactionDialog(List<Asset> assets, List<string> categories, List<IncomeSource>? incomeSources = null)
+    public AddTransactionDialog(List<Asset> assets, List<string> categories, List<IncomeSource>? incomeSources = null, Transaction? existingTransaction = null)
     {
         InitializeComponent();
         RequestedTheme = (App.MainWindowInstance?.Content as FrameworkElement)?.RequestedTheme ?? ElementTheme.Default;
         _assets = assets ?? new List<Asset>();
         _availableCategories = categories ?? new List<string>();
         _availableIncomeSources = incomeSources ?? new List<IncomeSource>();
+        _existingTransaction = existingTransaction;
 
         AssetComboBox.ItemsSource = _assets;
         if (_assets.Count > 0)
@@ -66,6 +70,64 @@ public sealed partial class AddTransactionDialog : ContentDialog
         }
 
         DatePicker.Date = DateTimeOffset.Now;
+
+        if (existingTransaction != null)
+        {
+            Title = "Edit Transaction";
+            PrimaryButtonText = "Save Changes";
+
+            // Pre-select Type
+            if (existingTransaction.IsIncome)
+            {
+                TypeRadioButtons.SelectedIndex = 1;
+                CategoryPanel.Visibility = Visibility.Collapsed;
+                IncomeSourcePanel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                TypeRadioButtons.SelectedIndex = 0;
+                CategoryPanel.Visibility = Visibility.Visible;
+                IncomeSourcePanel.Visibility = Visibility.Collapsed;
+            }
+
+            // Pre-select Amount
+            AmountNumberBox.Value = existingTransaction.Amount;
+
+            // Pre-select Asset
+            var matchAsset = _assets.FirstOrDefault(a => a.Id == existingTransaction.AssetId);
+            if (matchAsset != null)
+            {
+                AssetComboBox.SelectedItem = matchAsset;
+            }
+
+            // Pre-select Category
+            if (!string.IsNullOrWhiteSpace(existingTransaction.Category))
+            {
+                if (!catList.Contains(existingTransaction.Category, StringComparer.OrdinalIgnoreCase))
+                {
+                    catList.Insert(0, existingTransaction.Category);
+                }
+                CategoryComboBox.SelectedItem = catList.FirstOrDefault(c => string.Equals(c, existingTransaction.Category, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // Pre-select Income Source
+            if (!string.IsNullOrWhiteSpace(existingTransaction.IncomeSourceName))
+            {
+                if (!sourceDisplayList.Contains(existingTransaction.IncomeSourceName, StringComparer.OrdinalIgnoreCase))
+                {
+                    sourceDisplayList.Insert(0, existingTransaction.IncomeSourceName);
+                }
+                IncomeSourceComboBox.SelectedItem = sourceDisplayList.FirstOrDefault(s => string.Equals(s, existingTransaction.IncomeSourceName, StringComparison.OrdinalIgnoreCase));
+            }
+
+            DescriptionBox.Text = existingTransaction.Description;
+            DatePicker.Date = existingTransaction.Date;
+
+            if (!string.IsNullOrWhiteSpace(existingTransaction.ReceiptImageUrl))
+            {
+                ReceiptPathBox.PlaceholderText = "Existing receipt attached";
+            }
+        }
 
         PrimaryButtonClick += AddTransactionDialog_PrimaryButtonClick;
     }
@@ -233,5 +295,21 @@ public sealed partial class AddTransactionDialog : ContentDialog
             Date = DatePicker.Date?.DateTime ?? DateTime.Now,
             ReceiptFilePath = string.IsNullOrWhiteSpace(ReceiptPathBox.Text) ? null : ReceiptPathBox.Text
         };
+
+        if (IsEditMode)
+        {
+            UpdateResult = new UpdateTransactionRequest
+            {
+                Amount = amount,
+                AssetId = selectedAsset.Id,
+                Category = category.ToUpperInvariant(),
+                IncomeSourceId = incomeSourceId,
+                IncomeSourceName = incomeSourceName,
+                Description = DescriptionBox.Text?.Trim() ?? string.Empty,
+                Type = isIncome ? "INCOME" : "EXPENSE",
+                Date = DatePicker.Date?.DateTime ?? DateTime.Now,
+                ReceiptFilePath = string.IsNullOrWhiteSpace(ReceiptPathBox.Text) ? null : ReceiptPathBox.Text
+            };
+        }
     }
 }

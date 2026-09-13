@@ -52,6 +52,14 @@ public partial class PlannedExpense : ObservableObject
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }
 
+    [ObservableProperty]
+    [property: JsonPropertyName("sourceAssetName")]
+    private string? sourceAssetName;
+
+    [ObservableProperty]
+    [property: JsonPropertyName("targetAssetName")]
+    private string? targetAssetName;
+
     [JsonIgnore]
     public bool IsRecurring => string.Equals(Type, "RECURRING", StringComparison.OrdinalIgnoreCase);
 
@@ -59,7 +67,21 @@ public partial class PlannedExpense : ObservableObject
     public bool IsIncome => string.Equals(TxType, "INCOME", StringComparison.OrdinalIgnoreCase);
 
     [JsonIgnore]
+    public bool IsTransfer => string.Equals(TxType, "TRANSFER", StringComparison.OrdinalIgnoreCase) || !string.IsNullOrEmpty(TargetAssetId);
+
+    [JsonIgnore]
+    public bool IsSubscription => IsRecurring && !IsTransfer && !IsIncome;
+
+    [JsonIgnore]
     public string DisplayFrequency => Frequency ?? "One-time";
+
+    [JsonIgnore]
+    public string TransferFlowDisplay => !string.IsNullOrEmpty(SourceAssetName) && !string.IsNullOrEmpty(TargetAssetName)
+        ? $"{SourceAssetName} ➔ {TargetAssetName}"
+        : (!string.IsNullOrEmpty(SourceAssetName) ? $"{SourceAssetName} ➔ Target Account" : "Transfer");
+
+    [JsonIgnore]
+    public string SourceAccountDisplay => !string.IsNullOrEmpty(SourceAssetName) ? $"Paid from: {SourceAssetName}" : "Source Account";
 }
 
 public class CreatePlanRequest

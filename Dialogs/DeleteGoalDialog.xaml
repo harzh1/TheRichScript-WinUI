@@ -1,0 +1,53 @@
+<ContentDialog
+    x:Class="TheRichScript_WinUI.Dialogs.DeleteGoalDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Delete Financial Goal"
+    PrimaryButtonText="Delete Goal"
+    CloseButtonText="Cancel"
+    CornerRadius="12"
+    DefaultButton="Close">
+
+    <StackPanel Spacing="16" Width="400">
+        <!-- Warning InfoBar -->
+        <InfoBar
+            x:Name="WarningInfoBar"
+            IsOpen="True"
+            IsClosable="False"
+            Severity="Warning"
+            Title="Delete Confirmation"
+            Message="Are you sure you want to delete this goal? This action cannot be undone." />
+
+        <!-- Goal Summary -->
+        <TextBlock
+            x:Name="GoalSummaryText"
+            TextWrapping="Wrap"
+            FontSize="13"
+            Style="{StaticResource StatLabelTextStyle}" />
+
+        <!-- Refund Section (Visible when goal has balance) -->
+        <StackPanel x:Name="RefundSection" Spacing="8" Visibility="Collapsed">
+            <TextBlock
+                x:Name="RefundPromptText"
+                TextWrapping="Wrap"
+                FontSize="13"
+                Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+
+            <StackPanel Spacing="6">
+                <TextBlock Text="Refund Destination Account" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox
+                    x:Name="AssetComboBox"
+                    HorizontalAlignment="Stretch"
+                    DisplayMemberPath="DisplayNameWithBalance"
+                    SelectedValuePath="Id"
+                    PlaceholderText="Select account..." />
+                <TextBlock
+                    x:Name="ValidationErrorText"
+                    Text="Please select an account to refund the funds to."
+                    Foreground="#EF4444"
+                    FontSize="11"
+                    Visibility="Collapsed" />
+            </StackPanel>
+        </StackPanel>
+    </StackPanel>
+</ContentDialog>

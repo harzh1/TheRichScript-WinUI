@@ -21,10 +21,19 @@ public partial class BudgetsPlansViewModel : ObservableObject
     private bool isLoading;
 
     [ObservableProperty]
+    private ObservableCollection<PlannedExpense> subscriptions = new();
+
+    [ObservableProperty]
     private ObservableCollection<PlannedExpense> recurringPlans = new();
 
     [ObservableProperty]
     private ObservableCollection<PlannedExpense> manualPlans = new();
+
+    [ObservableProperty]
+    private double totalMonthlySubscriptions;
+
+    [ObservableProperty]
+    private double totalMonthlyRecurringTransfers;
 
     [ObservableProperty]
     private double totalMonthlyCommitments;
@@ -34,6 +43,12 @@ public partial class BudgetsPlansViewModel : ObservableObject
 
     [ObservableProperty]
     private double netRecurringCashflow;
+
+    [ObservableProperty]
+    private int activeSubscriptionsCount;
+
+    [ObservableProperty]
+    private int activeRecurringPlansCount;
 
     [ObservableProperty]
     private int activePlansCount;
@@ -61,7 +76,7 @@ public partial class BudgetsPlansViewModel : ObservableObject
 
     private void OnDataUpdated(DataCacheType types)
     {
-        if (types.HasFlag(DataCacheType.Plans))
+        if (types.HasFlag(DataCacheType.Plans) || types.HasFlag(DataCacheType.Assets))
         {
             ApplyCachedData();
         }
@@ -72,17 +87,42 @@ public partial class BudgetsPlansViewModel : ObservableObject
         var plans = _dataCacheService.CachedPlans;
         if (plans != null)
         {
+            Subscriptions.Clear();
             RecurringPlans.Clear();
             ManualPlans.Clear();
-            double recExp = 0, recInc = 0;
+
+            var assetMap = _dataCacheService.CachedAssets?.ToDictionary(a => a.Id, a => a.Name) ?? new();
+
+            double subTotal = 0, transferTotal = 0, recInc = 0;
 
             foreach (var plan in plans)
             {
+                // Resolve asset names from cached assets if available
+                if (!string.IsNullOrEmpty(plan.AssetId) && assetMap.TryGetValue(plan.AssetId, out var srcName))
+                {
+                    plan.SourceAssetName = srcName;
+                }
+                if (!string.IsNullOrEmpty(plan.TargetAssetId) && assetMap.TryGetValue(plan.TargetAssetId, out var tgtName))
+                {
+                    plan.TargetAssetName = tgtName;
+                }
+
                 if (plan.IsRecurring)
                 {
-                    RecurringPlans.Add(plan);
-                    if (plan.IsIncome) recInc += plan.Amount;
-                    else recExp += plan.Amount;
+                    if (plan.IsTransfer)
+                    {
+                        RecurringPlans.Add(plan);
+                        transferTotal += plan.Amount;
+                    }
+                    else if (plan.IsIncome)
+                    {
+                        recInc += plan.Amount;
+                    }
+                    else
+                    {
+                        Subscriptions.Add(plan);
+                        subTotal += plan.Amount;
+                    }
                 }
                 else
                 {
@@ -90,10 +130,14 @@ public partial class BudgetsPlansViewModel : ObservableObject
                 }
             }
 
-            TotalMonthlyCommitments = recExp;
+            TotalMonthlySubscriptions = subTotal;
+            TotalMonthlyRecurringTransfers = transferTotal;
+            TotalMonthlyCommitments = subTotal + transferTotal;
             TotalRecurringIncome = recInc;
-            NetRecurringCashflow = recInc - recExp;
-            ActivePlansCount = RecurringPlans.Count + ManualPlans.Count;
+            NetRecurringCashflow = recInc - subTotal;
+            ActiveSubscriptionsCount = Subscriptions.Count;
+            ActiveRecurringPlansCount = RecurringPlans.Count;
+            ActivePlansCount = Subscriptions.Count + RecurringPlans.Count + ManualPlans.Count;
         }
     }
 

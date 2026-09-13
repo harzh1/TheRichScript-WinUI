@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Controls;
+using TheRichScript_WinUI.Dialogs;
 using TheRichScript_WinUI.Models;
 using TheRichScript_WinUI.Services;
 
@@ -17,11 +21,16 @@ public partial class GoalsViewModel : ObservableObject
     private readonly IDataCacheService _dataCacheService;
     private readonly IBusyIndicatorService _busyIndicatorService;
 
+    private List<Goal> _rawGoals = new();
+
     [ObservableProperty]
     private bool isLoading;
 
     [ObservableProperty]
     private ObservableCollection<Goal> goals = new();
+
+    [ObservableProperty]
+    private ObservableCollection<Goal> filteredGoals = new();
 
     [ObservableProperty]
     private double totalTargetAmount;
@@ -30,7 +39,28 @@ public partial class GoalsViewModel : ObservableObject
     private double totalSavedAmount;
 
     [ObservableProperty]
+    private double remainingTargetAmount;
+
+    [ObservableProperty]
     private double overallProgressPercentage;
+
+    [ObservableProperty]
+    private int completedGoalsCount;
+
+    [ObservableProperty]
+    private int activeGoalsCount;
+
+    [ObservableProperty]
+    private int totalGoalsCount;
+
+    [ObservableProperty]
+    private string searchText = string.Empty;
+
+    [ObservableProperty]
+    private string selectedStatusFilter = "All Goals";
+
+    [ObservableProperty]
+    private ObservableCollection<string> statusFilters = new() { "All Goals", "In Progress", "Completed", "Pinned" };
 
     [ObservableProperty]
     private string currencySymbol = "₹";
@@ -63,25 +93,75 @@ public partial class GoalsViewModel : ObservableObject
         }
     }
 
+    partial void OnSearchTextChanged(string value) => ApplyFilters();
+    partial void OnSelectedStatusFilterChanged(string value) => ApplyFilters();
+
+    [RelayCommand]
+    private void ClearFilter()
+    {
+        SearchText = string.Empty;
+        SelectedStatusFilter = "All Goals";
+    }
+
     private void ApplyCachedData()
     {
         var cached = _dataCacheService.CachedGoals;
         if (cached != null)
         {
+            _rawGoals = new List<Goal>(cached);
             Goals.Clear();
             double targetSum = 0;
             double savedSum = 0;
+            int completedCount = 0;
 
-            foreach (var g in cached)
+            foreach (var g in _rawGoals)
             {
                 Goals.Add(g);
                 targetSum += g.TargetAmount;
                 savedSum += g.CurrentAmount;
+                if (g.IsCompleted) completedCount++;
             }
 
             TotalTargetAmount = targetSum;
             TotalSavedAmount = savedSum;
+            RemainingTargetAmount = Math.Max(0, targetSum - savedSum);
             OverallProgressPercentage = targetSum > 0 ? Math.Min(100.0, (savedSum / targetSum) * 100.0) : 0;
+            CompletedGoalsCount = completedCount;
+            ActiveGoalsCount = _rawGoals.Count - completedCount;
+            TotalGoalsCount = _rawGoals.Count;
+
+            ApplyFilters();
+        }
+    }
+
+    private void ApplyFilters()
+    {
+        var query = _rawGoals.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(SearchText))
+        {
+            query = query.Where(g => g.Name != null && g.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (SelectedStatusFilter == "In Progress")
+        {
+            query = query.Where(g => !g.IsCompleted);
+        }
+        else if (SelectedStatusFilter == "Completed")
+        {
+            query = query.Where(g => g.IsCompleted);
+        }
+        else if (SelectedStatusFilter == "Pinned")
+        {
+            query = query.Where(g => g.IsPinned);
+        }
+
+        query = query.OrderByDescending(g => g.IsPinned).ThenByDescending(g => g.CreatedAt);
+
+        FilteredGoals.Clear();
+        foreach (var g in query)
+        {
+            FilteredGoals.Add(g);
         }
     }
 
@@ -131,6 +211,7 @@ public partial class GoalsViewModel : ObservableObject
             {
                 goal.IsPinned = newPinned;
                 _dataCacheService.Invalidate(DataCacheType.Goals);
+                ApplyFilters();
             }
         }
         catch (Exception ex)
@@ -144,68 +225,34 @@ public partial class GoalsViewModel : ObservableObject
     {
         if (goal == null) return;
 
-        if (goal.CurrentAmount > 0 && string.IsNullOrEmpty(goal.TargetAssetId))
-        {
-            // Goal has balance - ask user for refund asset
-            var assetsResponse = await _dataCacheService.GetAssetsAsync();
-            if (assetsResponse != null && assetsResponse.Count > 0)
-            {
-                var defaultRefundAsset = assetsResponse[0].Id;
-                var confirmed = await _dialogService.ShowConfirmationAsync(
-                    "Delete Goal & Refund Balance",
-                    $"This goal has a saved balance of {CurrencySymbol}{goal.CurrentAmount:N2}. Deleting it will refund this amount back to your primary asset '{assetsResponse[0].Name}'. Proceed?",
-                    "Refund & Delete",
-                    "Cancel");
+        var assets = await _dataCacheService.GetAssetsAsync() ?? new List<Asset>();
 
-                if (!confirmed) return;
+        var dialog = new DeleteGoalDialog(goal, assets);
+        var result = await _dialogService.ShowDialogAsync(dialog);
 
-                using (_busyIndicatorService.BeginBusy($"Deleting goal '{goal.Name}' & refunding funds..."))
-                {
-                    IsLoading = true;
-                    try
-                    {
-                        var response = await _goalService.DeleteGoalAsync(goal.Id, defaultRefundAsset);
-                        if (response.Success)
-                        {
-                            _dataCacheService.Invalidate(DataCacheType.Goals | DataCacheType.Assets | DataCacheType.Analytics);
-                            await _dialogService.ShowMessageAsync("Success", $"Goal '{goal.Name}' deleted and funds refunded.");
-                        }
-                        else
-                        {
-                            await _dialogService.ShowErrorAsync(response.Error ?? "Failed to delete goal.");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        await _dialogService.ShowErrorAsync(ex.Message);
-                    }
-                    finally
-                    {
-                        IsLoading = false;
-                    }
-                }
-                return;
-            }
-        }
+        if (result != ContentDialogResult.Primary) return;
 
-        var simpleConfirm = await _dialogService.ShowConfirmationAsync(
-            "Delete Goal",
-            $"Are you sure you want to delete goal '{goal.Name}'?",
-            "Delete",
-            "Cancel");
+        string? refundAssetId = goal.CurrentAmount > 0 ? dialog.SelectedRefundAssetId : null;
 
-        if (!simpleConfirm) return;
+        var busyText = goal.CurrentAmount > 0
+            ? $"Deleting goal '{goal.Name}' & refunding funds..."
+            : $"Deleting goal '{goal.Name}'...";
 
-        using (_busyIndicatorService.BeginBusy($"Deleting goal '{goal.Name}'..."))
+        using (_busyIndicatorService.BeginBusy(busyText))
         {
             IsLoading = true;
             try
             {
-                var response = await _goalService.DeleteGoalAsync(goal.Id);
+                var response = await _goalService.DeleteGoalAsync(goal.Id, refundAssetId);
                 if (response.Success)
                 {
-                    _dataCacheService.Invalidate(DataCacheType.Goals);
-                    await _dialogService.ShowMessageAsync("Success", $"Goal '{goal.Name}' deleted.");
+                    _dataCacheService.Invalidate(DataCacheType.Goals | DataCacheType.Assets | DataCacheType.Transactions | DataCacheType.Analytics);
+                    await LoadGoalsAsync();
+
+                    var successMsg = goal.CurrentAmount > 0
+                        ? $"Goal '{goal.Name}' deleted and {CurrencySymbol}{goal.CurrentAmount:N2} refunded successfully."
+                        : $"Goal '{goal.Name}' deleted.";
+                    await _dialogService.ShowMessageAsync("Success", successMsg);
                 }
                 else
                 {

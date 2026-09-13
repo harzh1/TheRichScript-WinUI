@@ -29,7 +29,7 @@
             </StackPanel>
 
             <!-- Initial Deposit -->
-            <StackPanel Spacing="4">
+            <StackPanel x:Name="InitialDepositPanel" Spacing="4">
                 <TextBlock Text="Initial Deposit (Optional)" Style="{StaticResource StatLabelTextStyle}" />
                 <NumberBox x:Name="InitialDepositNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" />
             </StackPanel>

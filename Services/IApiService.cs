@@ -22,6 +22,7 @@ public interface IApiService
 {
     void SetAuthToken(string? token);
     string? GetAuthToken();
+    void SetTokenRefreshHandler(Func<Task<bool>> refreshHandler, Action onSessionExpired);
     Task<ApiResponse<T>> GetAsync<T>(string endpoint);
     Task<ApiResponse<T>> PostAsync<T>(string endpoint, object? body = null);
     Task<ApiResponse<T>> PutAsync<T>(string endpoint, object? body = null);
@@ -66,6 +67,15 @@ public class ApiService : IApiService
 
     public string? GetAuthToken() => _authToken;
 
+    private Func<Task<bool>>? _tokenRefreshHandler;
+    private Action? _onSessionExpired;
+
+    public void SetTokenRefreshHandler(Func<Task<bool>> refreshHandler, Action onSessionExpired)
+    {
+        _tokenRefreshHandler = refreshHandler;
+        _onSessionExpired = onSessionExpired;
+    }
+
     private Uri GetUri(string endpoint)
     {
         var baseUrl = _settingsService.Settings.ApiBaseUrl.TrimEnd('/');
@@ -73,14 +83,16 @@ public class ApiService : IApiService
         return new Uri($"{baseUrl}/{cleanEndpoint}");
     }
 
-    public async Task<ApiResponse<T>> GetAsync<T>(string endpoint)
+    public async Task<ApiResponse<T>> GetAsync<T>(string endpoint) => await GetInternalAsync<T>(endpoint, isRetry: false);
+
+    private async Task<ApiResponse<T>> GetInternalAsync<T>(string endpoint, bool isRetry)
     {
         try
         {
             var uri = GetUri(endpoint);
             LogHttp($"GET {uri}");
             using var response = await _httpClient.GetAsync(uri);
-            return await HandleResponseAsync<T>(response, $"GET {uri}");
+            return await HandleResponseAsync<T>(response, $"GET {uri}", isRetry ? null : () => GetInternalAsync<T>(endpoint, true));
         }
         catch (Exception ex)
         {
@@ -94,7 +106,9 @@ public class ApiService : IApiService
         }
     }
 
-    public async Task<ApiResponse<T>> PostAsync<T>(string endpoint, object? body = null)
+    public async Task<ApiResponse<T>> PostAsync<T>(string endpoint, object? body = null) => await PostInternalAsync<T>(endpoint, body, isRetry: false);
+
+    private async Task<ApiResponse<T>> PostInternalAsync<T>(string endpoint, object? body, bool isRetry)
     {
         try
         {
@@ -112,7 +126,7 @@ public class ApiService : IApiService
 
             LogHttp($"POST {uri}");
             using var response = await _httpClient.PostAsync(uri, content);
-            return await HandleResponseAsync<T>(response, $"POST {uri}");
+            return await HandleResponseAsync<T>(response, $"POST {uri}", isRetry ? null : () => PostInternalAsync<T>(endpoint, body, true));
         }
         catch (Exception ex)
         {
@@ -126,7 +140,9 @@ public class ApiService : IApiService
         }
     }
 
-    public async Task<ApiResponse<T>> PutAsync<T>(string endpoint, object? body = null)
+    public async Task<ApiResponse<T>> PutAsync<T>(string endpoint, object? body = null) => await PutInternalAsync<T>(endpoint, body, isRetry: false);
+
+    private async Task<ApiResponse<T>> PutInternalAsync<T>(string endpoint, object? body, bool isRetry)
     {
         try
         {
@@ -144,7 +160,7 @@ public class ApiService : IApiService
 
             LogHttp($"PUT {uri}");
             using var response = await _httpClient.PutAsync(uri, content);
-            return await HandleResponseAsync<T>(response, $"PUT {uri}");
+            return await HandleResponseAsync<T>(response, $"PUT {uri}", isRetry ? null : () => PutInternalAsync<T>(endpoint, body, true));
         }
         catch (Exception ex)
         {
@@ -158,7 +174,9 @@ public class ApiService : IApiService
         }
     }
 
-    public async Task<ApiResponse<T>> DeleteAsync<T>(string endpoint, object? body = null)
+    public async Task<ApiResponse<T>> DeleteAsync<T>(string endpoint, object? body = null) => await DeleteInternalAsync<T>(endpoint, body, isRetry: false);
+
+    private async Task<ApiResponse<T>> DeleteInternalAsync<T>(string endpoint, object? body, bool isRetry)
     {
         try
         {
@@ -173,7 +191,7 @@ public class ApiService : IApiService
 
             LogHttp($"DELETE {uri}");
             using var response = await _httpClient.SendAsync(request);
-            return await HandleResponseAsync<T>(response, $"DELETE {uri}");
+            return await HandleResponseAsync<T>(response, $"DELETE {uri}", isRetry ? null : () => DeleteInternalAsync<T>(endpoint, body, true));
         }
         catch (Exception ex)
         {
@@ -189,15 +207,15 @@ public class ApiService : IApiService
 
     public async Task<ApiResponse<T>> PostMultipartAsync<T>(string endpoint, Dictionary<string, string> stringFields, List<(string fieldName, string filePath)> files)
     {
-        return await SendMultipartAsync<T>(HttpMethod.Post, endpoint, stringFields, files);
+        return await SendMultipartAsync<T>(HttpMethod.Post, endpoint, stringFields, files, isRetry: false);
     }
 
     public async Task<ApiResponse<T>> PutMultipartAsync<T>(string endpoint, Dictionary<string, string> stringFields, List<(string fieldName, string filePath)> files)
     {
-        return await SendMultipartAsync<T>(HttpMethod.Put, endpoint, stringFields, files);
+        return await SendMultipartAsync<T>(HttpMethod.Put, endpoint, stringFields, files, isRetry: false);
     }
 
-    private async Task<ApiResponse<T>> SendMultipartAsync<T>(HttpMethod method, string endpoint, Dictionary<string, string> stringFields, List<(string fieldName, string filePath)> files)
+    private async Task<ApiResponse<T>> SendMultipartAsync<T>(HttpMethod method, string endpoint, Dictionary<string, string> stringFields, List<(string fieldName, string filePath)> files, bool isRetry)
     {
         try
         {
@@ -227,7 +245,7 @@ public class ApiService : IApiService
                 LogHttp($"{method} (Multipart) {uri}");
                 using var request = new HttpRequestMessage(method, uri) { Content = formData };
                 using var response = await _httpClient.SendAsync(request);
-                return await HandleResponseAsync<T>(response, $"{method} (Multipart) {uri}");
+                return await HandleResponseAsync<T>(response, $"{method} (Multipart) {uri}", isRetry ? null : () => SendMultipartAsync<T>(method, endpoint, stringFields, files, true));
             }
             finally
             {
@@ -249,11 +267,32 @@ public class ApiService : IApiService
         }
     }
 
-    private async Task<ApiResponse<T>> HandleResponseAsync<T>(HttpResponseMessage response, string requestContext)
+    private async Task<ApiResponse<T>> HandleResponseAsync<T>(HttpResponseMessage response, string requestContext, Func<Task<ApiResponse<T>>>? retryFunc = null)
     {
         var rawContent = await response.Content.ReadAsStringAsync();
         var statusCode = (int)response.StatusCode;
         LogHttp($"RESPONSE [{statusCode}] {requestContext} -> {rawContent}");
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized &&
+            retryFunc != null &&
+            _tokenRefreshHandler != null &&
+            !requestContext.Contains("auth/login", StringComparison.OrdinalIgnoreCase) &&
+            !requestContext.Contains("auth/register", StringComparison.OrdinalIgnoreCase) &&
+            !requestContext.Contains("auth/refresh", StringComparison.OrdinalIgnoreCase))
+        {
+            LogHttp($"401 Unauthorized for {requestContext}. Attempting token refresh via Refresh Token API...");
+            var refreshed = await _tokenRefreshHandler();
+            if (refreshed)
+            {
+                LogHttp($"Token refresh succeeded. Retrying request: {requestContext}...");
+                return await retryFunc();
+            }
+            else
+            {
+                LogHttp($"Token refresh rejected by backend (expired >30 days, revoked, or invalid). Session expired.");
+                _onSessionExpired?.Invoke();
+            }
+        }
 
         try
         {

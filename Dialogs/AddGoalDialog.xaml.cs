@@ -13,13 +13,18 @@ namespace TheRichScript_WinUI.Dialogs;
 public sealed partial class AddGoalDialog : ContentDialog
 {
     private readonly List<string> _selectedImagePaths = new();
+    private readonly Goal? _existingGoal;
 
     public CreateGoalRequest? Result { get; private set; }
+    public UpdateGoalRequest? UpdateResult { get; private set; }
+    public List<string> ImageFilePaths => _selectedImagePaths.ToList();
+    public bool IsEditMode => _existingGoal != null;
 
     public AddGoalDialog(List<Asset> assets, Goal? existingGoal = null)
     {
         InitializeComponent();
         RequestedTheme = (App.MainWindowInstance?.Content as FrameworkElement)?.RequestedTheme ?? ElementTheme.Default;
+        _existingGoal = existingGoal;
 
         AssetComboBox.ItemsSource = assets;
         if (assets.Count > 0)
@@ -32,6 +37,9 @@ public sealed partial class AddGoalDialog : ContentDialog
         if (existingGoal != null)
         {
             Title = "Edit Financial Goal";
+            PrimaryButtonText = "Save Changes";
+            InitialDepositPanel.Visibility = Visibility.Collapsed;
+
             NameBox.Text = existingGoal.Name;
             TargetAmountNumberBox.Value = existingGoal.TargetAmount;
             DatePicker.Date = existingGoal.ExpectedDate;
@@ -191,5 +199,19 @@ public sealed partial class AddGoalDialog : ContentDialog
             ExpectedDate = DatePicker.Date?.DateTime ?? DateTime.Now.AddMonths(6),
             ImageFilePaths = _selectedImagePaths.ToList()
         };
+
+        if (IsEditMode)
+        {
+            UpdateResult = new UpdateGoalRequest
+            {
+                Name = name,
+                TargetAmount = target,
+                SourceAssetId = hasRecurring ? assetId : null,
+                RecurringAmount = hasRecurring ? recurring : null,
+                RecurringFrequency = hasRecurring ? freq : null,
+                ExpectedDate = DatePicker.Date?.DateTime ?? DateTime.Now.AddMonths(6),
+                IsPinned = _existingGoal?.IsPinned
+            };
+        }
     }
 }

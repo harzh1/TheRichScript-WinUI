@@ -77,17 +77,6 @@ public class SettingsService : ISettingsService
 
     public string GetCurrencySymbol(string currencyCode)
     {
-        return currencyCode.ToUpperInvariant() switch
-        {
-            "INR" => "₹",
-            "USD" => "$",
-            "EUR" => "€",
-            "GBP" => "£",
-            "JPY" => "¥",
-            "CAD" => "CA$",
-            "AUD" => "A$",
-            "AED" => "AED ",
-            _ => currencyCode + " "
-        };
+        return CountryCurrencyData.GetCurrencySymbol(currencyCode);
     }
 }

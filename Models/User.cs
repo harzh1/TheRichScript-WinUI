@@ -70,6 +70,42 @@ public class AuthResponse
     [JsonPropertyName("token")]
     public string? Token { get; set; }
 
+    [JsonPropertyName("accessToken")]
+    public string? AccessToken { get; set; }
+
+    [JsonPropertyName("refreshToken")]
+    public string? RefreshToken { get; set; }
+
+    [JsonPropertyName("user")]
+    public User? User { get; set; }
+
+    [JsonPropertyName("message")]
+    public string? Message { get; set; }
+
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
+}
+
+public class RefreshTokenRequest
+{
+    [JsonPropertyName("refreshToken")]
+    public string RefreshToken { get; set; } = string.Empty;
+}
+
+public class RefreshTokenResponse
+{
+    [JsonPropertyName("success")]
+    public bool Success { get; set; }
+
+    [JsonPropertyName("token")]
+    public string? Token { get; set; }
+
+    [JsonPropertyName("accessToken")]
+    public string? AccessToken { get; set; }
+
+    [JsonPropertyName("refreshToken")]
+    public string? RefreshToken { get; set; }
+
     [JsonPropertyName("user")]
     public User? User { get; set; }
 
