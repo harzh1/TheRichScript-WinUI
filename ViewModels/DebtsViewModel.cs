@@ -17,6 +17,7 @@ public partial class DebtsViewModel : ObservableObject
     private readonly ISettingsService _settingsService;
     private readonly IDataCacheService _dataCacheService;
     private readonly IBusyIndicatorService _busyIndicatorService;
+    private readonly IFxRateService _fxRateService;
 
     private List<Debt> _rawLentDebts = new();
     private List<Debt> _rawBorrowedDebts = new();
@@ -59,16 +60,22 @@ public partial class DebtsViewModel : ObservableObject
         IDialogService dialogService,
         ISettingsService settingsService,
         IDataCacheService dataCacheService,
-        IBusyIndicatorService busyIndicatorService)
+        IBusyIndicatorService busyIndicatorService,
+        IFxRateService fxRateService)
     {
         _debtService = debtService;
         _dialogService = dialogService;
         _settingsService = settingsService;
         _dataCacheService = dataCacheService;
         _busyIndicatorService = busyIndicatorService;
+        _fxRateService = fxRateService;
 
         CurrencySymbol = _settingsService.Settings.CurrencySymbol;
-        _settingsService.CurrencyChanged += _ => CurrencySymbol = _settingsService.Settings.CurrencySymbol;
+        _settingsService.CurrencyChanged += _ =>
+        {
+            CurrencySymbol = _settingsService.Settings.CurrencySymbol;
+            ApplyCachedData();
+        };
         _dataCacheService.DataUpdated += OnDataUpdated;
     }
 
@@ -88,27 +95,36 @@ public partial class DebtsViewModel : ObservableObject
             _rawLentDebts.Clear();
             _rawBorrowedDebts.Clear();
 
+            var baseCurrency = _settingsService.Settings.PreferredCurrency ?? "INR";
             double lentTotal = 0, lentPending = 0;
             double borrowedTotal = 0, borrowedPending = 0;
 
             foreach (var debt in debts)
             {
+                var debtCurr = string.IsNullOrWhiteSpace(debt.Currency) ? baseCurrency : debt.Currency;
+                var convertedTotal = _fxRateService.ConvertAmount(debt.Amount, debtCurr, baseCurrency);
+                var convertedPending = _fxRateService.ConvertAmount(debt.RemainingAmount, debtCurr, baseCurrency);
+
+                debt.BaseCurrency = baseCurrency;
+                debt.BaseAmount = convertedTotal;
+                debt.BaseRemainingAmount = convertedPending;
+
                 if (debt.IsLent)
                 {
                     _rawLentDebts.Add(debt);
-                    lentTotal += debt.Amount;
+                    lentTotal += convertedTotal;
                     if (!debt.IsSettled && !debt.IsExpired)
                     {
-                        lentPending += debt.RemainingAmount;
+                        lentPending += convertedPending;
                     }
                 }
                 else
                 {
                     _rawBorrowedDebts.Add(debt);
-                    borrowedTotal += debt.Amount;
+                    borrowedTotal += convertedTotal;
                     if (!debt.IsSettled && !debt.IsExpired)
                     {
-                        borrowedPending += debt.RemainingAmount;
+                        borrowedPending += convertedPending;
                     }
                 }
             }
@@ -121,6 +137,26 @@ public partial class DebtsViewModel : ObservableObject
             TotalDebtsCount = _rawLentDebts.Count + _rawBorrowedDebts.Count;
 
             ApplyFilters();
+
+            // Asynchronously preload live rates if foreign currencies are present
+            var foreignCurrencies = debts
+                .Select(d => d.Currency)
+                .Where(c => !string.IsNullOrWhiteSpace(c) && !string.Equals(c, baseCurrency, StringComparison.OrdinalIgnoreCase))
+                .Select(c => c!)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (foreignCurrencies.Count > 0)
+            {
+                _ = Task.Run(async () =>
+                {
+                    await _fxRateService.PreloadRatesAsync(foreignCurrencies, baseCurrency);
+                    App.MainWindowInstance?.DispatcherQueue?.TryEnqueue(() =>
+                    {
+                        ApplyCachedData();
+                    });
+                });
+            }
         }
     }
 

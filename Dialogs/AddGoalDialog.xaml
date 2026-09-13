@@ -10,6 +10,9 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="550">
         <StackPanel Spacing="14" Width="400">
+            <!-- Validation Error Bar -->
+            <InfoBar x:Name="DialogErrorBar" Severity="Error" IsOpen="False" IsClosable="True" />
+
             <!-- Goal Name -->
             <StackPanel Spacing="4">
                 <TextBlock Text="Goal Name" Style="{StaticResource StatLabelTextStyle}" />
@@ -18,8 +21,14 @@
 
             <!-- Target Amount -->
             <StackPanel Spacing="4">
-                <TextBlock Text="Target Amount" Style="{StaticResource StatLabelTextStyle}" />
+                <TextBlock x:Name="TargetAmountLabel" Text="Target Amount" Style="{StaticResource StatLabelTextStyle}" />
                 <NumberBox x:Name="TargetAmountNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" PlaceholderText="0.00" />
+            </StackPanel>
+
+            <!-- Goal Currency Selector -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Goal Currency" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="CurrencyComboBox" DisplayMemberPath="DisplayName" SelectedValuePath="Code" HorizontalAlignment="Stretch" PlaceholderText="Select Currency..." />
             </StackPanel>
 
             <!-- Target Completion Date -->
@@ -28,16 +37,30 @@
                 <CalendarDatePicker x:Name="DatePicker" HorizontalAlignment="Stretch" />
             </StackPanel>
 
-            <!-- Initial Deposit -->
-            <StackPanel x:Name="InitialDepositPanel" Spacing="4">
-                <TextBlock Text="Initial Deposit (Optional)" Style="{StaticResource StatLabelTextStyle}" />
-                <NumberBox x:Name="InitialDepositNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" />
+            <!-- Deposit Account (Destination) -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Deposit Account (Where saved funds are held)" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="DepositAccountComboBox" HorizontalAlignment="Stretch" DisplayMemberPath="DisplayNameWithBalance" SelectedValuePath="Id" PlaceholderText="Select deposit account..." />
             </StackPanel>
 
-            <!-- Funding Asset -->
+            <!-- Initial Deposit -->
+            <StackPanel x:Name="InitialDepositPanel" Spacing="4">
+                <TextBlock x:Name="InitialDepositLabel" Text="Initial Deposit (Optional)" Style="{StaticResource StatLabelTextStyle}" />
+                <NumberBox x:Name="InitialDepositNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" PlaceholderText="0.00" />
+            </StackPanel>
+
+            <!-- Initial Deposit Cross-Currency FX Notice -->
+            <Border x:Name="InitialDepositFxPanel" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="10" Visibility="Collapsed">
+                <StackPanel Spacing="4">
+                    <TextBlock x:Name="InitialDepositFxText" Text="Currencies differ between source account and goal. Amount debited from source account will be converted to goal currency at live rate." TextWrapping="Wrap" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock x:Name="InitialDepositConvertedText" Text="" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Visibility="Collapsed" />
+                </StackPanel>
+            </Border>
+
+            <!-- Source Account (For Initial Deposit & Recurring) -->
             <StackPanel Spacing="4">
-                <TextBlock Text="Source Account (For Deposit &amp; Recurring)" Style="{StaticResource StatLabelTextStyle}" />
-                <ComboBox x:Name="AssetComboBox" HorizontalAlignment="Stretch" DisplayMemberPath="DisplayNameWithBalance" SelectedValuePath="Id" />
+                <TextBlock Text="Source Account (For initial deposit &amp; recurring)" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="SourceAccountComboBox" HorizontalAlignment="Stretch" DisplayMemberPath="DisplayNameWithBalance" SelectedValuePath="Id" PlaceholderText="Select source account..." />
             </StackPanel>
 
             <!-- Recurring Auto-Funding (Optional) -->
@@ -48,8 +71,8 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Auto-Fund Amount" Style="{StaticResource StatLabelTextStyle}" />
-                    <NumberBox x:Name="RecurringAmountNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" />
+                    <TextBlock x:Name="RecurringAmountLabel" Text="Auto-Fund Amount" Style="{StaticResource StatLabelTextStyle}" />
+                    <NumberBox x:Name="RecurringAmountNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" PlaceholderText="0.00" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Spacing="4">

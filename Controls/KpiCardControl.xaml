@@ -1,0 +1,70 @@
+<UserControl
+    x:Class="TheRichScript_WinUI.Controls.KpiCardControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Border x:Name="RootBorder"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="8"
+            Padding="16,14"
+            MinHeight="136"
+            PointerEntered="RootBorder_PointerEntered"
+            PointerExited="RootBorder_PointerExited"
+            Tapped="RootBorder_Tapped">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Top Row: Clean Fluent Icon Badge at Top Left -->
+            <FontIcon x:Name="IconGlyph"
+                      Grid.Row="0"
+                      Glyph="&#xE8EC;"
+                      FontSize="28"
+                      Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                      HorizontalAlignment="Left"
+                      VerticalAlignment="Top" />
+
+            <!-- Middle Content: Title, Value & Subtitle -->
+            <StackPanel Grid.Row="1" Spacing="2" Margin="0,12,0,0" VerticalAlignment="Center">
+                <TextBlock x:Name="TitleText"
+                           Text="Title"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                           TextTrimming="CharacterEllipsis" />
+                <TextBlock x:Name="ValueText"
+                           Text="₹0.00"
+                           FontSize="22"
+                           FontWeight="Bold"
+                           FontFamily="Segoe UI Variable Display"
+                           Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                           TextTrimming="CharacterEllipsis"
+                           Margin="0,2,0,0" />
+                <TextBlock x:Name="SubtitleText"
+                           Text="Description"
+                           FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           TextTrimming="CharacterEllipsis"
+                           Margin="0,1,0,0" />
+            </StackPanel>
+
+            <!-- Bottom Row: Action Icon (&#xE8A7; at Bottom Right) -->
+            <FontIcon x:Name="ActionIcon"
+                      Grid.Row="2"
+                      Glyph="&#xE8A7;"
+                      FontSize="12"
+                      Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Bottom"
+                      Margin="0,2,0,0" />
+        </Grid>
+    </Border>
+</UserControl>

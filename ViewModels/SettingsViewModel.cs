@@ -103,7 +103,8 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool isDeletingAccount;
 
-    public List<string> AvailableCurrencies { get; } = new() { "INR", "USD", "EUR", "GBP", "JPY", "CAD", "AUD", "AED" };
+    public IReadOnlyList<CountryInfo> AllCountries => CountryCurrencyData.AllCountries;
+    public IReadOnlyList<CurrencyInfo> AllCurrencies => CountryCurrencyData.AllCurrencies;
     public List<string> AvailableThemes { get; } = new() { "Default", "Light", "Dark" };
 
     public SettingsViewModel(
@@ -327,8 +328,8 @@ public partial class SettingsViewModel : ObservableObject
                 {
                     FirstName = FirstName.Trim(),
                     LastName = string.IsNullOrWhiteSpace(LastName) ? null : LastName.Trim(),
-                    Country = Country,
-                    Currency = Currency
+                    Country = Country?.Trim().ToUpperInvariant() ?? "IN",
+                    Currency = Currency?.Trim().ToUpperInvariant() ?? "INR"
                 };
 
                 var success = await _authService.UpdateProfileAsync(req);

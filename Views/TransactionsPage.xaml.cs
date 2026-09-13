@@ -82,7 +82,7 @@ public sealed partial class TransactionsPage : Page
 
     private async void EditTx_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is Transaction tx)
+        if ((sender as FrameworkElement)?.Tag is Transaction tx)
         {
             var dataCache = App.GetService<IDataCacheService>();
             var txService = App.GetService<ITransactionService>();
@@ -120,7 +120,7 @@ public sealed partial class TransactionsPage : Page
 
     private async void DeleteTx_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is Transaction tx)
+        if ((sender as FrameworkElement)?.Tag is Transaction tx)
         {
             await ViewModel.DeleteTransactionCommand.ExecuteAsync(tx);
         }

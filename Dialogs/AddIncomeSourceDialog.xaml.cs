@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using TheRichScript_WinUI.Helpers;
 using TheRichScript_WinUI.Models;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
+
+using TheRichScript_WinUI.Services;
 
 namespace TheRichScript_WinUI.Dialogs;
 
@@ -65,7 +68,68 @@ public sealed partial class AddIncomeSourceDialog : ContentDialog
             }
         }
 
+        DefaultAssetComboBox.SelectionChanged += (_, _) => UpdateCurrencyDisplay();
+        UpdateCurrencyDisplay();
+
+        NumericInputHelper.Attach(ExpectedAmountBox, allowDecimals: true, allowNegative: false);
+
         PrimaryButtonClick += AddIncomeSourceDialog_PrimaryButtonClick;
+    }
+
+    private void ShowError(string message)
+    {
+        DialogErrorBar.Message = message;
+        DialogErrorBar.IsOpen = true;
+    }
+
+    private void HideError()
+    {
+        DialogErrorBar.IsOpen = false;
+        DialogErrorBar.Message = string.Empty;
+    }
+
+    private void UpdateCurrencyDisplay()
+    {
+        string? currency = null;
+        if (DefaultAssetComboBox.SelectedItem is Asset selAsset && !string.IsNullOrWhiteSpace(selAsset.Currency))
+        {
+            currency = selAsset.Currency;
+        }
+
+        var symbol = "₹";
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(currency))
+            {
+                symbol = CountryCurrencyData.GetCurrencySymbol(currency);
+            }
+            else
+            {
+                var settings = App.GetService<ISettingsService>();
+                if (!string.IsNullOrWhiteSpace(settings?.Settings?.CurrencySymbol))
+                {
+                    symbol = settings.Settings.CurrencySymbol;
+                }
+                else
+                {
+                    var auth = App.GetService<IAuthService>();
+                    if (!string.IsNullOrWhiteSpace(auth?.CurrentUser?.Currency))
+                    {
+                        symbol = CountryCurrencyData.GetCurrencySymbol(auth.CurrentUser.Currency);
+                    }
+                }
+            }
+        }
+        catch { }
+
+        if (ExpectedAmountLabel != null)
+        {
+            ExpectedAmountLabel.Text = $"Expected Inflow ({symbol})";
+        }
+        if (ExpectedAmountBox != null)
+        {
+            ExpectedAmountBox.PlaceholderText = $"0.00 ({symbol})";
+        }
     }
 
     private async void BrowseIcon_Click(object sender, RoutedEventArgs e)
@@ -97,16 +161,28 @@ public sealed partial class AddIncomeSourceDialog : ContentDialog
 
     private void AddIncomeSourceDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
+        HideError();
+
         var name = NameBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(name))
         {
             args.Cancel = true;
+            ShowError("Income Stream Name is required.");
+            NameBox.Focus(FocusState.Programmatic);
+            return;
+        }
+
+        var expectedAmount = ExpectedAmountBox.Value;
+        if (!double.IsNaN(expectedAmount) && expectedAmount < 0)
+        {
+            args.Cancel = true;
+            ShowError("Expected Inflow cannot be negative.");
+            ExpectedAmountBox.Focus(FocusState.Programmatic);
             return;
         }
 
         var isPassive = (TypeRadioButtons.SelectedItem as RadioButton)?.Tag?.ToString() == "PASSIVE";
         var isFixed = (NatureRadioButtons.SelectedItem as RadioButton)?.Tag?.ToString() == "FIXED";
-        var expectedAmount = ExpectedAmountBox.Value;
         var frequencyTag = (FrequencyComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString();
         if (frequencyTag == "FLEXIBLE") frequencyTag = null;
 

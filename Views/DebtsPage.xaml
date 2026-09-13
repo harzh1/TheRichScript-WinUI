@@ -54,73 +54,41 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Money Lent -->
-                <Border Grid.Column="0" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="MONEY LENT (RECEIVABLE)" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A10B981" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xEAFC;" FontSize="11" Foreground="#10B981" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.TotalLentPending, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#10B981" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 1. Money Lent -->
+                <controls:KpiCardControl
+                    Grid.Column="0"
+                    Title="Money Lent"
+                    Value="{x:Bind ViewModel.TotalLentPending, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Receivable from borrowers"
+                    Glyph="&#xE896;"
+                    ShowActionIcon="False" />
 
-                <!-- Money Borrowed -->
-                <Border Grid.Column="1" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="MONEY BORROWED (PAYABLE)" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1AF43F5E" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xEF42;" FontSize="11" Foreground="#F43F5E" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.TotalBorrowedPending, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#F43F5E" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 2. Money Borrowed -->
+                <controls:KpiCardControl
+                    Grid.Column="1"
+                    Title="Money Borrowed"
+                    Value="{x:Bind ViewModel.TotalBorrowedPending, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Payable to lenders"
+                    Glyph="&#xE898;"
+                    ShowActionIcon="False" />
 
-                <!-- Net Position -->
-                <Border Grid.Column="2" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="NET RECEIVABLE POSITION" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A38BDF8" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE8D4;" FontSize="11" Foreground="#38BDF8" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.NetReceivable, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#38BDF8" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 3. Net Position -->
+                <controls:KpiCardControl
+                    Grid.Column="2"
+                    Title="Net Receivable"
+                    Value="{x:Bind ViewModel.NetReceivable, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Lent minus borrowed balance"
+                    Glyph="&#xE8D4;"
+                    ShowActionIcon="False" />
 
-                <!-- Total Debt Records -->
-                <Border Grid.Column="3" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="TOTAL LOAN CONTRACTS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1AF59E0B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE7C1;" FontSize="11" Foreground="#F59E0B" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.TotalDebtsCount, Mode=OneWay}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#F59E0B" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 4. Total Debt Records -->
+                <controls:KpiCardControl
+                    Grid.Column="3"
+                    Title="Total Loans"
+                    Value="{x:Bind ViewModel.TotalDebtsCount, Mode=OneWay}"
+                    Subtitle="Active loan contracts"
+                    Glyph="&#xE7C1;"
+                    ShowActionIcon="False" />
             </Grid>
 
             <!-- 3. Pivot Section: Lent vs Borrowed with StaggeredLayout -->
@@ -134,40 +102,67 @@
                         <ItemsControl ItemsSource="{x:Bind ViewModel.FilteredLentDebts, Mode=OneWay}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <controls:StaggeredPanel ColumnSpacing="12" RowSpacing="12" DesiredColumnWidth="320" MaxColumns="3" />
+                                    <controls:StaggeredPanel ColumnSpacing="12" RowSpacing="12" DesiredColumnWidth="250" MaxColumns="5" />
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="models:Debt">
                                     <Border Style="{StaticResource FluentCardStyle}" Padding="14,12" CornerRadius="8">
                                         <StackPanel Spacing="10">
-                                            <!-- Top row: Person Name + Status Badge -->
-                                            <Grid>
+                                            <!-- Top row: Person Name + Status Badge + 3-Dots Menu -->
+                                            <Grid ColumnSpacing="8">
                                                 <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
-                                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                                    <Border Width="26" Height="26" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
-                                                        <FontIcon Glyph="{x:Bind TypeGlyph}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                    </Border>
-                                                    <TextBlock Text="{x:Bind PersonName}" FontWeight="SemiBold" FontSize="14" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="180" VerticalAlignment="Center" />
-                                                </StackPanel>
-
-                                                <Border Grid.Column="1" HorizontalAlignment="Right" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,1" VerticalAlignment="Center">
-                                                    <TextBlock Text="{x:Bind StatusBadgeText}" FontSize="9" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <Border Grid.Column="0" Width="26" Height="26" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                                    <FontIcon Glyph="{x:Bind TypeGlyph}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                                 </Border>
+                                                <TextBlock Grid.Column="1" Text="{x:Bind PersonName}" FontWeight="SemiBold" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+
+                                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,1" VerticalAlignment="Center">
+                                                        <TextBlock Text="{x:Bind StatusBadgeText}" FontSize="9" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                    </Border>
+
+                                                    <!-- 3-Dots Options Menu -->
+                                                    <Button Padding="4"
+                                                            Background="Transparent"
+                                                            BorderThickness="0"
+                                                            CornerRadius="4"
+                                                            VerticalAlignment="Center"
+                                                            ToolTipService.ToolTip="Options">
+                                                        <FontIcon Glyph="&#xE712;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                        <Button.Flyout>
+                                                            <MenuFlyout>
+                                                                <MenuFlyoutItem Text="Edit Record" Click="EditDebt_Click" Tag="{x:Bind}">
+                                                                    <MenuFlyoutItem.Icon>
+                                                                        <FontIcon Glyph="&#xE70F;" />
+                                                                    </MenuFlyoutItem.Icon>
+                                                                </MenuFlyoutItem>
+                                                                <MenuFlyoutSeparator Visibility="{x:Bind IsSettled, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}" />
+                                                                <MenuFlyoutItem Text="Write Off Debt" Click="WriteOffDebt_Click" Tag="{x:Bind}" Visibility="{x:Bind IsSettled, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}">
+                                                                    <MenuFlyoutItem.Icon>
+                                                                        <FontIcon Glyph="&#xE7BA;" />
+                                                                    </MenuFlyoutItem.Icon>
+                                                                </MenuFlyoutItem>
+                                                            </MenuFlyout>
+                                                        </Button.Flyout>
+                                                    </Button>
+                                                </StackPanel>
                                             </Grid>
 
                                             <!-- Balance Info -->
                                             <Grid Margin="0,2,0,0">
                                                 <StackPanel Spacing="1">
                                                     <TextBlock Text="Remaining Due" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
-                                                    <TextBlock Text="{x:Bind RemainingAmount, Converter={StaticResource CurrencyConverter}}" FontSize="17" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                    <TextBlock Text="{x:Bind FormattedRemaining}" FontSize="16" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                    <TextBlock Text="{x:Bind FormattedBaseRemaining}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Visibility="{x:Bind ShowBaseValue, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                                 </StackPanel>
                                                 <StackPanel HorizontalAlignment="Right" Spacing="1">
                                                     <TextBlock Text="Original Lent" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Right" />
-                                                    <TextBlock Text="{x:Bind Amount, Converter={StaticResource CurrencyConverter}}" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                    <TextBlock Text="{x:Bind FormattedAmount}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 </StackPanel>
                                             </Grid>
 
@@ -178,24 +173,14 @@
                                             <Grid>
                                                 <TextBlock Text="{x:Bind DueDateText}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
                                                 <TextBlock HorizontalAlignment="Right" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center">
-                                                    <Run Text="Settled: " /><Run Text="{x:Bind SettledAmount, Converter={StaticResource CurrencyConverter}}" />
+                                                    <Run Text="Settled: " /><Run Text="{x:Bind FormattedSettledAmount}" />
                                                 </TextBlock>
                                             </Grid>
 
-                                            <!-- Action Buttons -->
-                                            <Grid ColumnSpacing="6" Margin="0,2,0,0" Visibility="{x:Bind IsSettled, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <Button Style="{StaticResource SmallHeaderAccentButtonStyle}" HorizontalAlignment="Stretch" Padding="6,4" Click="SettleDebt_Click" Tag="{x:Bind}">
-                                                    <TextBlock Text="Record Payment" FontSize="11" />
-                                                </Button>
-                                                <Button Grid.Column="1" Style="{StaticResource SmallHeaderButtonStyle}" Padding="6,4" Click="WriteOffDebt_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Write Off Debt">
-                                                    <TextBlock Text="Write Off" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                </Button>
-                                            </Grid>
+                                            <!-- Action Button -->
+                                            <Button Style="{StaticResource SmallHeaderAccentButtonStyle}" HorizontalAlignment="Stretch" Margin="0,2,0,0" Padding="6,4" Click="SettleDebt_Click" Tag="{x:Bind}" Visibility="{x:Bind IsSettled, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}">
+                                                <TextBlock Text="Record Payment" FontSize="11" />
+                                            </Button>
                                         </StackPanel>
                                     </Border>
                                 </DataTemplate>
@@ -213,40 +198,67 @@
                         <ItemsControl ItemsSource="{x:Bind ViewModel.FilteredBorrowedDebts, Mode=OneWay}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <controls:StaggeredPanel ColumnSpacing="12" RowSpacing="12" DesiredColumnWidth="320" MaxColumns="3" />
+                                    <controls:StaggeredPanel ColumnSpacing="12" RowSpacing="12" DesiredColumnWidth="250" MaxColumns="5" />
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="models:Debt">
                                     <Border Style="{StaticResource FluentCardStyle}" Padding="14,12" CornerRadius="8">
                                         <StackPanel Spacing="10">
-                                            <!-- Top row: Person Name + Status Badge -->
-                                            <Grid>
+                                            <!-- Top row: Person Name + Status Badge + 3-Dots Menu -->
+                                            <Grid ColumnSpacing="8">
                                                 <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
-                                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                                    <Border Width="26" Height="26" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
-                                                        <FontIcon Glyph="{x:Bind TypeGlyph}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                    </Border>
-                                                    <TextBlock Text="{x:Bind PersonName}" FontWeight="SemiBold" FontSize="14" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="180" VerticalAlignment="Center" />
-                                                </StackPanel>
-
-                                                <Border Grid.Column="1" HorizontalAlignment="Right" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,1" VerticalAlignment="Center">
-                                                    <TextBlock Text="{x:Bind StatusBadgeText}" FontSize="9" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <Border Grid.Column="0" Width="26" Height="26" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                                    <FontIcon Glyph="{x:Bind TypeGlyph}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                                 </Border>
+                                                <TextBlock Grid.Column="1" Text="{x:Bind PersonName}" FontWeight="SemiBold" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+
+                                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,1" VerticalAlignment="Center">
+                                                        <TextBlock Text="{x:Bind StatusBadgeText}" FontSize="9" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                    </Border>
+
+                                                    <!-- 3-Dots Options Menu -->
+                                                    <Button Padding="4"
+                                                            Background="Transparent"
+                                                            BorderThickness="0"
+                                                            CornerRadius="4"
+                                                            VerticalAlignment="Center"
+                                                            ToolTipService.ToolTip="Options">
+                                                        <FontIcon Glyph="&#xE712;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                        <Button.Flyout>
+                                                            <MenuFlyout>
+                                                                <MenuFlyoutItem Text="Edit Record" Click="EditDebt_Click" Tag="{x:Bind}">
+                                                                    <MenuFlyoutItem.Icon>
+                                                                        <FontIcon Glyph="&#xE70F;" />
+                                                                    </MenuFlyoutItem.Icon>
+                                                                </MenuFlyoutItem>
+                                                                <MenuFlyoutSeparator Visibility="{x:Bind IsSettled, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}" />
+                                                                <MenuFlyoutItem Text="Write Off Debt" Click="WriteOffDebt_Click" Tag="{x:Bind}" Visibility="{x:Bind IsSettled, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}">
+                                                                    <MenuFlyoutItem.Icon>
+                                                                        <FontIcon Glyph="&#xE7BA;" />
+                                                                    </MenuFlyoutItem.Icon>
+                                                                </MenuFlyoutItem>
+                                                            </MenuFlyout>
+                                                        </Button.Flyout>
+                                                    </Button>
+                                                </StackPanel>
                                             </Grid>
 
                                             <!-- Balance Info -->
                                             <Grid Margin="0,2,0,0">
                                                 <StackPanel Spacing="1">
                                                     <TextBlock Text="Remaining Payable" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
-                                                    <TextBlock Text="{x:Bind RemainingAmount, Converter={StaticResource CurrencyConverter}}" FontSize="17" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                    <TextBlock Text="{x:Bind FormattedRemaining}" FontSize="16" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                    <TextBlock Text="{x:Bind FormattedBaseRemaining}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Visibility="{x:Bind ShowBaseValue, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                                 </StackPanel>
                                                 <StackPanel HorizontalAlignment="Right" Spacing="1">
                                                     <TextBlock Text="Original Borrowed" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Right" />
-                                                    <TextBlock Text="{x:Bind Amount, Converter={StaticResource CurrencyConverter}}" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                    <TextBlock Text="{x:Bind FormattedAmount}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 </StackPanel>
                                             </Grid>
 
@@ -257,7 +269,7 @@
                                             <Grid>
                                                 <TextBlock Text="{x:Bind DueDateText}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
                                                 <TextBlock HorizontalAlignment="Right" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center">
-                                                    <Run Text="Paid: " /><Run Text="{x:Bind SettledAmount, Converter={StaticResource CurrencyConverter}}" />
+                                                    <Run Text="Paid: " /><Run Text="{x:Bind FormattedSettledAmount}" />
                                                 </TextBlock>
                                             </Grid>
 

@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:TheRichScript_WinUI.Models"
+    xmlns:controls="using:TheRichScript_WinUI.Controls"
     xmlns:vm="using:TheRichScript_WinUI.ViewModels"
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
     mc:Ignorable="d">
@@ -100,73 +101,41 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Month Income -->
-                <Border Grid.Column="0" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="MONTH INCOME" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A10B981" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xEAFC;" FontSize="11" Foreground="#10B981" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.AnalyticsData.MonthIncome, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#10B981" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 1. Month Income -->
+                <controls:KpiCardControl
+                    Grid.Column="0"
+                    Title="Month Income"
+                    Value="{x:Bind ViewModel.AnalyticsData.MonthIncome, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Recorded cash inflows"
+                    Glyph="&#xEAFC;"
+                    ShowActionIcon="False" />
 
-                <!-- Month Expense -->
-                <Border Grid.Column="1" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="MONTH EXPENSES" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1AF43F5E" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xEF42;" FontSize="11" Foreground="#F43F5E" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.AnalyticsData.MonthExpense, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#F43F5E" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 2. Month Expense -->
+                <controls:KpiCardControl
+                    Grid.Column="1"
+                    Title="Month Expenses"
+                    Value="{x:Bind ViewModel.AnalyticsData.MonthExpense, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Recorded cash outflows"
+                    Glyph="&#xEF42;"
+                    ShowActionIcon="False" />
 
-                <!-- Month Net Savings -->
-                <Border Grid.Column="2" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="NET SAVINGS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A38BDF8" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE8D4;" FontSize="11" Foreground="#38BDF8" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.AnalyticsData.MonthNetSavings, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#38BDF8" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 3. Month Net Savings -->
+                <controls:KpiCardControl
+                    Grid.Column="2"
+                    Title="Net Savings"
+                    Value="{x:Bind ViewModel.AnalyticsData.MonthNetSavings, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Retained cash balance"
+                    Glyph="&#xE8D4;"
+                    ShowActionIcon="False" />
 
-                <!-- Savings Rate % -->
-                <Border Grid.Column="3" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="SAVINGS RATE" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1AF59E0B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE809;" FontSize="11" Foreground="#F59E0B" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.FormattedSavingsRate, Mode=OneWay}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#F59E0B" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 4. Savings Rate % -->
+                <controls:KpiCardControl
+                    Grid.Column="3"
+                    Title="Savings Rate"
+                    Value="{x:Bind ViewModel.FormattedSavingsRate, Mode=OneWay}"
+                    Subtitle="Percentage of income saved"
+                    Glyph="&#xE809;"
+                    ShowActionIcon="False" />
             </Grid>
 
             <!-- ═══════════════════════════════════════════════════════════ -->

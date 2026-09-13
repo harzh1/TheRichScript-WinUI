@@ -11,9 +11,11 @@ public class Category
     public string Name { get; set; } = string.Empty;
 
     [JsonPropertyName("monthlyLimit")]
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public double? MonthlyLimit { get; set; }
 
     [JsonPropertyName("yearlyLimit")]
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public double? YearlyLimit { get; set; }
 
     [JsonPropertyName("limitId")]

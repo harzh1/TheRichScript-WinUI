@@ -19,7 +19,9 @@ public enum DataCacheType
     Debts = 64,
     Plans = 128,
     Analytics = 256,
-    All = Assets | AssetTypes | Transactions | Categories | IncomeSources | Goals | Debts | Plans | Analytics
+    Contacts = 512,
+    Notifications = 1024,
+    All = Assets | AssetTypes | Transactions | Categories | IncomeSources | Goals | Debts | Plans | Analytics | Contacts | Notifications
 }
 
 public interface IDataCacheService
@@ -569,6 +571,7 @@ public class DataCacheService : IDataCacheService
         if (cacheTypes.HasFlag(DataCacheType.Debts)) _lastDebtsFetch = DateTime.MinValue;
         if (cacheTypes.HasFlag(DataCacheType.Plans)) _lastPlansFetch = DateTime.MinValue;
         if (cacheTypes.HasFlag(DataCacheType.Analytics)) _lastAnalyticsFetch = DateTime.MinValue;
+        if (cacheTypes.HasFlag(DataCacheType.Contacts)) { /* invalidate contacts */ }
 
         // Trigger asynchronous background revalidation for invalidated caches
         _ = Task.Run(() => RevalidateAsync(cacheTypes, force: true));
@@ -596,7 +599,5 @@ public class DataCacheService : IDataCacheService
         _lastDebtsFetch = DateTime.MinValue;
         _lastPlansFetch = DateTime.MinValue;
         _lastAnalyticsFetch = DateTime.MinValue;
-
-        DataUpdated?.Invoke(DataCacheType.All);
     }
 }

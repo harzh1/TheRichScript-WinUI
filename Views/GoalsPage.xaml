@@ -48,72 +48,40 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- 1. Total Goals Target -->
-                <Border Grid.Column="0" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="TOTAL GOALS TARGET" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A38BDF8" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE706;" FontSize="11" Foreground="#38BDF8" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.TotalTargetAmount, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#38BDF8" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <controls:KpiCardControl
+                    Grid.Column="0"
+                    Title="Total Target"
+                    Value="{x:Bind ViewModel.TotalTargetAmount, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Cumulative savings objective"
+                    Glyph="&#xE706;"
+                    ShowActionIcon="False" />
 
                 <!-- 2. Total Saved So Far -->
-                <Border Grid.Column="1" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="TOTAL SAVED SO FAR" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A10B981" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xEAFC;" FontSize="11" Foreground="#10B981" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.TotalSavedAmount, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#10B981" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <controls:KpiCardControl
+                    Grid.Column="1"
+                    Title="Total Saved"
+                    Value="{x:Bind ViewModel.TotalSavedAmount, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Accumulated goal savings"
+                    Glyph="&#xEAFC;"
+                    ShowActionIcon="False" />
 
                 <!-- 3. Remaining To Save -->
-                <Border Grid.Column="2" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="REMAINING TO SAVE" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1AF59E0B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE916;" FontSize="11" Foreground="#F59E0B" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.RemainingTargetAmount, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#F59E0B" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <controls:KpiCardControl
+                    Grid.Column="2"
+                    Title="Remaining"
+                    Value="{x:Bind ViewModel.RemainingTargetAmount, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Outstanding balance to achieve"
+                    Glyph="&#xE916;"
+                    ShowActionIcon="False" />
 
                 <!-- 4. Overall Progress -->
-                <Border Grid.Column="3" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="OVERALL PROGRESS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A6366F1" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="#6366F1" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.OverallProgressPercentage, Mode=OneWay, Converter={StaticResource PercentTextConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#6366F1" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <controls:KpiCardControl
+                    Grid.Column="3"
+                    Title="Overall Progress"
+                    Value="{x:Bind ViewModel.OverallProgressPercentage, Mode=OneWay, Converter={StaticResource PercentTextConverter}}"
+                    Subtitle="Portfolio completion rate"
+                    Glyph="&#xE73E;"
+                    ShowActionIcon="False" />
             </Grid>
 
             <!-- 3. Search & Filter Bar Card -->
@@ -179,7 +147,7 @@
                           Visibility="{x:Bind local:GoalsPage.ShowGoalsList(ViewModel.FilteredGoals.Count), Mode=OneWay}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <controls:StaggeredPanel ColumnSpacing="14" RowSpacing="14" DesiredColumnWidth="360" MaxColumns="3" />
+                        <controls:StaggeredPanel ColumnSpacing="12" RowSpacing="12" DesiredColumnWidth="265" MaxColumns="4" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>

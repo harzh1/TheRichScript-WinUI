@@ -33,6 +33,69 @@ public sealed partial class MainWindow : Window
 
         var navService = App.GetService<INavigationService>();
         navService.Initialize(RootFrame, RootFrame);
+        navService.CanGoBackChanged += UpdateBackButtonState;
+        UpdateBackButtonState(navService.CanGoBack);
+    }
+
+    public void UpdateBackButtonState(bool canGoBack)
+    {
+        DispatcherQueue?.TryEnqueue(() =>
+        {
+            if (AppTitleBar != null)
+            {
+                AppTitleBar.IsBackButtonEnabled = canGoBack;
+            }
+        });
+    }
+
+    private void AppTitleBar_BackRequested(TitleBar sender, object args)
+    {
+        var navService = App.GetService<INavigationService>();
+        if (navService.CanGoBack)
+        {
+            navService.GoBack();
+        }
+    }
+
+    private void AppTitleBar_PaneToggleRequested(TitleBar sender, object args)
+    {
+        HamburgerToggleRequested?.Invoke();
+    }
+
+    private void RootGrid_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.Left && e.KeyStatus.IsMenuKeyDown)
+        {
+            var navService = App.GetService<INavigationService>();
+            if (navService.CanGoBack)
+            {
+                navService.GoBack();
+                e.Handled = true;
+            }
+        }
+        else if (e.Key == Windows.System.VirtualKey.GoBack)
+        {
+            var navService = App.GetService<INavigationService>();
+            if (navService.CanGoBack)
+            {
+                navService.GoBack();
+                e.Handled = true;
+            }
+        }
+    }
+
+    private void RootGrid_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        var props = e.GetCurrentPoint(RootGrid).Properties;
+        if (props.IsXButton1Pressed)
+        {
+            var navService = App.GetService<INavigationService>();
+            if (navService.CanGoBack)
+            {
+                navService.GoBack();
+                e.Handled = true;
+            }
+        }
     }
 
     public void UpdateTitleBarTheme(ElementTheme theme)
@@ -73,16 +136,14 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void TitleBarMenuButton_Click(object sender, RoutedEventArgs e)
-    {
-        HamburgerToggleRequested?.Invoke();
-    }
-
     /// <summary>
     /// Called by ShellPage to show/hide the hamburger button based on NavigationView display mode.
     /// </summary>
     public void SetHamburgerVisible(bool visible)
     {
-        TitleBarMenuButton.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+        if (AppTitleBar != null)
+        {
+            AppTitleBar.IsPaneToggleButtonVisible = visible;
+        }
     }
 }

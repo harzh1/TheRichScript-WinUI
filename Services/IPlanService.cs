@@ -10,6 +10,7 @@ public interface IPlanService
     Task<ApiResponse<PlannedExpense>> CreatePlanAsync(CreatePlanRequest request);
     Task<ApiResponse<PlannedExpense>> UpdatePlanAsync(string id, UpdatePlanRequest request);
     Task<ApiResponse<object>> DeletePlanAsync(string id);
+    Task<ApiResponse<object>> TriggerRecurringPlansAsync();
 }
 
 public class PlanService : IPlanService
@@ -39,5 +40,10 @@ public class PlanService : IPlanService
     public async Task<ApiResponse<object>> DeletePlanAsync(string id)
     {
         return await _apiService.DeleteAsync<object>($"plans/{id}");
+    }
+
+    public async Task<ApiResponse<object>> TriggerRecurringPlansAsync()
+    {
+        return await _apiService.PostAsync<object>("cron/trigger");
     }
 }

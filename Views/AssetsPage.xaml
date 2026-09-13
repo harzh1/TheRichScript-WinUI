@@ -52,73 +52,41 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Total Portfolio Net Worth -->
-                <Border Grid.Column="0" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="PORTFOLIO VALUE" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A38BDF8" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE8EC;" FontSize="11" Foreground="#38BDF8" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.TotalPortfolioValue, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#38BDF8" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 1. Total Portfolio Net Worth -->
+                <controls:KpiCardControl
+                    Grid.Column="0"
+                    Title="Portfolio Value"
+                    Value="{x:Bind ViewModel.TotalPortfolioValue, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Total asset valuation"
+                    Glyph="&#xE8EC;"
+                    ShowActionIcon="False" />
 
-                <!-- Liquid Cash & Bank Balances -->
-                <Border Grid.Column="1" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="LIQUID CASH &amp; BANKS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A10B981" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE8C7;" FontSize="11" Foreground="#10B981" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.LiquidCashValue, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#10B981" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 2. Liquid Cash & Bank Balances -->
+                <controls:KpiCardControl
+                    Grid.Column="1"
+                    Title="Liquid Cash &amp; Banks"
+                    Value="{x:Bind ViewModel.LiquidCashValue, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Readily accessible liquidity"
+                    Glyph="&#xE8C7;"
+                    ShowActionIcon="False" />
 
-                <!-- Investments & Growth -->
-                <Border Grid.Column="2" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="INVESTMENTS &amp; GROWTH" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A6366F1" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xEAFC;" FontSize="11" Foreground="#6366F1" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.InvestedValue, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#6366F1" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 3. Investments & Growth -->
+                <controls:KpiCardControl
+                    Grid.Column="2"
+                    Title="Investments &amp; Growth"
+                    Value="{x:Bind ViewModel.InvestedValue, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Market &amp; long-term holdings"
+                    Glyph="&#xEAFC;"
+                    ShowActionIcon="False" />
 
-                <!-- Active Accounts Count -->
-                <Border Grid.Column="3" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="ACTIVE ACCOUNTS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1AF59E0B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE716;" FontSize="11" Foreground="#F59E0B" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.TotalAssetCount, Mode=OneWay}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#F59E0B" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 4. Active Accounts Count -->
+                <controls:KpiCardControl
+                    Grid.Column="3"
+                    Title="Active Accounts"
+                    Value="{x:Bind ViewModel.TotalAssetCount, Mode=OneWay}"
+                    Subtitle="Configured financial accounts"
+                    Glyph="&#xE716;"
+                    ShowActionIcon="False" />
             </Grid>
 
             <!-- 3. Search & Filter Bar Card -->
@@ -154,48 +122,47 @@
             <ItemsControl ItemsSource="{x:Bind ViewModel.GroupedAssets, Mode=OneWay}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:AssetGroup">
-                        <Border Style="{StaticResource FluentCardStyle}" Margin="0,0,0,16" Padding="16,14">
-                            <StackPanel Spacing="12">
+                        <StackPanel Spacing="10" Margin="0,0,0,24">
 
-                                <!-- Group Header Row -->
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+                            <!-- Group Header Row -->
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                                    <!-- Left: Group Icon, Name & Count -->
-                                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                        <Border Width="26" Height="26" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
-                                            <FontIcon Glyph="{x:Bind TypeGlyph}" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                        </Border>
-                                        <TextBlock Text="{x:Bind TypeName}" Style="{StaticResource SectionHeaderTextStyle}" FontSize="15" VerticalAlignment="Center" />
-                                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,1" VerticalAlignment="Center">
-                                            <TextBlock Text="{x:Bind Items.Count}" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        </Border>
-                                    </StackPanel>
+                                <!-- Left: Group Icon, Name & Count -->
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Border Width="26" Height="26" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                        <FontIcon Glyph="{x:Bind TypeGlyph}" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <TextBlock Text="{x:Bind TypeName}" Style="{StaticResource SectionHeaderTextStyle}" FontSize="15" VerticalAlignment="Center" />
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,1" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind Items.Count}" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    </Border>
+                                </StackPanel>
 
-                                    <!-- Right: Group Total Value & Allocation % -->
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind TotalValue, Converter={StaticResource CurrencyConverter}}" FontWeight="SemiBold" FontSize="15" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                            <TextBlock FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                                                <Run Text="{x:Bind PercentageOfTotal, Converter={StaticResource PercentTextConverter}}" />
-                                            </TextBlock>
-                                        </Border>
-                                    </StackPanel>
-                                </Grid>
+                                <!-- Right: Group Total Value & Allocation % -->
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind TotalValue, Converter={StaticResource CurrencyConverter}}" FontWeight="SemiBold" FontSize="15" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                        <TextBlock FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                            <Run Text="{x:Bind PercentageOfTotal, Converter={StaticResource PercentTextConverter}}" />
+                                        </TextBlock>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
 
-                                <!-- Asset Cards ItemsControl with StaggeredPanel ItemsPanel -->
-                                <ItemsControl ItemsSource="{x:Bind Items}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <controls:StaggeredPanel ColumnSpacing="12" RowSpacing="12" DesiredColumnWidth="280" MaxColumns="3" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="models:Asset">
-                                            <Border Style="{StaticResource FluentSubtleCardStyle}" Padding="14,12" CornerRadius="8">
+                            <!-- Asset Cards ItemsControl with StaggeredPanel ItemsPanel -->
+                            <ItemsControl ItemsSource="{x:Bind Items}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <controls:StaggeredPanel ColumnSpacing="12" RowSpacing="12" DesiredColumnWidth="280" MaxColumns="3" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="models:Asset">
+                                        <Border Style="{StaticResource FluentCardStyle}" Padding="14,12" CornerRadius="8">
                                                 <StackPanel Spacing="10">
 
                                                     <!-- Card Header: Title & Actions -->
@@ -207,23 +174,47 @@
                                                             <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource TextFillColorPrimaryBrush}" MaxWidth="160" VerticalAlignment="Center" />
                                                         </StackPanel>
 
-                                                        <!-- Edit & Delete Buttons -->
-                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="2">
-                                                            <Button Padding="4" Background="Transparent" BorderThickness="0" Click="EditAsset_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Edit Account">
-                                                                <FontIcon Glyph="&#xE70F;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                            </Button>
-                                                            <Button Padding="4" Background="Transparent" BorderThickness="0" Click="DeleteAsset_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Delete Account">
-                                                                <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                            </Button>
-                                                        </StackPanel>
+                                                        <!-- 3-Dots Options Menu -->
+                                                        <Button HorizontalAlignment="Right"
+                                                                Padding="4"
+                                                                Background="Transparent"
+                                                                BorderThickness="0"
+                                                                CornerRadius="4"
+                                                                VerticalAlignment="Center"
+                                                                ToolTipService.ToolTip="Options">
+                                                            <FontIcon Glyph="&#xE712;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                            <Button.Flyout>
+                                                                <MenuFlyout>
+                                                                    <MenuFlyoutItem Text="Edit Account" Click="EditAsset_Click" Tag="{x:Bind}">
+                                                                        <MenuFlyoutItem.Icon>
+                                                                            <FontIcon Glyph="&#xE70F;" />
+                                                                        </MenuFlyoutItem.Icon>
+                                                                    </MenuFlyoutItem>
+                                                                    <MenuFlyoutSeparator />
+                                                                    <MenuFlyoutItem Text="Delete Account" Click="DeleteAsset_Click" Tag="{x:Bind}">
+                                                                        <MenuFlyoutItem.Icon>
+                                                                            <FontIcon Glyph="&#xE74D;" />
+                                                                        </MenuFlyoutItem.Icon>
+                                                                    </MenuFlyoutItem>
+                                                                </MenuFlyout>
+                                                            </Button.Flyout>
+                                                        </Button>
                                                     </Grid>
 
                                                     <!-- Balance Display -->
-                                                    <TextBlock Text="{x:Bind Value, Converter={StaticResource CurrencyConverter}}" FontSize="18" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                    <StackPanel Spacing="2">
+                                                        <TextBlock Text="{x:Bind FormattedValue}" FontSize="18" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                        <TextBlock Text="{x:Bind FormattedBaseValue}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Visibility="{x:Bind ShowBaseValue, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                    </StackPanel>
 
-                                                    <!-- Card Footer: Type & Quantity -->
+                                                    <!-- Card Footer: Type & Currency & Quantity -->
                                                     <Grid Margin="0,2,0,0">
-                                                        <TextBlock Text="{x:Bind Type}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                            <TextBlock Text="{x:Bind Type}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="3" Padding="4,1" VerticalAlignment="Center">
+                                                                <TextBlock Text="{x:Bind Currency}" FontSize="9" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
                                                         <TextBlock Visibility="{x:Bind Quantity, Converter={StaticResource NullToVisibilityConverter}}" HorizontalAlignment="Right" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center">
                                                             <Run Text="Qty: " /><Run Text="{x:Bind Quantity}" />
                                                         </TextBlock>
@@ -236,7 +227,6 @@
                                 </ItemsControl>
 
                             </StackPanel>
-                        </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace TheRichScript_WinUI.Services;
@@ -27,8 +28,8 @@ public interface IApiService
     Task<ApiResponse<T>> PostAsync<T>(string endpoint, object? body = null);
     Task<ApiResponse<T>> PutAsync<T>(string endpoint, object? body = null);
     Task<ApiResponse<T>> DeleteAsync<T>(string endpoint, object? body = null);
-    Task<ApiResponse<T>> PostMultipartAsync<T>(string endpoint, Dictionary<string, string> stringFields, List<(string fieldName, string filePath)> files);
-    Task<ApiResponse<T>> PutMultipartAsync<T>(string endpoint, Dictionary<string, string> stringFields, List<(string fieldName, string filePath)> files);
+    Task<ApiResponse<T>> PostMultipartAsync<T>(string endpoint, IEnumerable<KeyValuePair<string, string>> stringFields, List<(string fieldName, string filePath)> files);
+    Task<ApiResponse<T>> PutMultipartAsync<T>(string endpoint, IEnumerable<KeyValuePair<string, string>> stringFields, List<(string fieldName, string filePath)> files);
 }
 
 public class ApiService : IApiService
@@ -40,7 +41,9 @@ public class ApiService : IApiService
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        NumberHandling = JsonNumberHandling.AllowReadingFromString,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
     public ApiService(ISettingsService settingsService)
@@ -205,17 +208,17 @@ public class ApiService : IApiService
         }
     }
 
-    public async Task<ApiResponse<T>> PostMultipartAsync<T>(string endpoint, Dictionary<string, string> stringFields, List<(string fieldName, string filePath)> files)
+    public async Task<ApiResponse<T>> PostMultipartAsync<T>(string endpoint, IEnumerable<KeyValuePair<string, string>> stringFields, List<(string fieldName, string filePath)> files)
     {
         return await SendMultipartAsync<T>(HttpMethod.Post, endpoint, stringFields, files, isRetry: false);
     }
 
-    public async Task<ApiResponse<T>> PutMultipartAsync<T>(string endpoint, Dictionary<string, string> stringFields, List<(string fieldName, string filePath)> files)
+    public async Task<ApiResponse<T>> PutMultipartAsync<T>(string endpoint, IEnumerable<KeyValuePair<string, string>> stringFields, List<(string fieldName, string filePath)> files)
     {
         return await SendMultipartAsync<T>(HttpMethod.Put, endpoint, stringFields, files, isRetry: false);
     }
 
-    private async Task<ApiResponse<T>> SendMultipartAsync<T>(HttpMethod method, string endpoint, Dictionary<string, string> stringFields, List<(string fieldName, string filePath)> files, bool isRetry)
+    private async Task<ApiResponse<T>> SendMultipartAsync<T>(HttpMethod method, string endpoint, IEnumerable<KeyValuePair<string, string>> stringFields, List<(string fieldName, string filePath)> files, bool isRetry)
     {
         try
         {
@@ -276,6 +279,7 @@ public class ApiService : IApiService
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized &&
             retryFunc != null &&
             _tokenRefreshHandler != null &&
+            !string.IsNullOrWhiteSpace(_authToken) &&
             !requestContext.Contains("auth/login", StringComparison.OrdinalIgnoreCase) &&
             !requestContext.Contains("auth/register", StringComparison.OrdinalIgnoreCase) &&
             !requestContext.Contains("auth/refresh", StringComparison.OrdinalIgnoreCase))
@@ -362,13 +366,14 @@ public class ApiService : IApiService
 
             return result;
         }
-        catch
+        catch (Exception ex)
         {
+            LogHttp($"JSON parse error for {requestContext}: {ex.Message}");
             return new ApiResponse<T>
             {
-                Success = response.IsSuccessStatusCode,
+                Success = false,
                 StatusCode = statusCode,
-                Error = CleanErrorMessage(rawContent, response)
+                Error = !response.IsSuccessStatusCode ? CleanErrorMessage(rawContent, response) : $"Failed to parse response: {ex.Message}"
             };
         }
     }

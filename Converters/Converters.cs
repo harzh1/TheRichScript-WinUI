@@ -48,19 +48,13 @@ public class CurrencyConverter : IValueConverter
 
 public class AmountColorConverter : IValueConverter
 {
-    private static readonly SolidColorBrush IncomeBrush = new(Windows.UI.Color.FromArgb(255, 16, 185, 129)); // #10B981 Emerald Green
-    private static readonly SolidColorBrush ExpenseBrush = new(Windows.UI.Color.FromArgb(255, 244, 63, 94)); // #F43F5E Coral Rose
-    private static readonly SolidColorBrush TransferBrush = new(Windows.UI.Color.FromArgb(255, 56, 189, 248)); // #38BDF8 Sky Blue
-
     public object Convert(object? value, Type targetType, object? parameter, string language)
     {
-        if (value is string str)
+        if (Application.Current.Resources.TryGetValue("TextFillColorPrimaryBrush", out var brush) && brush is Brush b)
         {
-            if (string.Equals(str, "INCOME", StringComparison.OrdinalIgnoreCase)) return IncomeBrush;
-            if (string.Equals(str, "EXPENSE", StringComparison.OrdinalIgnoreCase)) return ExpenseBrush;
-            if (string.Equals(str, "TRANSFER", StringComparison.OrdinalIgnoreCase)) return TransferBrush;
+            return b;
         }
-        return TransferBrush;
+        return new SolidColorBrush(Colors.White);
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
@@ -109,20 +103,13 @@ public class TypeToBadgeTextConverter : IValueConverter
 
 public class TypeToForegroundConverter : IValueConverter
 {
-    private static readonly SolidColorBrush IncomeBrush = new(Windows.UI.Color.FromArgb(255, 16, 185, 129)); // #10B981
-    private static readonly SolidColorBrush ExpenseBrush = new(Windows.UI.Color.FromArgb(255, 244, 63, 94)); // #F43F5E
-    private static readonly SolidColorBrush TransferBrush = new(Windows.UI.Color.FromArgb(255, 56, 189, 248)); // #38BDF8
-    private static readonly SolidColorBrush DefaultBrush = new(Windows.UI.Color.FromArgb(255, 107, 114, 128));
-
     public object Convert(object? value, Type targetType, object? parameter, string language)
     {
-        if (value is string str)
+        if (Application.Current.Resources.TryGetValue("TextFillColorSecondaryBrush", out var brush) && brush is Brush b)
         {
-            if (string.Equals(str, "INCOME", StringComparison.OrdinalIgnoreCase)) return IncomeBrush;
-            if (string.Equals(str, "EXPENSE", StringComparison.OrdinalIgnoreCase)) return ExpenseBrush;
-            if (string.Equals(str, "TRANSFER", StringComparison.OrdinalIgnoreCase)) return TransferBrush;
+            return b;
         }
-        return DefaultBrush;
+        return new SolidColorBrush(Colors.Gray);
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
@@ -133,20 +120,13 @@ public class TypeToForegroundConverter : IValueConverter
 
 public class TypeToBackgroundConverter : IValueConverter
 {
-    private static readonly SolidColorBrush IncomeBgBrush = new(Windows.UI.Color.FromArgb(26, 16, 185, 129)); // #1A10B981 (10% tint)
-    private static readonly SolidColorBrush ExpenseBgBrush = new(Windows.UI.Color.FromArgb(26, 244, 63, 94)); // #1AF43F5E (10% tint)
-    private static readonly SolidColorBrush TransferBgBrush = new(Windows.UI.Color.FromArgb(26, 56, 189, 248)); // #1A38BDF8 (10% tint)
-    private static readonly SolidColorBrush DefaultBgBrush = new(Windows.UI.Color.FromArgb(25, 128, 128, 128));
-
     public object Convert(object? value, Type targetType, object? parameter, string language)
     {
-        if (value is string str)
+        if (Application.Current.Resources.TryGetValue("SubtleFillColorSecondaryBrush", out var brush) && brush is Brush b)
         {
-            if (string.Equals(str, "INCOME", StringComparison.OrdinalIgnoreCase)) return IncomeBgBrush;
-            if (string.Equals(str, "EXPENSE", StringComparison.OrdinalIgnoreCase)) return ExpenseBgBrush;
-            if (string.Equals(str, "TRANSFER", StringComparison.OrdinalIgnoreCase)) return TransferBgBrush;
+            return b;
         }
-        return DefaultBgBrush;
+        return new SolidColorBrush(Colors.Transparent);
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)

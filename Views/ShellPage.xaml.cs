@@ -64,38 +64,24 @@ public sealed partial class ShellPage : Page
 
         if (args.SelectedItemContainer is NavigationViewItem selectedItem && selectedItem.Tag is string tag)
         {
-            switch (tag)
+            Type? targetPage = tag switch
             {
-                case "Dashboard":
-                    navService.NavigateTo(typeof(DashboardPage));
-                    break;
-                case "Transactions":
-                    navService.NavigateTo(typeof(TransactionsPage));
-                    break;
-                case "Assets":
-                    navService.NavigateTo(typeof(AssetsPage));
-                    break;
-                case "IncomeSources":
-                    navService.NavigateTo(typeof(IncomeSourcesPage));
-                    break;
-                case "BudgetsPlans":
-                    navService.NavigateTo(typeof(BudgetsPlansPage));
-                    break;
-                case "Goals":
-                    navService.NavigateTo(typeof(GoalsPage));
-                    break;
-                case "Debts":
-                    navService.NavigateTo(typeof(DebtsPage));
-                    break;
-                case "Analytics":
-                    navService.NavigateTo(typeof(AnalyticsPage));
-                    break;
-                case "Categories":
-                    navService.NavigateTo(typeof(CategoriesPage));
-                    break;
-                case "Settings":
-                    navService.NavigateTo(typeof(SettingsPage));
-                    break;
+                "Dashboard" => typeof(DashboardPage),
+                "Transactions" => typeof(TransactionsPage),
+                "Assets" => typeof(AssetsPage),
+                "IncomeSources" => typeof(IncomeSourcesPage),
+                "BudgetsPlans" => typeof(BudgetsPlansPage),
+                "Goals" => typeof(GoalsPage),
+                "Debts" => typeof(DebtsPage),
+                "Analytics" => typeof(AnalyticsPage),
+                "Categories" => typeof(CategoriesPage),
+                "Settings" => typeof(SettingsPage),
+                _ => null
+            };
+
+            if (targetPage != null && navService.CurrentPageType != targetPage)
+            {
+                navService.NavigateTo(targetPage);
             }
         }
     }
@@ -121,7 +107,7 @@ public sealed partial class ShellPage : Page
         {
             var item = NavView.MenuItems.OfType<NavigationViewItem>().FirstOrDefault(i => i.Tag?.ToString() == matchTag)
                        ?? NavView.FooterMenuItems.OfType<NavigationViewItem>().FirstOrDefault(i => i.Tag?.ToString() == matchTag);
-            if (item != null)
+            if (item != null && !ReferenceEquals(NavView.SelectedItem, item))
             {
                 NavView.SelectedItem = item;
             }

@@ -9,6 +9,9 @@
     DefaultButton="Primary">
 
     <StackPanel Spacing="16" Width="380">
+        <!-- Validation Error Bar -->
+        <InfoBar x:Name="DialogErrorBar" Severity="Error" IsOpen="False" IsClosable="True" />
+
         <!-- Category Name -->
         <StackPanel Spacing="6">
             <TextBlock Text="Category Name" Style="{StaticResource StatLabelTextStyle}" />
@@ -17,14 +20,14 @@
 
         <!-- Monthly Limit -->
         <StackPanel Spacing="6">
-            <TextBlock Text="Monthly Budget Limit (Optional, 0 for none)" Style="{StaticResource StatLabelTextStyle}" />
-            <NumberBox x:Name="MonthlyLimitNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" />
+            <TextBlock x:Name="MonthlyLimitLabel" Text="Monthly Budget Limit (Optional, 0 for none)" Style="{StaticResource StatLabelTextStyle}" />
+            <NumberBox x:Name="MonthlyLimitNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" PlaceholderText="0.00" />
         </StackPanel>
 
         <!-- Yearly Limit -->
         <StackPanel Spacing="6">
-            <TextBlock Text="Yearly Budget Limit (Optional, 0 for none)" Style="{StaticResource StatLabelTextStyle}" />
-            <NumberBox x:Name="YearlyLimitNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" />
+            <TextBlock x:Name="YearlyLimitLabel" Text="Yearly Budget Limit (Optional, 0 for none)" Style="{StaticResource StatLabelTextStyle}" />
+            <NumberBox x:Name="YearlyLimitNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" PlaceholderText="0.00" />
         </StackPanel>
     </StackPanel>
 </ContentDialog>

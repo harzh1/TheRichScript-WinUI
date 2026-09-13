@@ -10,6 +10,9 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="560">
         <StackPanel Spacing="16" Width="400">
+            <!-- Validation Error Bar -->
+            <InfoBar x:Name="DialogErrorBar" Severity="Error" IsOpen="False" IsClosable="True" />
+
             <!-- Informational subtitle -->
             <TextBlock Text="Set up an automated recurring expense deducted from an account (e.g. streaming, rent, gym membership, utilities)."
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -24,7 +27,7 @@
 
             <!-- Amount -->
             <StackPanel Spacing="6">
-                <TextBlock Text="Billing Amount" Style="{StaticResource StatLabelTextStyle}" />
+                <TextBlock x:Name="AmountLabel" Text="Billing Amount" Style="{StaticResource StatLabelTextStyle}" />
                 <NumberBox x:Name="AmountNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" SmallChange="1" LargeChange="10" PlaceholderText="0.00" />
             </StackPanel>
 
@@ -44,7 +47,7 @@
             <!-- Frequency -->
             <StackPanel Spacing="6">
                 <TextBlock Text="Billing Frequency" Style="{StaticResource StatLabelTextStyle}" />
-                <ComboBox x:Name="FrequencyComboBox" HorizontalAlignment="Stretch" SelectedIndex="2">
+                <ComboBox x:Name="FrequencyComboBox" HorizontalAlignment="Stretch" SelectedIndex="2" SelectionChanged="FrequencyComboBox_SelectionChanged">
                     <ComboBoxItem Content="Daily" Tag="DAILY" />
                     <ComboBoxItem Content="Weekly" Tag="WEEKLY" />
                     <ComboBoxItem Content="Monthly" Tag="MONTHLY" />
@@ -54,8 +57,15 @@
 
             <!-- Next Due Date -->
             <StackPanel Spacing="6">
-                <TextBlock Text="Next Billing / Due Date" Style="{StaticResource StatLabelTextStyle}" />
-                <CalendarDatePicker x:Name="DatePicker" HorizontalAlignment="Stretch" />
+                <Grid>
+                    <TextBlock Text="Next Billing / Due Date" Style="{StaticResource StatLabelTextStyle}" VerticalAlignment="Center" />
+                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
+                        <Button x:Name="TodayButton" Content="Today" Click="SetDateToday_Click" Padding="8,2" FontSize="11" />
+                        <Button x:Name="NextCycleButton" Content="Next Cycle" Click="SetDateNextCycle_Click" Padding="8,2" FontSize="11" />
+                    </StackPanel>
+                </Grid>
+                <CalendarDatePicker x:Name="DatePicker" HorizontalAlignment="Stretch" DateChanged="DatePicker_DateChanged" />
+                <TextBlock x:Name="ScheduleSummaryText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" TextWrapping="Wrap" />
             </StackPanel>
         </StackPanel>
     </ScrollViewer>

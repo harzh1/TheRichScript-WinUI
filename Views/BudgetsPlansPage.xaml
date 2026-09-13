@@ -58,73 +58,41 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Monthly Subscriptions (Auto-Expenses) -->
-                <Border Grid.Column="0" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="MONTHLY SUBSCRIPTIONS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1AF43F5E" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xEF42;" FontSize="11" Foreground="#F43F5E" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.TotalMonthlySubscriptions, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#F43F5E" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 1. Monthly Subscriptions (Auto-Expenses) -->
+                <controls:KpiCardControl
+                    Grid.Column="0"
+                    Title="Subscriptions"
+                    Value="{x:Bind ViewModel.TotalMonthlySubscriptions, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Recurring auto-expenses"
+                    Glyph="&#xEF42;"
+                    ShowActionIcon="False" />
 
-                <!-- Monthly Recurring Transfers (Asset Transfers) -->
-                <Border Grid.Column="1" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="MONTHLY TRANSFERS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A38BDF8" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE72A;" FontSize="11" Foreground="#38BDF8" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.TotalMonthlyRecurringTransfers, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#38BDF8" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 2. Monthly Recurring Transfers (Asset Transfers) -->
+                <controls:KpiCardControl
+                    Grid.Column="1"
+                    Title="Recurring Transfers"
+                    Value="{x:Bind ViewModel.TotalMonthlyRecurringTransfers, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Scheduled account transfers"
+                    Glyph="&#xE72A;"
+                    ShowActionIcon="False" />
 
-                <!-- Total Monthly Committed -->
-                <Border Grid.Column="2" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="TOTAL COMMITTED / MO" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A6366F1" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xEAFC;" FontSize="11" Foreground="#6366F1" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.TotalMonthlyCommitments, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#6366F1" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 3. Total Monthly Committed -->
+                <controls:KpiCardControl
+                    Grid.Column="2"
+                    Title="Total Committed"
+                    Value="{x:Bind ViewModel.TotalMonthlyCommitments, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Monthly automated outflow"
+                    Glyph="&#xEAFC;"
+                    ShowActionIcon="False" />
 
-                <!-- Total Active Plans Count -->
-                <Border Grid.Column="3" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="ACTIVE PLANS &amp; SUBS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A10B981" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE8FD;" FontSize="11" Foreground="#10B981" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.ActivePlansCount, Mode=OneWay}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#10B981" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 4. Total Active Plans Count -->
+                <controls:KpiCardControl
+                    Grid.Column="3"
+                    Title="Active Plans"
+                    Value="{x:Bind ViewModel.ActivePlansCount, Mode=OneWay}"
+                    Subtitle="Enrolled commitments"
+                    Glyph="&#xE8FD;"
+                    ShowActionIcon="False" />
             </Grid>
 
             <!-- 3. Subscriptions Section (Auto-Expenses) -->
@@ -133,11 +101,19 @@
                     <Grid>
                         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <TextBlock Text="Subscriptions (Auto Expenses)" Style="{StaticResource SectionHeaderTextStyle}" FontSize="15" VerticalAlignment="Center" />
-                            <Border Background="#1AF43F5E" CornerRadius="10" Padding="8,2" VerticalAlignment="Center">
-                                <TextBlock Text="{x:Bind ViewModel.Subscriptions.Count, Mode=OneWay}" FontSize="10" FontWeight="Bold" Foreground="#F43F5E" />
+                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="8,2" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Bind ViewModel.Subscriptions.Count, Mode=OneWay}" FontSize="10" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             </Border>
                         </StackPanel>
-                        <HyperlinkButton Content="+ New Subscription" Click="AddSubscription_Click" HorizontalAlignment="Right" Padding="4,0" FontSize="12" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Button Click="ProcessDueTransfers_Click" Padding="8,3" FontSize="11" ToolTipService.ToolTip="Process and record any subscriptions that are due">
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <FontIcon Glyph="&#xE72C;" FontSize="11" />
+                                    <TextBlock Text="Process Due Bills" />
+                                </StackPanel>
+                            </Button>
+                            <HyperlinkButton Content="+ New Subscription" Click="AddSubscription_Click" Padding="4,0" FontSize="12" VerticalAlignment="Center" />
+                        </StackPanel>
                     </Grid>
 
                     <TextBlock Text="No active subscriptions. Subscriptions automate recurring payments like Netflix, gym memberships, rent, or utilities."
@@ -160,8 +136,8 @@
                                     </Grid.ColumnDefinitions>
 
                                     <!-- Subscription Glyph -->
-                                    <Border Grid.Column="0" Width="28" Height="28" CornerRadius="6" Background="#1AF43F5E" VerticalAlignment="Center">
-                                        <FontIcon Glyph="&#xEF42;" FontSize="11" Foreground="#F43F5E" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <Border Grid.Column="0" Width="28" Height="28" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
+                                        <FontIcon Glyph="&#xEF42;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Border>
 
                                     <!-- Name & Category -->
@@ -175,7 +151,7 @@
                                     <!-- Source Account / Paid from -->
                                     <Border Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="7,3">
                                         <StackPanel Orientation="Horizontal" Spacing="5">
-                                            <FontIcon Glyph="&#xE8C7;" FontSize="10" Foreground="#38BDF8" VerticalAlignment="Center" />
+                                            <FontIcon Glyph="&#xE8C7;" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                                             <TextBlock Text="{x:Bind SourceAccountDisplay}" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
                                     </Border>
@@ -187,24 +163,45 @@
 
                                     <!-- Next Due Date -->
                                     <StackPanel Grid.Column="4" VerticalAlignment="Center" Spacing="1">
-                                        <TextBlock Text="Next Due" FontSize="9" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="Next Due" FontSize="9" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="3" Padding="4,0" Visibility="{x:Bind IsDueNow, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <TextBlock Text="DUE" FontSize="8" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            </Border>
+                                        </StackPanel>
                                         <TextBlock Text="{x:Bind NextDueDate, Converter={StaticResource DateTimeFormatConverter}}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                                     </StackPanel>
 
                                     <!-- Amount -->
-                                    <TextBlock Grid.Column="5" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="SemiBold" FontSize="13" Foreground="#F43F5E">
+                                    <TextBlock Grid.Column="5" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="SemiBold" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}">
                                         <Run Text="{x:Bind Amount, Converter={StaticResource CurrencyConverter}}" />
                                     </TextBlock>
 
-                                    <!-- Actions: Edit & Delete -->
-                                    <StackPanel Grid.Column="6" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
-                                        <Button Background="Transparent" BorderThickness="0" Padding="4" Click="EditSubscription_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Edit Subscription">
-                                            <FontIcon Glyph="&#xE70F;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        </Button>
-                                        <Button Background="Transparent" BorderThickness="0" Padding="4" Click="DeletePlan_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Delete Subscription">
-                                            <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        </Button>
-                                    </StackPanel>
+                                    <!-- Actions: 3-Dots Options Menu -->
+                                    <Button Grid.Column="6"
+                                            Padding="4"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            CornerRadius="4"
+                                            VerticalAlignment="Center"
+                                            ToolTipService.ToolTip="Options">
+                                        <FontIcon Glyph="&#xE712;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <Button.Flyout>
+                                            <MenuFlyout>
+                                                <MenuFlyoutItem Text="Edit Subscription" Click="EditSubscription_Click" Tag="{x:Bind}">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE70F;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                                <MenuFlyoutSeparator />
+                                                <MenuFlyoutItem Text="Delete Subscription" Click="DeletePlan_Click" Tag="{x:Bind}">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE74D;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                            </MenuFlyout>
+                                        </Button.Flyout>
+                                    </Button>
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
@@ -218,11 +215,19 @@
                     <Grid>
                         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <TextBlock Text="Recurring Plans (Asset Transfers)" Style="{StaticResource SectionHeaderTextStyle}" FontSize="15" VerticalAlignment="Center" />
-                            <Border Background="#1A38BDF8" CornerRadius="10" Padding="8,2" VerticalAlignment="Center">
-                                <TextBlock Text="{x:Bind ViewModel.RecurringPlans.Count, Mode=OneWay}" FontSize="10" FontWeight="Bold" Foreground="#38BDF8" />
+                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="8,2" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Bind ViewModel.RecurringPlans.Count, Mode=OneWay}" FontSize="10" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             </Border>
                         </StackPanel>
-                        <HyperlinkButton Content="+ New Recurring Plan" Click="AddRecurringPlan_Click" HorizontalAlignment="Right" Padding="4,0" FontSize="12" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Button Click="ProcessDueTransfers_Click" Padding="8,3" FontSize="11" ToolTipService.ToolTip="Process and execute any recurring transfers that are due">
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <FontIcon Glyph="&#xE72C;" FontSize="11" />
+                                    <TextBlock Text="Process Due Plans" />
+                                </StackPanel>
+                            </Button>
+                            <HyperlinkButton Content="+ New Recurring Plan" Click="AddRecurringPlan_Click" Padding="4,0" FontSize="12" VerticalAlignment="Center" />
+                        </StackPanel>
                     </Grid>
 
                     <TextBlock Text="No recurring transfer plans yet. Automate money transfers from one asset to another at scheduled intervals (e.g. Monthly SIP, savings deposits, investment transfers)."
@@ -245,8 +250,8 @@
                                     </Grid.ColumnDefinitions>
 
                                     <!-- Transfer Glyph -->
-                                    <Border Grid.Column="0" Width="28" Height="28" CornerRadius="6" Background="#1A38BDF8" VerticalAlignment="Center">
-                                        <FontIcon Glyph="&#xE72A;" FontSize="11" Foreground="#38BDF8" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <Border Grid.Column="0" Width="28" Height="28" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Center">
+                                        <FontIcon Glyph="&#xE72A;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Border>
 
                                     <!-- Name & Category -->
@@ -260,7 +265,7 @@
                                     <!-- Transfer Flow Badge: [From Asset] ➔ [To Asset] -->
                                     <Border Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="8,3">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon Glyph="&#xE72A;" FontSize="9" Foreground="#38BDF8" VerticalAlignment="Center" />
+                                            <FontIcon Glyph="&#xE72A;" FontSize="9" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                                             <TextBlock Text="{x:Bind TransferFlowDisplay}" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
                                     </Border>
@@ -272,24 +277,45 @@
 
                                     <!-- Next Due Date -->
                                     <StackPanel Grid.Column="4" VerticalAlignment="Center" Spacing="1">
-                                        <TextBlock Text="Next Date" FontSize="9" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="Next Date" FontSize="9" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="3" Padding="4,0" Visibility="{x:Bind IsDueNow, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <TextBlock Text="DUE" FontSize="8" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            </Border>
+                                        </StackPanel>
                                         <TextBlock Text="{x:Bind NextDueDate, Converter={StaticResource DateTimeFormatConverter}}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                                     </StackPanel>
 
                                     <!-- Amount -->
-                                    <TextBlock Grid.Column="5" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="SemiBold" FontSize="13" Foreground="#38BDF8">
+                                    <TextBlock Grid.Column="5" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="SemiBold" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}">
                                         <Run Text="{x:Bind Amount, Converter={StaticResource CurrencyConverter}}" />
                                     </TextBlock>
 
-                                    <!-- Actions: Edit & Delete -->
-                                    <StackPanel Grid.Column="6" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
-                                        <Button Background="Transparent" BorderThickness="0" Padding="4" Click="EditRecurringPlan_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Edit Recurring Plan">
-                                            <FontIcon Glyph="&#xE70F;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        </Button>
-                                        <Button Background="Transparent" BorderThickness="0" Padding="4" Click="DeletePlan_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Delete Recurring Plan">
-                                            <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        </Button>
-                                    </StackPanel>
+                                    <!-- Actions: 3-Dots Options Menu -->
+                                    <Button Grid.Column="6"
+                                            Padding="4"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            CornerRadius="4"
+                                            VerticalAlignment="Center"
+                                            ToolTipService.ToolTip="Options">
+                                        <FontIcon Glyph="&#xE712;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <Button.Flyout>
+                                            <MenuFlyout>
+                                                <MenuFlyoutItem Text="Edit Recurring Plan" Click="EditRecurringPlan_Click" Tag="{x:Bind}">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE70F;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                                <MenuFlyoutSeparator />
+                                                <MenuFlyoutItem Text="Delete Recurring Plan" Click="DeletePlan_Click" Tag="{x:Bind}">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE74D;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                            </MenuFlyout>
+                                        </Button.Flyout>
+                                    </Button>
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
@@ -327,14 +353,31 @@
                                             <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" HorizontalAlignment="Left" VerticalAlignment="Center">
                                                 <TextBlock Text="{x:Bind Category}" FontSize="9" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                             </Border>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="2" VerticalAlignment="Center">
-                                                <Button Padding="4" Background="Transparent" BorderThickness="0" Click="EditTemplate_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Edit Template">
-                                                    <FontIcon Glyph="&#xE70F;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                </Button>
-                                                <Button Padding="4" Background="Transparent" BorderThickness="0" Click="DeletePlan_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Delete Template">
-                                                    <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                </Button>
-                                            </StackPanel>
+                                            <!-- 3-Dots Options Menu -->
+                                            <Button HorizontalAlignment="Right"
+                                                    Padding="4"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    CornerRadius="4"
+                                                    VerticalAlignment="Center"
+                                                    ToolTipService.ToolTip="Options">
+                                                <FontIcon Glyph="&#xE712;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <Button.Flyout>
+                                                    <MenuFlyout>
+                                                        <MenuFlyoutItem Text="Edit Template" Click="EditTemplate_Click" Tag="{x:Bind}">
+                                                            <MenuFlyoutItem.Icon>
+                                                                <FontIcon Glyph="&#xE70F;" />
+                                                            </MenuFlyoutItem.Icon>
+                                                        </MenuFlyoutItem>
+                                                        <MenuFlyoutSeparator />
+                                                        <MenuFlyoutItem Text="Delete Template" Click="DeletePlan_Click" Tag="{x:Bind}">
+                                                            <MenuFlyoutItem.Icon>
+                                                                <FontIcon Glyph="&#xE74D;" />
+                                                            </MenuFlyoutItem.Icon>
+                                                        </MenuFlyoutItem>
+                                                    </MenuFlyout>
+                                                </Button.Flyout>
+                                            </Button>
                                         </Grid>
 
                                         <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />

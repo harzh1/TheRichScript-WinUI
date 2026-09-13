@@ -3,15 +3,49 @@ using System.Collections.Generic;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Shapes;
 using TheRichScript_WinUI.Models;
+using TheRichScript_WinUI.Services;
 
 namespace TheRichScript_WinUI.Controls;
 
 public sealed partial class GoalCardControl : UserControl
 {
+    private static readonly Dictionary<string, BitmapImage> _imageCache = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly SolidColorBrush DotActiveBrush = new(Microsoft.UI.Colors.White);
+    private static readonly SolidColorBrush DotInactiveBrush = new(Microsoft.UI.ColorHelper.FromArgb(128, 255, 255, 255));
+
+    public static BitmapImage? GetOrCreateBitmap(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return null;
+
+        if (_imageCache.TryGetValue(url, out var cached))
+        {
+            return cached;
+        }
+
+        try
+        {
+            var bitmap = new BitmapImage
+            {
+                UriSource = new Uri(url),
+                DecodePixelType = DecodePixelType.Logical,
+                DecodePixelWidth = 530 // 2x retina display scaling for ~265px card width, saves memory & decodes instantly
+            };
+            _imageCache[url] = bitmap;
+            return bitmap;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     private DispatcherTimer? _slideshowTimer;
+    private Storyboard? _slideStoryboard;
+    private bool _isSliding;
     private int _currentImageIndex;
     private List<string> _images = new();
 
@@ -57,8 +91,21 @@ public sealed partial class GoalCardControl : UserControl
     {
         if (d is GoalCardControl control)
         {
+            if (e.OldValue is System.ComponentModel.INotifyPropertyChanged oldObj)
+            {
+                oldObj.PropertyChanged -= control.OnGoalModelPropertyChanged;
+            }
+            if (e.NewValue is System.ComponentModel.INotifyPropertyChanged newObj)
+            {
+                newObj.PropertyChanged += control.OnGoalModelPropertyChanged;
+            }
             control.UpdateUI();
         }
+    }
+
+    private void OnGoalModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        DispatcherQueue?.TryEnqueue(UpdateUI);
     }
 
     private void GoalCardControl_Loaded(object sender, RoutedEventArgs e)
@@ -69,10 +116,19 @@ public sealed partial class GoalCardControl : UserControl
     private void GoalCardControl_Unloaded(object sender, RoutedEventArgs e)
     {
         StopSlideshow();
+        if (Goal is System.ComponentModel.INotifyPropertyChanged notify)
+        {
+            notify.PropertyChanged -= OnGoalModelPropertyChanged;
+        }
     }
 
     private string GetEffectiveCurrencySymbol()
     {
+        if (!string.IsNullOrWhiteSpace(Goal?.Currency))
+        {
+            return CountryCurrencyData.GetCurrencySymbol(Goal.Currency);
+        }
+
         if (!string.IsNullOrEmpty(CurrencySymbol) && CurrencySymbol != "₹")
         {
             return CurrencySymbol;
@@ -94,8 +150,7 @@ public sealed partial class GoalCardControl : UserControl
         if (Goal == null) return;
 
         var symbol = GetEffectiveCurrencySymbol();
-        GoalNameTextImage.Text = Goal.Name;
-        GoalNameTextNoImg.Text = Goal.Name;
+        GoalNameText.Text = Goal.Name;
         CurrentAmountText.Text = $"{symbol}{Goal.CurrentAmount:N2}";
         TargetAmountText.Text = $"{symbol}{Goal.TargetAmount:N2}";
         GoalProgressBar.Value = Goal.ProgressPercentage;
@@ -115,7 +170,17 @@ public sealed partial class GoalCardControl : UserControl
         }
         else
         {
-            RemainingAmountText.Text = $"{symbol}{Goal.RemainingAmount:N2} remaining";
+            if (Goal.ShowBaseValue && Goal.BaseTargetAmount > 0)
+            {
+                var baseSymbol = CountryCurrencyData.GetCurrencySymbol(Goal.BaseCurrency);
+                var baseRemaining = Math.Max(0, Goal.BaseTargetAmount - Goal.BaseCurrentAmount);
+                RemainingAmountText.Text = $"{symbol}{Goal.RemainingAmount:N2} remaining (≈ {baseSymbol}{baseRemaining:N0})";
+            }
+            else
+            {
+                RemainingAmountText.Text = $"{symbol}{Goal.RemainingAmount:N2} remaining";
+            }
+
             if (Application.Current.Resources.TryGetValue("TextFillColorSecondaryBrush", out var secBrush) && secBrush is Brush sBrush)
             {
                 RemainingAmountText.Foreground = sBrush;
@@ -130,17 +195,12 @@ public sealed partial class GoalCardControl : UserControl
 
         // Pin Icons and Badges
         var pinGlyph = Goal.IsPinned ? "\uE840" : "\uE718";
-        PinIconImage.Glyph = pinGlyph;
-        PinIconNoImg.Glyph = pinGlyph;
-
-        var pinnedVis = Goal.IsPinned ? Visibility.Visible : Visibility.Collapsed;
-        PinnedBadgeImage.Visibility = pinnedVis;
-        PinnedBadgeNoImg.Visibility = pinnedVis;
+        PinMenuIcon.Glyph = pinGlyph;
+        PinnedBadge.Visibility = Goal.IsPinned ? Visibility.Visible : Visibility.Collapsed;
+        PinMenuItem.Text = Goal.IsPinned ? "Unpin Goal" : "Pin Goal";
 
         // Completed states
-        var completedVis = Goal.IsCompleted ? Visibility.Visible : Visibility.Collapsed;
-        CompletedBadgeImage.Visibility = completedVis;
-        CompletedBadgeNoImg.Visibility = completedVis;
+        CompletedBadge.Visibility = Goal.IsCompleted ? Visibility.Visible : Visibility.Collapsed;
 
         // Auto-funding
         if (Goal.RecurringAmount.HasValue && Goal.RecurringAmount.Value > 0)
@@ -157,17 +217,45 @@ public sealed partial class GoalCardControl : UserControl
         _images = Goal.ImageUrls ?? new List<string>();
         if (_images.Count > 0)
         {
-            ImageBannerGrid.Visibility = Visibility.Visible;
-            NoImageHeaderGrid.Visibility = Visibility.Collapsed;
+            // Eagerly preload and cache all images into memory upfront
+            for (int i = 0; i < _images.Count; i++)
+            {
+                GetOrCreateBitmap(_images[i]);
+            }
+
+            FallbackBackgroundGrid.Visibility = Visibility.Collapsed;
+            SlideshowViewport.Visibility = Visibility.Visible;
+            ImageCurrent.Visibility = Visibility.Visible;
             _currentImageIndex = 0;
-            DisplayCurrentImage();
+
+            ImageCurrent.Source = GetOrCreateBitmap(_images[0]);
+            TransformCurrent.X = 0;
+
+            // Pre-arm ImageNext with the upcoming image (index 1) so it is already decoded and warm in GPU memory!
+            if (_images.Count > 1)
+            {
+                ImageNext.Source = GetOrCreateBitmap(_images[1]);
+                TransformNext.X = 265.0;
+                ImageNext.Opacity = 0;
+                ImageNext.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                ImageNext.Source = null;
+                ImageNext.Opacity = 0;
+                ImageNext.Visibility = Visibility.Collapsed;
+            }
+
             BuildDotIndicators();
             StartSlideshow();
         }
         else
         {
-            ImageBannerGrid.Visibility = Visibility.Collapsed;
-            NoImageHeaderGrid.Visibility = Visibility.Visible;
+            FallbackBackgroundGrid.Visibility = Visibility.Visible;
+            SlideshowViewport.Visibility = Visibility.Collapsed;
+            ImageCurrent.Source = null;
+            ImageNext.Source = null;
+            SlideshowDotsBadge.Visibility = Visibility.Collapsed;
             DotsIndicatorPanel.Children.Clear();
             StopSlideshow();
         }
@@ -178,13 +266,11 @@ public sealed partial class GoalCardControl : UserControl
         StopSlideshow();
         if (_images.Count > 1)
         {
-            _slideshowTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.5) };
+            // Calm 3.5s cycle: 1.2s smooth slow sliding + 2.3s display
+            _slideshowTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3.5) };
             _slideshowTimer.Tick += (s, e) =>
             {
-                if (_images.Count == 0) return;
-                _currentImageIndex = (_currentImageIndex + 1) % _images.Count;
-                DisplayCurrentImage();
-                UpdateDotIndicators();
+                SlideToNextImage();
             };
             _slideshowTimer.Start();
         }
@@ -197,49 +283,132 @@ public sealed partial class GoalCardControl : UserControl
             _slideshowTimer.Stop();
             _slideshowTimer = null;
         }
+        if (_slideStoryboard != null)
+        {
+            _slideStoryboard.Stop();
+            _slideStoryboard = null;
+        }
+        _isSliding = false;
+        if (TransformCurrent != null) TransformCurrent.X = 0;
+        if (TransformNext != null) TransformNext.X = 0;
+        if (ImageNext != null)
+        {
+            ImageNext.Opacity = 0;
+            ImageNext.Visibility = Visibility.Collapsed;
+        }
     }
 
-    private void DisplayCurrentImage()
+    private void SlideToNextImage()
     {
-        if (_images.Count == 0 || _currentImageIndex >= _images.Count) return;
+        if (_images.Count <= 1 || _isSliding) return;
+
+        double width = ImageContainer.ActualWidth > 0 ? ImageContainer.ActualWidth : 265.0;
+        int nextIndex = (_currentImageIndex + 1) % _images.Count;
 
         try
         {
-            var uri = _images[_currentImageIndex];
-            SlideshowImage.Source = new BitmapImage(new Uri(uri));
+            // ImageNext was ALREADY preloaded and decoded into memory 3.5s ago!
+            var nextBitmap = GetOrCreateBitmap(_images[nextIndex]);
+            if (ImageNext.Source != nextBitmap)
+            {
+                ImageNext.Source = nextBitmap;
+            }
+
+            // Position ImageNext right at the right edge, make it fully opaque
+            TransformNext.X = width;
+            ImageNext.Opacity = 1;
+            ImageNext.Visibility = Visibility.Visible;
+            TransformCurrent.X = 0;
+
+            _slideStoryboard = new Storyboard();
+
+            // Smooth slow slide: current image glides left out of frame
+            var animCurrent = new DoubleAnimation
+            {
+                From = 0,
+                To = -width,
+                Duration = TimeSpan.FromMilliseconds(1200),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+            };
+            Storyboard.SetTarget(animCurrent, TransformCurrent);
+            Storyboard.SetTargetProperty(animCurrent, "X");
+            _slideStoryboard.Children.Add(animCurrent);
+
+            // Incoming image glides from right into center frame
+            var animNext = new DoubleAnimation
+            {
+                From = width,
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(1200),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+            };
+            Storyboard.SetTarget(animNext, TransformNext);
+            Storyboard.SetTargetProperty(animNext, "X");
+            _slideStoryboard.Children.Add(animNext);
+
+            // Update dot indicator to the incoming image immediately
+            UpdateDotIndicators(nextIndex);
+
+            _isSliding = true;
+            _slideStoryboard.Completed += (s, e) =>
+            {
+                _currentImageIndex = nextIndex;
+                ImageCurrent.Source = ImageNext.Source;
+                TransformCurrent.X = 0;
+
+                // Park ImageNext off-screen and hide opacity
+                TransformNext.X = width;
+                ImageNext.Opacity = 0;
+                _isSliding = false;
+
+                // IMMEDIATELY pre-load the upcoming image into ImageNext
+                // so during the 2.3s pause, it downloads and decodes into GPU VRAM!
+                int upcomingIndex = (_currentImageIndex + 1) % _images.Count;
+                ImageNext.Source = GetOrCreateBitmap(_images[upcomingIndex]);
+            };
+
+            _slideStoryboard.Begin();
         }
-        catch { }
+        catch
+        {
+            _isSliding = false;
+        }
     }
 
     private void BuildDotIndicators()
     {
         DotsIndicatorPanel.Children.Clear();
-        if (_images.Count <= 1) return;
+        if (_images.Count <= 1)
+        {
+            SlideshowDotsBadge.Visibility = Visibility.Collapsed;
+            return;
+        }
 
+        SlideshowDotsBadge.Visibility = Visibility.Visible;
         for (int i = 0; i < _images.Count; i++)
         {
-            var dot = new Ellipse
+            bool isActive = (i == _currentImageIndex);
+            var dot = new Border
             {
-                Width = 6,
-                Height = 6,
-                Fill = i == _currentImageIndex
-                    ? new SolidColorBrush(Microsoft.UI.Colors.White)
-                    : new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(100, 255, 255, 255)),
-                Margin = new Thickness(1, 0, 1, 0)
+                Width = isActive ? 14 : 5,
+                Height = 4,
+                CornerRadius = new CornerRadius(2),
+                Background = isActive ? DotActiveBrush : DotInactiveBrush
             };
             DotsIndicatorPanel.Children.Add(dot);
         }
     }
 
-    private void UpdateDotIndicators()
+    private void UpdateDotIndicators(int? activeIndex = null)
     {
+        var targetIndex = activeIndex ?? _currentImageIndex;
         for (int i = 0; i < DotsIndicatorPanel.Children.Count; i++)
         {
-            if (DotsIndicatorPanel.Children[i] is Ellipse dot)
+            if (DotsIndicatorPanel.Children[i] is Border dot)
             {
-                dot.Fill = i == _currentImageIndex
-                    ? new SolidColorBrush(Microsoft.UI.Colors.White)
-                    : new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(100, 255, 255, 255));
+                bool isActive = (i == targetIndex);
+                dot.Width = isActive ? 14 : 5;
+                dot.Background = isActive ? DotActiveBrush : DotInactiveBrush;
             }
         }
     }
@@ -274,5 +443,26 @@ public sealed partial class GoalCardControl : UserControl
         {
             DepositFundsClicked?.Invoke(Goal);
         }
+    }
+
+    protected override Windows.Foundation.Size MeasureOverride(Windows.Foundation.Size availableSize)
+    {
+        double width = availableSize.Width;
+        if (double.IsInfinity(width) || width <= 0)
+        {
+            width = 270.0;
+        }
+
+        // Top image section strictly enforces 16:9 aspect ratio (Height = Width * 9 / 16)
+        double image16x9Height = Math.Round(width * 9.0 / 16.0);
+        ImageContainer.Height = image16x9Height;
+
+        // Clip viewport to prevent horizontal slide-in overflow outside card bounds
+        SlideshowViewport.Clip = new RectangleGeometry
+        {
+            Rect = new Windows.Foundation.Rect(0, 0, width, image16x9Height)
+        };
+
+        return base.MeasureOverride(availableSize);
     }
 }

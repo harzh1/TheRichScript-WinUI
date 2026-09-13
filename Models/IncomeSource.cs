@@ -21,6 +21,7 @@ public class IncomeSource
     public bool IsFixed { get; set; } = true;
 
     [JsonPropertyName("expectedAmount")]
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public double? ExpectedAmount { get; set; }
 
     [JsonPropertyName("frequency")]
@@ -42,6 +43,7 @@ public class IncomeSource
     public bool IsActive { get; set; } = true;
 
     [JsonPropertyName("totalReceived")]
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public double TotalReceived { get; set; }
 
     [JsonPropertyName("transactionCount")]
@@ -74,22 +76,18 @@ public class IncomeSource
     };
 
     [JsonIgnore]
-    public string TypeBadgeBackground => Type == "PASSIVE" ? "#1A6366F1" : "#1A10B981";
-
-    [JsonIgnore]
-    public string TypeBadgeForeground => Type == "PASSIVE" ? "#6366F1" : "#10B981";
-
-    [JsonIgnore]
     public string TypeIconGlyph => Type == "PASSIVE" ? "\uE8D4" : "\uEAFC";
 
     [JsonIgnore]
-    public string TypeIconBackground => Type == "PASSIVE" ? "#1A6366F1" : "#1A10B981";
-
-    [JsonIgnore]
-    public string TypeIconForeground => Type == "PASSIVE" ? "#6366F1" : "#10B981";
-
-    [JsonIgnore]
     public bool HasIcon => !string.IsNullOrWhiteSpace(IconUrl);
+
+    [JsonIgnore]
+    public string LastReceivedDisplay => LastReceivedDate.HasValue
+        ? LastReceivedDate.Value.ToString("dd MMM yyyy")
+        : "No logs yet";
+
+    [JsonIgnore]
+    public bool HasExpectedAmount => ExpectedAmount.HasValue && ExpectedAmount.Value > 0.001;
 }
 
 public class CreateIncomeSourceRequest

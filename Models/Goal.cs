@@ -1,31 +1,104 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
+using TheRichScript_WinUI.Services;
 
 namespace TheRichScript_WinUI.Models;
 
-public class Goal
+public class Goal : INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
     [JsonPropertyName("id")]
     public string Id { get; set; } = string.Empty;
 
     [JsonPropertyName("userId")]
     public string UserId { get; set; } = string.Empty;
 
+    private string _name = string.Empty;
     [JsonPropertyName("name")]
-    public string Name { get; set; } = string.Empty;
+    public string Name
+    {
+        get => _name;
+        set
+        {
+            if (_name != value)
+            {
+                _name = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
+    private double _targetAmount;
     [JsonPropertyName("targetAmount")]
-    public double TargetAmount { get; set; }
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+    public double TargetAmount
+    {
+        get => _targetAmount;
+        set
+        {
+            if (_targetAmount != value)
+            {
+                _targetAmount = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ProgressPercentage));
+                OnPropertyChanged(nameof(RemainingAmount));
+                OnPropertyChanged(nameof(IsCompleted));
+                OnPropertyChanged(nameof(FormattedTargetAmount));
+                OnPropertyChanged(nameof(FormattedProgress));
+            }
+        }
+    }
 
+    private double _currentAmount;
     [JsonPropertyName("currentAmount")]
-    public double CurrentAmount { get; set; }
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+    public double CurrentAmount
+    {
+        get => _currentAmount;
+        set
+        {
+            if (_currentAmount != value)
+            {
+                _currentAmount = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ProgressPercentage));
+                OnPropertyChanged(nameof(RemainingAmount));
+                OnPropertyChanged(nameof(IsCompleted));
+                OnPropertyChanged(nameof(FormattedCurrentAmount));
+                OnPropertyChanged(nameof(FormattedProgress));
+            }
+        }
+    }
 
     [JsonPropertyName("expectedDate")]
     public DateTime ExpectedDate { get; set; }
 
+    private bool _isPinned;
     [JsonPropertyName("isPinned")]
-    public bool IsPinned { get; set; }
+    public bool IsPinned
+    {
+        get => _isPinned;
+        set
+        {
+            if (_isPinned != value)
+            {
+                _isPinned = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     [JsonPropertyName("recurringAmount")]
     public double? RecurringAmount { get; set; }
@@ -61,7 +134,33 @@ public class Goal
     public string? PrimaryImageUrl => ImageUrls.Count > 0 ? ImageUrls[0] : null;
 
     [JsonIgnore]
-    public string FormattedProgress => $"{CurrentAmount:N0} / {TargetAmount:N0} ({ProgressPercentage:F1}%)";
+    public string CurrencySymbol => CountryCurrencyData.GetCurrencySymbol(Currency);
+
+    [JsonIgnore]
+    public string FormattedCurrentAmount => $"{CurrencySymbol}{CurrentAmount:N2}";
+
+    [JsonIgnore]
+    public string FormattedTargetAmount => $"{CurrencySymbol}{TargetAmount:N2}";
+
+    [JsonIgnore]
+    public string FormattedProgress => $"{CurrencySymbol}{CurrentAmount:N0} / {CurrencySymbol}{TargetAmount:N0} ({ProgressPercentage:F1}%)";
+
+    [JsonIgnore]
+    public double BaseTargetAmount { get; set; }
+
+    [JsonIgnore]
+    public double BaseCurrentAmount { get; set; }
+
+    [JsonIgnore]
+    public string? BaseCurrency { get; set; }
+
+    [JsonIgnore]
+    public string FormattedBaseProgress => $"≈ {CountryCurrencyData.GetCurrencySymbol(BaseCurrency)}{BaseCurrentAmount:N0} / {CountryCurrencyData.GetCurrencySymbol(BaseCurrency)}{BaseTargetAmount:N0}";
+
+    [JsonIgnore]
+    public bool ShowBaseValue => !string.IsNullOrWhiteSpace(BaseCurrency) &&
+                                 !string.IsNullOrWhiteSpace(Currency) &&
+                                 !string.Equals(Currency, BaseCurrency, StringComparison.OrdinalIgnoreCase);
 }
 
 public class CreateGoalRequest
@@ -69,6 +168,7 @@ public class CreateGoalRequest
     public string Name { get; set; } = string.Empty;
     public double TargetAmount { get; set; }
     public double InitialDeposit { get; set; }
+    public string? Currency { get; set; }
     public string? AssetId { get; set; }
     public DateTime ExpectedDate { get; set; } = DateTime.Now.AddMonths(6);
     public double? RecurringAmount { get; set; }
@@ -85,6 +185,9 @@ public class UpdateGoalRequest
 
     [JsonPropertyName("targetAmount")]
     public double? TargetAmount { get; set; }
+
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
 
     [JsonPropertyName("expectedDate")]
     public DateTime? ExpectedDate { get; set; }
@@ -103,6 +206,9 @@ public class UpdateGoalRequest
 
     [JsonPropertyName("targetAssetId")]
     public string? TargetAssetId { get; set; }
+
+    [JsonPropertyName("imageUrls")]
+    public List<string>? ImageUrls { get; set; }
 }
 
 public class AddGoalFundsRequest
@@ -112,6 +218,12 @@ public class AddGoalFundsRequest
 
     [JsonPropertyName("assetId")]
     public string AssetId { get; set; } = string.Empty;
+
+    [JsonPropertyName("destinationAmount")]
+    public double? DestinationAmount { get; set; }
+
+    [JsonPropertyName("exchangeRate")]
+    public double? ExchangeRate { get; set; }
 }
 
 public class DeleteGoalRequest

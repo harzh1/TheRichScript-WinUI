@@ -25,6 +25,18 @@ public class User
     [JsonPropertyName("avatarUrl")]
     public string? AvatarUrl { get; set; }
 
+    [JsonPropertyName("isActive")]
+    public bool IsActive { get; set; } = true;
+
+    [JsonPropertyName("lastLoginAt")]
+    public DateTime? LastLoginAt { get; set; }
+
+    [JsonPropertyName("emailVerifiedAt")]
+    public DateTime? EmailVerifiedAt { get; set; }
+
+    [JsonPropertyName("deletedAt")]
+    public DateTime? DeletedAt { get; set; }
+
     [JsonIgnore]
     public string FullName
     {

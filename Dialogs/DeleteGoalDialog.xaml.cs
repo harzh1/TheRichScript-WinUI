@@ -21,13 +21,16 @@ public sealed partial class DeleteGoalDialog : ContentDialog
         RequestedTheme = (App.MainWindowInstance?.Content as FrameworkElement)?.RequestedTheme ?? ElementTheme.Default;
         _goal = goal;
 
-        var symbol = "₹";
-        try
+        var symbol = !string.IsNullOrWhiteSpace(goal.Currency) ? goal.CurrencySymbol : "₹";
+        if (string.IsNullOrWhiteSpace(goal.Currency))
         {
-            var settings = App.GetService<ISettingsService>();
-            if (settings?.Settings?.CurrencySymbol != null) symbol = settings.Settings.CurrencySymbol;
+            try
+            {
+                var settings = App.GetService<ISettingsService>();
+                if (settings?.Settings?.CurrencySymbol != null) symbol = settings.Settings.CurrencySymbol;
+            }
+            catch { }
         }
-        catch { }
 
         _hasBalance = goal.CurrentAmount > 0;
 

@@ -18,6 +18,7 @@ public partial class IncomeSourcesViewModel : ObservableObject
     private readonly ISettingsService _settingsService;
     private readonly IDataCacheService _dataCacheService;
     private readonly IBusyIndicatorService _busyIndicatorService;
+    private readonly IFxRateService _fxRateService;
 
     private List<IncomeSource> _allSources = new();
 
@@ -70,7 +71,8 @@ public partial class IncomeSourcesViewModel : ObservableObject
         IDialogService dialogService,
         ISettingsService settingsService,
         IDataCacheService dataCacheService,
-        IBusyIndicatorService busyIndicatorService)
+        IBusyIndicatorService busyIndicatorService,
+        IFxRateService fxRateService)
     {
         _incomeSourceService = incomeSourceService;
         _assetService = assetService;
@@ -78,9 +80,14 @@ public partial class IncomeSourcesViewModel : ObservableObject
         _settingsService = settingsService;
         _dataCacheService = dataCacheService;
         _busyIndicatorService = busyIndicatorService;
+        _fxRateService = fxRateService;
 
         CurrencySymbol = _settingsService.Settings.CurrencySymbol;
-        _settingsService.CurrencyChanged += _ => CurrencySymbol = _settingsService.Settings.CurrencySymbol;
+        _settingsService.CurrencyChanged += _ =>
+        {
+            CurrencySymbol = _settingsService.Settings.CurrencySymbol;
+            ApplyCachedData();
+        };
         _dataCacheService.DataUpdated += OnDataUpdated;
     }
 
@@ -105,7 +112,10 @@ public partial class IncomeSourcesViewModel : ObservableObject
         {
             _allSources = new List<IncomeSource>(sources);
 
-            // Compute summary metrics directly from cached items
+            var baseCurrency = _settingsService.Settings.PreferredCurrency ?? "INR";
+            var assetCurrencyMap = AvailableAssets?.ToDictionary(a => a.Id, a => a.Currency) ?? new();
+
+            // Compute summary metrics directly from cached items in base currency
             double activeSum = 0;
             double passiveSum = 0;
             int activeCount = 0;
@@ -123,14 +133,22 @@ public partial class IncomeSourcesViewModel : ObservableObject
                     _ => expected
                 };
 
+                string sourceCurrency = baseCurrency;
+                if (!string.IsNullOrEmpty(s.DefaultAssetId) && assetCurrencyMap.TryGetValue(s.DefaultAssetId, out var aCurr) && !string.IsNullOrWhiteSpace(aCurr))
+                {
+                    sourceCurrency = aCurr;
+                }
+
+                var convertedMonthly = _fxRateService.ConvertAmount(monthly, sourceCurrency, baseCurrency);
+
                 if (isPassive)
                 {
-                    passiveSum += monthly;
+                    passiveSum += convertedMonthly;
                     passiveCount++;
                 }
                 else
                 {
-                    activeSum += monthly;
+                    activeSum += convertedMonthly;
                     activeCount++;
                 }
             }

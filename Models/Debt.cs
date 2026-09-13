@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json.Serialization;
+using TheRichScript_WinUI.Services;
 
 namespace TheRichScript_WinUI.Models;
 
@@ -20,10 +21,15 @@ public class Debt
     [JsonPropertyName("personName")]
     public string PersonName { get; set; } = string.Empty;
 
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
     [JsonPropertyName("amount")]
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public double Amount { get; set; }
 
     [JsonPropertyName("settledAmount")]
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public double SettledAmount { get; set; }
 
     [JsonPropertyName("dueDate")]
@@ -34,6 +40,18 @@ public class Debt
 
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }
+
+    [JsonPropertyName("contactId")]
+    public string? ContactId { get; set; }
+
+    [JsonPropertyName("notes")]
+    public string? Notes { get; set; }
+
+    [JsonPropertyName("updatedAt")]
+    public DateTime? UpdatedAt { get; set; }
+
+    [JsonPropertyName("deletedAt")]
+    public DateTime? DeletedAt { get; set; }
 
     [JsonIgnore]
     public bool IsLent => string.Equals(Type, "LENT", StringComparison.OrdinalIgnoreCase);
@@ -54,23 +72,36 @@ public class Debt
     public double SettlementPercentage => Amount > 0 ? Math.Min(100.0, (SettledAmount / Amount) * 100.0) : 0.0;
 
     [JsonIgnore]
-    public string FormattedSettlement
-    {
-        get
-        {
-            var symbol = "₹";
-            try
-            {
-                var settings = App.GetService<TheRichScript_WinUI.Services.ISettingsService>();
-                if (settings?.Settings?.CurrencySymbol != null)
-                {
-                    symbol = settings.Settings.CurrencySymbol;
-                }
-            }
-            catch { }
-            return $"{symbol} {SettledAmount:N2} of {symbol} {Amount:N2} settled";
-        }
-    }
+    public string CurrencySymbol => CountryCurrencyData.GetCurrencySymbol(Currency);
+
+    [JsonIgnore]
+    public string FormattedAmount => $"{CurrencySymbol}{Amount:N2}";
+
+    [JsonIgnore]
+    public string FormattedSettledAmount => $"{CurrencySymbol}{SettledAmount:N2}";
+
+    [JsonIgnore]
+    public string FormattedRemaining => $"{CurrencySymbol}{RemainingAmount:N2}";
+
+    [JsonIgnore]
+    public double BaseAmount { get; set; }
+
+    [JsonIgnore]
+    public double BaseRemainingAmount { get; set; }
+
+    [JsonIgnore]
+    public string? BaseCurrency { get; set; }
+
+    [JsonIgnore]
+    public string FormattedBaseRemaining => $"≈ {CountryCurrencyData.GetCurrencySymbol(BaseCurrency)}{BaseRemainingAmount:N2}";
+
+    [JsonIgnore]
+    public bool ShowBaseValue => !string.IsNullOrWhiteSpace(BaseCurrency) &&
+                                 !string.IsNullOrWhiteSpace(Currency) &&
+                                 !string.Equals(Currency, BaseCurrency, StringComparison.OrdinalIgnoreCase);
+
+    [JsonIgnore]
+    public string FormattedSettlement => $"{CurrencySymbol}{SettledAmount:N2} of {CurrencySymbol}{Amount:N2} settled";
 
     [JsonIgnore]
     public string TypeGlyph => IsLent ? "\uE896" : "\uE898";
@@ -96,8 +127,20 @@ public class CreateDebtRequest
     [JsonPropertyName("amount")]
     public double Amount { get; set; }
 
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
+    [JsonPropertyName("exchangeRate")]
+    public double? ExchangeRate { get; set; }
+
     [JsonPropertyName("dueDate")]
     public DateTime? DueDate { get; set; }
+
+    [JsonPropertyName("contactId")]
+    public string? ContactId { get; set; }
+
+    [JsonPropertyName("notes")]
+    public string? Notes { get; set; }
 }
 
 public class UpdateDebtRequest
@@ -114,8 +157,20 @@ public class UpdateDebtRequest
     [JsonPropertyName("amount")]
     public double? Amount { get; set; }
 
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
+    [JsonPropertyName("exchangeRate")]
+    public double? ExchangeRate { get; set; }
+
     [JsonPropertyName("dueDate")]
     public DateTime? DueDate { get; set; }
+
+    [JsonPropertyName("contactId")]
+    public string? ContactId { get; set; }
+
+    [JsonPropertyName("notes")]
+    public string? Notes { get; set; }
 }
 
 public class SettleDebtRequest
@@ -125,4 +180,10 @@ public class SettleDebtRequest
 
     [JsonPropertyName("assetId")]
     public string AssetId { get; set; } = string.Empty;
+
+    [JsonPropertyName("settleAssetAmount")]
+    public double? SettleAssetAmount { get; set; }
+
+    [JsonPropertyName("exchangeRate")]
+    public double? ExchangeRate { get; set; }
 }

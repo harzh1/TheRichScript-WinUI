@@ -63,7 +63,7 @@ public sealed partial class AssetsPage : Page
 
     private async void EditAsset_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is Asset asset)
+        if ((sender as FrameworkElement)?.Tag is Asset asset)
         {
             var dataCache = App.GetService<IDataCacheService>();
             var assetService = App.GetService<IAssetService>();
@@ -87,7 +87,10 @@ public sealed partial class AssetsPage : Page
                         Name = dialog.Result.Name,
                         Type = dialog.Result.Type,
                         Value = dialog.Result.Value,
-                        Quantity = dialog.Result.Quantity
+                        Quantity = dialog.Result.Quantity,
+                        Currency = !string.IsNullOrWhiteSpace(dialog.Result.Currency)
+                            ? dialog.Result.Currency.ToUpperInvariant()
+                            : (!string.IsNullOrWhiteSpace(asset.Currency) ? asset.Currency.ToUpperInvariant() : "INR")
                     };
 
                     var updateResp = await assetService.UpdateAssetAsync(asset.Id, updateReq);
@@ -107,7 +110,7 @@ public sealed partial class AssetsPage : Page
 
     private async void DeleteAsset_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is Asset asset)
+        if ((sender as FrameworkElement)?.Tag is Asset asset)
         {
             await ViewModel.DeleteAssetCommand.ExecuteAsync(asset);
         }

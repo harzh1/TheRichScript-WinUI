@@ -52,7 +52,15 @@ public sealed partial class BudgetsPlansPage : Page
                 var createResp = await planService.CreatePlanAsync(dialog.Result);
                 if (createResp.Success)
                 {
-                    dataCache?.Invalidate(DataCacheType.Plans);
+                    if (dialog.Result.NextDueDate.HasValue && dialog.Result.NextDueDate.Value.Date <= DateTime.Today)
+                    {
+                        await planService.TriggerRecurringPlansAsync();
+                        dataCache?.Invalidate(DataCacheType.Plans | DataCacheType.Assets | DataCacheType.Transactions | DataCacheType.Analytics);
+                    }
+                    else
+                    {
+                        dataCache?.Invalidate(DataCacheType.Plans);
+                    }
                     await ViewModel.LoadPlansAsync();
                 }
                 else
@@ -86,7 +94,15 @@ public sealed partial class BudgetsPlansPage : Page
                 var createResp = await planService.CreatePlanAsync(dialog.Result);
                 if (createResp.Success)
                 {
-                    dataCache?.Invalidate(DataCacheType.Plans);
+                    if (dialog.Result.NextDueDate.HasValue && dialog.Result.NextDueDate.Value.Date <= DateTime.Today)
+                    {
+                        await planService.TriggerRecurringPlansAsync();
+                        dataCache?.Invalidate(DataCacheType.Plans | DataCacheType.Assets | DataCacheType.Transactions | DataCacheType.Analytics);
+                    }
+                    else
+                    {
+                        dataCache?.Invalidate(DataCacheType.Plans);
+                    }
                     await ViewModel.LoadPlansAsync();
                 }
                 else
@@ -133,7 +149,7 @@ public sealed partial class BudgetsPlansPage : Page
 
     private async void EditSubscription_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is PlannedExpense plan)
+        if ((sender as FrameworkElement)?.Tag is PlannedExpense plan)
         {
             var dataCache = App.GetService<IDataCacheService>();
             var planService = App.GetService<IPlanService>();
@@ -168,7 +184,15 @@ public sealed partial class BudgetsPlansPage : Page
                     var updateResp = await planService.UpdatePlanAsync(plan.Id, updateReq);
                     if (updateResp.Success)
                     {
-                        dataCache?.Invalidate(DataCacheType.Plans);
+                        if (updateReq.NextDueDate.HasValue && updateReq.NextDueDate.Value.Date <= DateTime.Today)
+                        {
+                            await planService.TriggerRecurringPlansAsync();
+                            dataCache?.Invalidate(DataCacheType.Plans | DataCacheType.Assets | DataCacheType.Transactions | DataCacheType.Analytics);
+                        }
+                        else
+                        {
+                            dataCache?.Invalidate(DataCacheType.Plans);
+                        }
                         await ViewModel.LoadPlansAsync();
                     }
                     else
@@ -182,7 +206,7 @@ public sealed partial class BudgetsPlansPage : Page
 
     private async void EditRecurringPlan_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is PlannedExpense plan)
+        if ((sender as FrameworkElement)?.Tag is PlannedExpense plan)
         {
             var dataCache = App.GetService<IDataCacheService>();
             var planService = App.GetService<IPlanService>();
@@ -217,7 +241,15 @@ public sealed partial class BudgetsPlansPage : Page
                     var updateResp = await planService.UpdatePlanAsync(plan.Id, updateReq);
                     if (updateResp.Success)
                     {
-                        dataCache?.Invalidate(DataCacheType.Plans);
+                        if (updateReq.NextDueDate.HasValue && updateReq.NextDueDate.Value.Date <= DateTime.Today)
+                        {
+                            await planService.TriggerRecurringPlansAsync();
+                            dataCache?.Invalidate(DataCacheType.Plans | DataCacheType.Assets | DataCacheType.Transactions | DataCacheType.Analytics);
+                        }
+                        else
+                        {
+                            dataCache?.Invalidate(DataCacheType.Plans);
+                        }
                         await ViewModel.LoadPlansAsync();
                     }
                     else
@@ -231,7 +263,7 @@ public sealed partial class BudgetsPlansPage : Page
 
     private async void EditTemplate_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is PlannedExpense plan)
+        if ((sender as FrameworkElement)?.Tag is PlannedExpense plan)
         {
             var dataCache = App.GetService<IDataCacheService>();
             var planService = App.GetService<IPlanService>();
@@ -280,9 +312,32 @@ public sealed partial class BudgetsPlansPage : Page
 
     private async void DeletePlan_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is PlannedExpense plan)
+        if ((sender as FrameworkElement)?.Tag is PlannedExpense plan)
         {
             await ViewModel.DeletePlanCommand.ExecuteAsync(plan);
+        }
+    }
+
+    private async void ProcessDueTransfers_Click(object sender, RoutedEventArgs e)
+    {
+        var planService = App.GetService<IPlanService>();
+        var dialogService = App.GetService<IDialogService>();
+        var busy = App.GetService<IBusyIndicatorService>();
+        var dataCache = App.GetService<IDataCacheService>();
+
+        using (busy?.BeginBusy("Processing due recurring plans & subscriptions..."))
+        {
+            var resp = await planService.TriggerRecurringPlansAsync();
+            if (resp.Success)
+            {
+                dataCache?.Invalidate(DataCacheType.Plans | DataCacheType.Assets | DataCacheType.Transactions | DataCacheType.Analytics);
+                await ViewModel.LoadPlansAsync();
+                await dialogService.ShowMessageAsync("Sync Complete", "Due recurring transfers and subscriptions have been processed successfully.");
+            }
+            else
+            {
+                await dialogService.ShowErrorAsync(resp.Error ?? "Failed to process recurring plans.");
+            }
         }
     }
 }

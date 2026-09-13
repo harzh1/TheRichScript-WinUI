@@ -59,7 +59,7 @@ public sealed partial class CategoriesPage : Page
 
     private async void EditCategory_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is Category category)
+        if ((sender as FrameworkElement)?.Tag is Category category)
         {
             var dataCache = App.GetService<IDataCacheService>();
             var categoryService = App.GetService<ICategoryService>();
@@ -100,7 +100,7 @@ public sealed partial class CategoriesPage : Page
 
     private async void DeleteCategory_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is Category category)
+        if ((sender as FrameworkElement)?.Tag is Category category)
         {
             await ViewModel.DeleteCategoryCommand.ExecuteAsync(category);
         }

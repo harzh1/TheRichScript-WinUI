@@ -9,6 +9,9 @@
     DefaultButton="Primary">
 
     <StackPanel Spacing="16" Width="400">
+        <!-- Validation Error Bar -->
+        <InfoBar x:Name="DialogErrorBar" Severity="Error" IsOpen="False" IsClosable="True" />
+
         <!-- Type: Lent vs Borrowed -->
         <StackPanel Spacing="6">
             <TextBlock Text="Debt Classification" Style="{StaticResource StatLabelTextStyle}" />
@@ -21,12 +24,12 @@
         <!-- Person Name -->
         <StackPanel Spacing="6">
             <TextBlock Text="Person / Contact Name" Style="{StaticResource StatLabelTextStyle}" />
-            <TextBox x:Name="PersonBox" PlaceholderText="e.g. John Doe, Sarah, Landlord" />
+            <AutoSuggestBox x:Name="PersonBox" PlaceholderText="e.g. John Doe, Sarah, Landlord" />
         </StackPanel>
 
         <!-- Amount -->
         <StackPanel Spacing="6">
-            <TextBlock Text="Amount" Style="{StaticResource StatLabelTextStyle}" />
+            <TextBlock x:Name="AmountLabel" Text="Amount" Style="{StaticResource StatLabelTextStyle}" />
             <NumberBox x:Name="AmountNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" PlaceholderText="0.00" />
         </StackPanel>
 
@@ -36,10 +39,42 @@
             <ComboBox x:Name="AssetComboBox" HorizontalAlignment="Stretch" DisplayMemberPath="DisplayNameWithBalance" SelectedValuePath="Id" />
         </StackPanel>
 
+        <!-- Currency Selector -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Debt Currency" Style="{StaticResource StatLabelTextStyle}" />
+            <ComboBox x:Name="CurrencyComboBox" DisplayMemberPath="DisplayName" SelectedValuePath="Code" HorizontalAlignment="Stretch" PlaceholderText="Select Currency..." />
+        </StackPanel>
+
+        <!-- Cross-Currency FX Panel (Visible when debt currency != asset currency) -->
+        <Border x:Name="ExchangeRatePanel" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="12" Visibility="Collapsed">
+            <StackPanel Spacing="10">
+                <TextBlock x:Name="FxExplanationText" Text="Cross-Currency Debt: Leave blank to use live European Central Bank rate, or enter custom rate/account impact." TextWrapping="Wrap" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                <!-- Account Impact Amount -->
+                <StackPanel Spacing="4">
+                    <TextBlock x:Name="AssetImpactLabel" Text="Account Amount Debited/Credited" Style="{StaticResource StatLabelTextStyle}" />
+                    <NumberBox x:Name="AssetImpactNumberBox" Minimum="0" Value="NaN" SpinButtonPlacementMode="Inline" PlaceholderText="Optional account amount..." />
+                </StackPanel>
+
+                <!-- Exchange Rate -->
+                <StackPanel Spacing="4">
+                    <TextBlock x:Name="ExchangeRateLabel" Text="Exchange Rate" Style="{StaticResource StatLabelTextStyle}" />
+                    <NumberBox x:Name="ExchangeRateNumberBox" Minimum="0" Value="NaN" SpinButtonPlacementMode="Inline" PlaceholderText="Optional rate (e.g. 83.50)..." />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
         <!-- Due Date -->
         <StackPanel Spacing="6">
             <TextBlock Text="Expected Due Date (Optional)" Style="{StaticResource StatLabelTextStyle}" />
             <CalendarDatePicker x:Name="DatePicker" HorizontalAlignment="Stretch" />
+        </StackPanel>
+
+        <!-- Notes (Optional) -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Notes (Optional)" Style="{StaticResource StatLabelTextStyle}" />
+            <TextBox x:Name="NotesBox" PlaceholderText="e.g. For house rent, emergency loan, etc."
+                     AcceptsReturn="True" TextWrapping="Wrap" MaxHeight="80" />
         </StackPanel>
     </StackPanel>
 </ContentDialog>

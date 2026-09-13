@@ -52,6 +52,9 @@ public partial class App : Application
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<IDataCacheService, DataCacheService>();
         services.AddSingleton<IBusyIndicatorService, BusyIndicatorService>();
+        services.AddSingleton<IContactService, ContactService>();
+        services.AddSingleton<INotificationService, NotificationService>();
+        services.AddSingleton<IFxRateService, FxRateService>();
 
         // ViewModels
         services.AddSingleton<ShellViewModel>();

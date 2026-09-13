@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using TheRichScript_WinUI.Services;
 
 namespace TheRichScript_WinUI.Models;
 
@@ -21,10 +22,15 @@ public class Asset
     [JsonPropertyName("type")]
     public string Type { get; set; } = string.Empty;
 
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
     [JsonPropertyName("value")]
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public double Value { get; set; }
 
     [JsonPropertyName("quantity")]
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public double? Quantity { get; set; }
 
     [JsonPropertyName("createdAt")]
@@ -33,24 +39,31 @@ public class Asset
     [JsonPropertyName("updatedAt")]
     public DateTime UpdatedAt { get; set; }
 
+    [JsonPropertyName("deletedAt")]
+    public DateTime? DeletedAt { get; set; }
+
     [JsonIgnore]
-    public string DisplayNameWithBalance
-    {
-        get
-        {
-            var symbol = "₹";
-            try
-            {
-                var settings = App.GetService<TheRichScript_WinUI.Services.ISettingsService>();
-                if (settings?.Settings?.CurrencySymbol != null)
-                {
-                    symbol = settings.Settings.CurrencySymbol;
-                }
-            }
-            catch { }
-            return $"{Name} ({symbol} {Value:N2})";
-        }
-    }
+    public string CurrencySymbol => CountryCurrencyData.GetCurrencySymbol(Currency);
+
+    [JsonIgnore]
+    public string FormattedValue => $"{CurrencySymbol}{Value:N2}";
+
+    [JsonIgnore]
+    public string DisplayNameWithBalance => $"{Name} ({CurrencySymbol}{Value:N2})";
+
+    [JsonIgnore]
+    public double BaseValue { get; set; }
+
+    [JsonIgnore]
+    public string? BaseCurrency { get; set; }
+
+    [JsonIgnore]
+    public string FormattedBaseValue => $"≈ {CountryCurrencyData.GetCurrencySymbol(BaseCurrency)}{BaseValue:N2}";
+
+    [JsonIgnore]
+    public bool ShowBaseValue => !string.IsNullOrWhiteSpace(BaseCurrency) &&
+                                 !string.IsNullOrWhiteSpace(Currency) &&
+                                 !string.Equals(Currency, BaseCurrency, StringComparison.OrdinalIgnoreCase);
 
     [JsonIgnore]
     public double PercentageOfTotal { get; set; }
@@ -86,6 +99,9 @@ public class CreateAssetRequest
 
     [JsonPropertyName("quantity")]
     public double? Quantity { get; set; }
+
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
 }
 
 public class UpdateAssetRequest
@@ -101,6 +117,9 @@ public class UpdateAssetRequest
 
     [JsonPropertyName("quantity")]
     public double? Quantity { get; set; }
+
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
 }
 
 public class TransferAssetRequest
@@ -114,12 +133,15 @@ public class TransferAssetRequest
     [JsonPropertyName("amount")]
     public double Amount { get; set; }
 
+    [JsonPropertyName("destinationAmount")]
+    public double? DestinationAmount { get; set; }
+
+    [JsonPropertyName("exchangeRate")]
+    public double? ExchangeRate { get; set; }
+
     [JsonPropertyName("date")]
     public DateTime Date { get; set; } = DateTime.Now;
 
     [JsonPropertyName("description")]
     public string Description { get; set; } = string.Empty;
-
-    [JsonPropertyName("category")]
-    public string Category { get; set; } = "TRANSFER";
 }

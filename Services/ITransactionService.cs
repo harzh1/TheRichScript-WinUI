@@ -80,10 +80,34 @@ public class TransactionService : ITransactionService
                 { "assetId", request.AssetId },
                 { "type", request.Type.ToUpperInvariant() },
                 { "amount", request.Amount.ToString(CultureInfo.InvariantCulture) },
-                { "category", request.Category.ToUpperInvariant() },
-                { "description", request.Description },
+                { "description", request.Description ?? string.Empty },
                 { "date", request.Date.ToString("o") }
             };
+
+            if (!string.IsNullOrWhiteSpace(request.ToAssetId))
+            {
+                stringFields["toAssetId"] = request.ToAssetId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Currency))
+            {
+                stringFields["currency"] = request.Currency.ToUpperInvariant();
+            }
+
+            if (request.ExchangeRate.HasValue)
+            {
+                stringFields["exchangeRate"] = request.ExchangeRate.Value.ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (request.TargetAmount.HasValue)
+            {
+                stringFields["targetAmount"] = request.TargetAmount.Value.ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Category))
+            {
+                stringFields["category"] = request.Category.ToUpperInvariant();
+            }
 
             if (!string.IsNullOrWhiteSpace(request.IncomeSourceId))
             {
@@ -106,9 +130,13 @@ public class TransactionService : ITransactionService
             var body = new
             {
                 assetId = request.AssetId,
+                toAssetId = request.ToAssetId,
                 type = request.Type.ToUpperInvariant(),
                 amount = request.Amount,
-                category = request.Category.ToUpperInvariant(),
+                currency = request.Currency?.ToUpperInvariant(),
+                exchangeRate = request.ExchangeRate,
+                targetAmount = request.TargetAmount,
+                category = request.Category?.ToUpperInvariant(),
                 incomeSourceId = request.IncomeSourceId,
                 incomeSource = request.IncomeSourceName,
                 description = request.Description,
@@ -128,10 +156,34 @@ public class TransactionService : ITransactionService
                 { "assetId", request.AssetId },
                 { "type", request.Type.ToUpperInvariant() },
                 { "amount", request.Amount.ToString(CultureInfo.InvariantCulture) },
-                { "category", request.Category.ToUpperInvariant() },
-                { "description", request.Description },
+                { "description", request.Description ?? string.Empty },
                 { "date", request.Date.ToString("o") }
             };
+
+            if (!string.IsNullOrWhiteSpace(request.ToAssetId))
+            {
+                stringFields["toAssetId"] = request.ToAssetId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Currency))
+            {
+                stringFields["currency"] = request.Currency.ToUpperInvariant();
+            }
+
+            if (request.ExchangeRate.HasValue)
+            {
+                stringFields["exchangeRate"] = request.ExchangeRate.Value.ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (request.TargetAmount.HasValue)
+            {
+                stringFields["targetAmount"] = request.TargetAmount.Value.ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Category))
+            {
+                stringFields["category"] = request.Category.ToUpperInvariant();
+            }
 
             if (!string.IsNullOrWhiteSpace(request.IncomeSourceId))
             {
@@ -154,9 +206,13 @@ public class TransactionService : ITransactionService
             var body = new
             {
                 assetId = request.AssetId,
+                toAssetId = request.ToAssetId,
                 type = request.Type.ToUpperInvariant(),
                 amount = request.Amount,
-                category = request.Category.ToUpperInvariant(),
+                currency = request.Currency?.ToUpperInvariant(),
+                exchangeRate = request.ExchangeRate,
+                targetAmount = request.TargetAmount,
+                category = request.Category?.ToUpperInvariant(),
                 incomeSourceId = request.IncomeSourceId,
                 incomeSource = request.IncomeSourceName,
                 description = request.Description,

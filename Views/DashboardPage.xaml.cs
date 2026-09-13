@@ -219,7 +219,7 @@ public sealed partial class DashboardPage : Page
     {
         if (_isDialogOpen) return;
 
-        if (sender is Button btn && btn.Tag is PlannedExpense plan)
+        if ((sender as FrameworkElement)?.Tag is PlannedExpense plan)
         {
             _isDialogOpen = true;
             try
@@ -274,7 +274,7 @@ public sealed partial class DashboardPage : Page
 
     private async void DeleteQuickAddTemplate_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is PlannedExpense plan)
+        if ((sender as FrameworkElement)?.Tag is PlannedExpense plan)
         {
             await ViewModel.DeleteQuickAddTemplateAsync(plan);
         }

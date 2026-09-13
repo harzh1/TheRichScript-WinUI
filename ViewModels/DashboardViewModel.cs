@@ -21,6 +21,7 @@ public partial class DashboardViewModel : ObservableObject
     private readonly ISettingsService _settingsService;
     private readonly IDataCacheService _dataCacheService;
     private readonly IBusyIndicatorService _busyIndicatorService;
+    private readonly IFxRateService _fxRateService;
 
     [ObservableProperty]
     private bool isLoading;
@@ -56,7 +57,8 @@ public partial class DashboardViewModel : ObservableObject
         INavigationService navigationService,
         ISettingsService settingsService,
         IDataCacheService dataCacheService,
-        IBusyIndicatorService busyIndicatorService)
+        IBusyIndicatorService busyIndicatorService,
+        IFxRateService fxRateService)
     {
         _analyticsService = analyticsService;
         _transactionService = transactionService;
@@ -68,6 +70,7 @@ public partial class DashboardViewModel : ObservableObject
         _settingsService = settingsService;
         _dataCacheService = dataCacheService;
         _busyIndicatorService = busyIndicatorService;
+        _fxRateService = fxRateService;
 
         CurrencySymbol = _settingsService.Settings.CurrencySymbol;
         _settingsService.CurrencyChanged += _ => CurrencySymbol = _settingsService.Settings.CurrencySymbol;
@@ -92,6 +95,10 @@ public partial class DashboardViewModel : ObservableObject
         if (_dataCacheService.CachedAnalytics != null)
         {
             Analytics = _dataCacheService.CachedAnalytics;
+            if (!string.IsNullOrWhiteSpace(Analytics.Currency))
+            {
+                CurrencySymbol = CountryCurrencyData.GetCurrencySymbol(Analytics.Currency);
+            }
 
             TopExpenseCategories.Clear();
             if (Analytics.ExpensesByCategory != null)
@@ -116,6 +123,21 @@ public partial class DashboardViewModel : ObservableObject
                     }
                 }
             }
+        }
+        else if (Analytics == null && _dataCacheService.CachedAssets != null)
+        {
+            var baseCurrency = _settingsService.Settings.PreferredCurrency ?? "INR";
+            double total = 0;
+            foreach (var a in _dataCacheService.CachedAssets)
+            {
+                var aCurr = string.IsNullOrWhiteSpace(a.Currency) ? baseCurrency : a.Currency;
+                total += _fxRateService.ConvertAmount(a.Value, aCurr, baseCurrency);
+            }
+            Analytics = new AnalyticsSummary
+            {
+                Currency = baseCurrency,
+                TotalPortfolioValue = total
+            };
         }
 
         // 2. Available Assets - sync in-place without destructive Clear()
@@ -272,7 +294,7 @@ public partial class DashboardViewModel : ObservableObject
                     Description = template.Name,
                     Amount = template.Amount,
                     Type = template.TxType ?? "EXPENSE",
-                    Category = template.Category,
+                    Category = template.Category?.ToUpperInvariant(),
                     AssetId = template.AssetId ?? string.Empty,
                     Date = DateTime.Now
                 };

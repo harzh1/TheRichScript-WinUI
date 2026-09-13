@@ -36,6 +36,7 @@ public partial class AssetsViewModel : ObservableObject
     private readonly ISettingsService _settingsService;
     private readonly IDataCacheService _dataCacheService;
     private readonly IBusyIndicatorService _busyIndicatorService;
+    private readonly IFxRateService _fxRateService;
 
     private List<Asset> _rawAssets = new();
 
@@ -80,16 +81,23 @@ public partial class AssetsViewModel : ObservableObject
         IDialogService dialogService,
         ISettingsService settingsService,
         IDataCacheService dataCacheService,
-        IBusyIndicatorService busyIndicatorService)
+        IBusyIndicatorService busyIndicatorService,
+        IFxRateService fxRateService)
     {
         _assetService = assetService;
         _dialogService = dialogService;
         _settingsService = settingsService;
         _dataCacheService = dataCacheService;
         _busyIndicatorService = busyIndicatorService;
+        _fxRateService = fxRateService;
 
         CurrencySymbol = _settingsService.Settings.CurrencySymbol;
-        _settingsService.CurrencyChanged += _ => CurrencySymbol = _settingsService.Settings.CurrencySymbol;
+        _settingsService.CurrencyChanged += _ =>
+        {
+            CurrencySymbol = _settingsService.Settings.CurrencySymbol;
+            CalculatePortfolioMetrics();
+            ApplyFilters();
+        };
         _dataCacheService.DataUpdated += OnDataUpdated;
     }
 
@@ -120,6 +128,28 @@ public partial class AssetsViewModel : ObservableObject
             _rawAssets = new List<Asset>(assets);
             CalculatePortfolioMetrics();
             ApplyFilters();
+
+            // Asynchronously preload live FX rates for any foreign currency assets
+            var baseCurrency = _settingsService.Settings.PreferredCurrency ?? "INR";
+            var foreignCurrencies = _rawAssets
+                .Select(a => a.Currency)
+                .Where(c => !string.IsNullOrWhiteSpace(c) && !string.Equals(c, baseCurrency, StringComparison.OrdinalIgnoreCase))
+                .Select(c => c!)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (foreignCurrencies.Count > 0)
+            {
+                _ = Task.Run(async () =>
+                {
+                    await _fxRateService.PreloadRatesAsync(foreignCurrencies, baseCurrency);
+                    App.MainWindowInstance?.DispatcherQueue?.TryEnqueue(() =>
+                    {
+                        CalculatePortfolioMetrics();
+                        ApplyFilters();
+                    });
+                });
+            }
         }
     }
 
@@ -162,30 +192,41 @@ public partial class AssetsViewModel : ObservableObject
 
     private void CalculatePortfolioMetrics()
     {
-        double total = _rawAssets.Sum(a => a.Value);
-        TotalPortfolioValue = total;
-        TotalAssetCount = _rawAssets.Count;
-
+        var baseCurrency = _settingsService.Settings.PreferredCurrency ?? "INR";
+        double total = 0;
         double liquid = 0;
         double invested = 0;
 
         foreach (var asset in _rawAssets)
         {
-            asset.PercentageOfTotal = total > 0 ? (asset.Value / total) * 100 : 0;
+            var assetCurr = string.IsNullOrWhiteSpace(asset.Currency) ? baseCurrency : asset.Currency;
+            var convertedVal = _fxRateService.ConvertAmount(asset.Value, assetCurr, baseCurrency);
+
+            asset.BaseValue = convertedVal;
+            asset.BaseCurrency = baseCurrency;
+
+            total += convertedVal;
 
             var t = (asset.Type ?? string.Empty).ToUpperInvariant();
             if (t is "BANK" or "SAVINGS" or "CHECKING" or "CASH" or "LIQUID CASH" or "WALLET")
             {
-                liquid += asset.Value;
+                liquid += convertedVal;
             }
             else
             {
-                invested += asset.Value;
+                invested += convertedVal;
             }
         }
 
+        TotalPortfolioValue = total;
+        TotalAssetCount = _rawAssets.Count;
         LiquidCashValue = liquid;
         InvestedValue = invested;
+
+        foreach (var asset in _rawAssets)
+        {
+            asset.PercentageOfTotal = total > 0 ? (asset.BaseValue / total) * 100 : 0;
+        }
     }
 
     private void ApplyFilters()
@@ -216,17 +257,17 @@ public partial class AssetsViewModel : ObservableObject
         GroupedAssets.Clear();
         var groups = filteredList
             .GroupBy(a => string.IsNullOrWhiteSpace(a.Type) ? "OTHER" : a.Type.ToUpperInvariant())
-            .OrderByDescending(g => g.Sum(a => a.Value));
+            .OrderByDescending(g => g.Sum(a => a.BaseValue));
 
         foreach (var g in groups)
         {
-            double groupSum = g.Sum(a => a.Value);
+            double groupSum = g.Sum(a => a.BaseValue);
             GroupedAssets.Add(new AssetGroup
             {
                 TypeName = g.Key,
                 TotalValue = groupSum,
                 PercentageOfTotal = TotalPortfolioValue > 0 ? (groupSum / TotalPortfolioValue) * 100 : 0,
-                Items = g.OrderByDescending(a => a.Value).ToList()
+                Items = g.OrderByDescending(a => a.BaseValue).ToList()
             });
         }
     }

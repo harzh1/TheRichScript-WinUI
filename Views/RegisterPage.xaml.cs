@@ -21,6 +21,18 @@ public sealed partial class RegisterPage : Page
         ViewModel.Password = PasswordBox.Password;
     }
 
+    private void PasswordBox_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.Enter)
+        {
+            RegisterButton_Click(sender, e);
+            if (ViewModel.RegisterCommand.CanExecute(null))
+            {
+                ViewModel.RegisterCommand.Execute(null);
+            }
+        }
+    }
+
     private void RegisterButton_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.FirstName = FirstNameBox.Text;

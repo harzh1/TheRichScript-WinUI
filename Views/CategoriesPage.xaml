@@ -46,73 +46,42 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Total Categories -->
-                <Border Grid.Column="0" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="TOTAL CATEGORIES" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A6366F1" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE8FD;" FontSize="11" Foreground="#6366F1" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.TotalCategoriesCount, Mode=OneWay}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#6366F1" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 1. Total Categories -->
+                <!-- 1. Total Categories Count -->
+                <controls:KpiCardControl
+                    Grid.Column="0"
+                    Title="Total Categories"
+                    Value="{x:Bind ViewModel.TotalCategoriesCount, Mode=OneWay}"
+                    Subtitle="Expense classification buckets"
+                    Glyph="&#xE8FD;"
+                    ShowActionIcon="False" />
 
-                <!-- Budgeted Categories Count -->
-                <Border Grid.Column="1" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="BUDGETED CATEGORIES" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A38BDF8" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE809;" FontSize="11" Foreground="#38BDF8" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.BudgetedCategoriesCount, Mode=OneWay}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#38BDF8" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 2. Budgeted Categories Count -->
+                <controls:KpiCardControl
+                    Grid.Column="1"
+                    Title="Budgeted Categories"
+                    Value="{x:Bind ViewModel.BudgetedCategoriesCount, Mode=OneWay}"
+                    Subtitle="Categories with spending caps"
+                    Glyph="&#xE809;"
+                    ShowActionIcon="False" />
 
-                <!-- Total Monthly Budget Cap -->
-                <Border Grid.Column="2" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="TOTAL MONTHLY BUDGET CAP" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A10B981" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xEAFC;" FontSize="11" Foreground="#10B981" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.TotalMonthlyBudgetCap, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#10B981" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 3. Total Monthly Budget Cap -->
+                <controls:KpiCardControl
+                    Grid.Column="2"
+                    Title="Total Budget Cap"
+                    Value="{x:Bind ViewModel.TotalMonthlyBudgetCap, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Target monthly ceiling"
+                    Glyph="&#xEAFC;"
+                    ShowActionIcon="False" />
 
-                <!-- Current Month Spending in Budgeted -->
-                <Border Grid.Column="3" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="MONTH SPENDING IN BUDGETS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1AF43F5E" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xEF42;" FontSize="11" Foreground="#F43F5E" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.CurrentMonthSpending, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#F43F5E" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 4. Current Month Spending in Budgeted -->
+                <controls:KpiCardControl
+                    Grid.Column="3"
+                    Title="Spent in Budgets"
+                    Value="{x:Bind ViewModel.CurrentMonthSpending, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Budgeted category outflows"
+                    Glyph="&#xEF42;"
+                    ShowActionIcon="False" />
             </Grid>
 
             <!-- 3. All Categories & Limit Settings Section using StaggeredLayout -->
@@ -149,14 +118,31 @@
                                                 </Border>
                                             </StackPanel>
 
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
-                                                <Button Padding="4" Background="Transparent" BorderThickness="0" Click="EditCategory_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Edit Category / Limits">
-                                                    <FontIcon Glyph="&#xE70F;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                </Button>
-                                                <Button Padding="4" Background="Transparent" BorderThickness="0" Click="DeleteCategory_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Delete Category">
-                                                    <FontIcon Glyph="&#xE74D;" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                </Button>
-                                            </StackPanel>
+                                            <!-- 3-Dots Options Menu -->
+                                            <Button Grid.Column="1"
+                                                    Padding="4"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    CornerRadius="4"
+                                                    VerticalAlignment="Center"
+                                                    ToolTipService.ToolTip="Options">
+                                                <FontIcon Glyph="&#xE712;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <Button.Flyout>
+                                                    <MenuFlyout>
+                                                        <MenuFlyoutItem Text="Edit Category" Click="EditCategory_Click" Tag="{x:Bind}">
+                                                            <MenuFlyoutItem.Icon>
+                                                                <FontIcon Glyph="&#xE70F;" />
+                                                            </MenuFlyoutItem.Icon>
+                                                        </MenuFlyoutItem>
+                                                        <MenuFlyoutSeparator />
+                                                        <MenuFlyoutItem Text="Delete Category" Click="DeleteCategory_Click" Tag="{x:Bind}">
+                                                            <MenuFlyoutItem.Icon>
+                                                                <FontIcon Glyph="&#xE74D;" />
+                                                            </MenuFlyoutItem.Icon>
+                                                        </MenuFlyoutItem>
+                                                    </MenuFlyout>
+                                                </Button.Flyout>
+                                            </Button>
                                         </Grid>
 
                                         <!-- When Monthly Limit is Configured -->

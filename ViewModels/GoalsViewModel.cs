@@ -20,6 +20,7 @@ public partial class GoalsViewModel : ObservableObject
     private readonly ISettingsService _settingsService;
     private readonly IDataCacheService _dataCacheService;
     private readonly IBusyIndicatorService _busyIndicatorService;
+    private readonly IFxRateService _fxRateService;
 
     private List<Goal> _rawGoals = new();
 
@@ -71,7 +72,8 @@ public partial class GoalsViewModel : ObservableObject
         IDialogService dialogService,
         ISettingsService settingsService,
         IDataCacheService dataCacheService,
-        IBusyIndicatorService busyIndicatorService)
+        IBusyIndicatorService busyIndicatorService,
+        IFxRateService fxRateService)
     {
         _goalService = goalService;
         _assetService = assetService;
@@ -79,9 +81,14 @@ public partial class GoalsViewModel : ObservableObject
         _settingsService = settingsService;
         _dataCacheService = dataCacheService;
         _busyIndicatorService = busyIndicatorService;
+        _fxRateService = fxRateService;
 
         CurrencySymbol = _settingsService.Settings.CurrencySymbol;
-        _settingsService.CurrencyChanged += _ => CurrencySymbol = _settingsService.Settings.CurrencySymbol;
+        _settingsService.CurrencyChanged += _ =>
+        {
+            CurrencySymbol = _settingsService.Settings.CurrencySymbol;
+            ApplyCachedData();
+        };
         _dataCacheService.DataUpdated += OnDataUpdated;
     }
 
@@ -110,15 +117,25 @@ public partial class GoalsViewModel : ObservableObject
         {
             _rawGoals = new List<Goal>(cached);
             Goals.Clear();
+
+            var baseCurrency = _settingsService.Settings.PreferredCurrency ?? "INR";
             double targetSum = 0;
             double savedSum = 0;
             int completedCount = 0;
 
             foreach (var g in _rawGoals)
             {
+                var goalCurr = string.IsNullOrWhiteSpace(g.Currency) ? baseCurrency : g.Currency;
+                var convertedTarget = _fxRateService.ConvertAmount(g.TargetAmount, goalCurr, baseCurrency);
+                var convertedSaved = _fxRateService.ConvertAmount(g.CurrentAmount, goalCurr, baseCurrency);
+
+                g.BaseCurrency = baseCurrency;
+                g.BaseTargetAmount = convertedTarget;
+                g.BaseCurrentAmount = convertedSaved;
+
                 Goals.Add(g);
-                targetSum += g.TargetAmount;
-                savedSum += g.CurrentAmount;
+                targetSum += convertedTarget;
+                savedSum += convertedSaved;
                 if (g.IsCompleted) completedCount++;
             }
 
@@ -131,6 +148,26 @@ public partial class GoalsViewModel : ObservableObject
             TotalGoalsCount = _rawGoals.Count;
 
             ApplyFilters();
+
+            // Asynchronously preload live rates if foreign currencies are present
+            var foreignCurrencies = _rawGoals
+                .Select(g => g.Currency)
+                .Where(c => !string.IsNullOrWhiteSpace(c) && !string.Equals(c, baseCurrency, StringComparison.OrdinalIgnoreCase))
+                .Select(c => c!)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (foreignCurrencies.Count > 0)
+            {
+                _ = Task.Run(async () =>
+                {
+                    await _fxRateService.PreloadRatesAsync(foreignCurrencies, baseCurrency);
+                    App.MainWindowInstance?.DispatcherQueue?.TryEnqueue(() =>
+                    {
+                        ApplyCachedData();
+                    });
+                });
+            }
         }
     }
 
@@ -201,22 +238,54 @@ public partial class GoalsViewModel : ObservableObject
     {
         if (goal == null) return;
 
-        var newPinned = !goal.IsPinned;
-        var request = new UpdateGoalRequest { IsPinned = newPinned };
+        var previousPinned = goal.IsPinned;
+        var newPinned = !previousPinned;
+
+        // 1. Optimistic UI update
+        goal.IsPinned = newPinned;
+        ApplyFilters();
+
+        // 2. Build full update request so backend validation schemas (name, targetAmount, currency, expectedDate) pass
+        var request = new UpdateGoalRequest
+        {
+            Name = goal.Name,
+            TargetAmount = goal.TargetAmount > 0 ? goal.TargetAmount : 1.0,
+            Currency = !string.IsNullOrWhiteSpace(goal.Currency) ? goal.Currency.ToUpperInvariant() : "INR",
+            ExpectedDate = goal.ExpectedDate == default ? DateTime.Now.AddMonths(6) : goal.ExpectedDate,
+            RecurringAmount = goal.RecurringAmount,
+            RecurringFrequency = goal.RecurringFrequency,
+            SourceAssetId = goal.SourceAssetId,
+            TargetAssetId = goal.TargetAssetId,
+            IsPinned = newPinned,
+            ImageUrls = goal.ImageUrls != null ? new List<string>(goal.ImageUrls) : new List<string>()
+        };
 
         try
         {
             var response = await _goalService.UpdateGoalAsync(goal.Id, request);
             if (response.Success)
             {
-                goal.IsPinned = newPinned;
+                if (response.Data != null)
+                {
+                    goal.IsPinned = response.Data.IsPinned;
+                }
                 _dataCacheService.Invalidate(DataCacheType.Goals);
                 ApplyFilters();
+            }
+            else
+            {
+                // Rollback on failure
+                goal.IsPinned = previousPinned;
+                ApplyFilters();
+                await _dialogService.ShowErrorAsync(response.Error ?? "Failed to update goal pin status.", "Pin Goal");
             }
         }
         catch (Exception ex)
         {
-            await _dialogService.ShowErrorAsync(ex.Message);
+            // Rollback on error
+            goal.IsPinned = previousPinned;
+            ApplyFilters();
+            await _dialogService.ShowErrorAsync(ex.Message, "Pin Goal");
         }
     }
 

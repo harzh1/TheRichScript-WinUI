@@ -9,6 +9,9 @@
     DefaultButton="Primary">
 
     <StackPanel Spacing="16" Width="400">
+        <!-- Validation Error Bar -->
+        <InfoBar x:Name="DialogErrorBar" Severity="Error" IsOpen="False" IsClosable="True" />
+
         <!-- From Asset -->
         <StackPanel Spacing="6">
             <TextBlock Text="From Account (Source)" Style="{StaticResource StatLabelTextStyle}" />
@@ -23,9 +26,26 @@
 
         <!-- Amount -->
         <StackPanel Spacing="6">
-            <TextBlock Text="Transfer Amount" Style="{StaticResource StatLabelTextStyle}" />
+            <TextBlock x:Name="AmountLabel" Text="Transfer Amount" Style="{StaticResource StatLabelTextStyle}" />
             <NumberBox x:Name="AmountNumberBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" PlaceholderText="0.00" />
         </StackPanel>
+
+        <!-- Cross-Currency FX Details (Visible only when source and dest currencies differ) -->
+        <Border x:Name="FxPanel" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="8" Padding="12" Visibility="Collapsed">
+            <StackPanel Spacing="10">
+                <TextBlock x:Name="FxExplanationText" Text="Cross-Currency Transfer: Optional custom credited amount or rate. Leave blank to use live European Central Bank exchange rate." TextWrapping="Wrap" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                <StackPanel Spacing="4">
+                    <TextBlock x:Name="DestAmountLabel" Text="Destination Amount Credited" Style="{StaticResource StatLabelTextStyle}" />
+                    <NumberBox x:Name="DestAmountNumberBox" Minimum="0" Value="NaN" SpinButtonPlacementMode="Inline" PlaceholderText="Optional credited amount..." />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock x:Name="ExchangeRateLabel" Text="Exchange Rate" Style="{StaticResource StatLabelTextStyle}" />
+                    <NumberBox x:Name="ExchangeRateNumberBox" Minimum="0" Value="NaN" SpinButtonPlacementMode="Inline" PlaceholderText="Optional exchange rate..." />
+                </StackPanel>
+            </StackPanel>
+        </Border>
 
         <!-- Description -->
         <StackPanel Spacing="6">

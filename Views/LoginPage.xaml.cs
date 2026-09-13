@@ -37,6 +37,14 @@ public sealed partial class LoginPage : Page
         }
     }
 
+    private void EmailBox_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key == VirtualKey.Enter)
+        {
+            PasswordBox.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
+        }
+    }
+
     private void SignInButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         ViewModel.Email = EmailBox.Text;

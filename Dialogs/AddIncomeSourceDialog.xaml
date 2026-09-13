@@ -11,6 +11,9 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="540">
         <StackPanel Spacing="14" Width="400">
+            <!-- Validation Error Bar -->
+            <InfoBar x:Name="DialogErrorBar" Severity="Error" IsOpen="False" IsClosable="True" />
+
             <!-- Name -->
             <StackPanel Spacing="4">
                 <TextBlock Text="Income Stream Name" Style="{StaticResource StatLabelTextStyle}" />
@@ -43,7 +46,7 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Spacing="4">
-                    <TextBlock Text="Expected Inflow" Style="{StaticResource StatLabelTextStyle}" />
+                    <TextBlock x:Name="ExpectedAmountLabel" Text="Expected Inflow" Style="{StaticResource StatLabelTextStyle}" />
                     <NumberBox x:Name="ExpectedAmountBox" Minimum="0" Value="0" SpinButtonPlacementMode="Inline" SmallChange="1" LargeChange="10" PlaceholderText="0.00" />
                 </StackPanel>
 

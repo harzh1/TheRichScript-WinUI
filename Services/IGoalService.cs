@@ -10,6 +10,7 @@ public interface IGoalService
     Task<ApiResponse<List<Goal>>> GetGoalsAsync();
     Task<ApiResponse<Goal>> CreateGoalAsync(CreateGoalRequest request);
     Task<ApiResponse<Goal>> UpdateGoalAsync(string id, UpdateGoalRequest request, List<string>? imageFilePaths = null);
+    Task<ApiResponse<Goal>> AddFundsToGoalAsync(string id, AddGoalFundsRequest request);
     Task<ApiResponse<Goal>> AddFundsToGoalAsync(string id, double amount, string assetId);
     Task<ApiResponse<object>> DeleteGoalAsync(string id, string? refundAssetId = null);
 }
@@ -30,39 +31,48 @@ public class GoalService : IGoalService
 
     public async Task<ApiResponse<Goal>> CreateGoalAsync(CreateGoalRequest request)
     {
-        if (request.ImageFilePaths != null && request.ImageFilePaths.Count > 0)
+        var effectiveAssetId = !string.IsNullOrEmpty(request.AssetId)
+            ? request.AssetId
+            : (!string.IsNullOrEmpty(request.TargetAssetId) ? request.TargetAssetId : request.SourceAssetId);
+
+        if (request.ImageFilePaths.Count > 0)
         {
-            var stringFields = new Dictionary<string, string>
+            var stringFields = new List<KeyValuePair<string, string>>
             {
-                { "name", request.Name },
-                { "targetAmount", request.TargetAmount.ToString(CultureInfo.InvariantCulture) },
-                { "expectedDate", request.ExpectedDate.ToString("o") }
+                new("name", request.Name),
+                new("targetAmount", request.TargetAmount.ToString(CultureInfo.InvariantCulture)),
+                new("initialDeposit", request.InitialDeposit.ToString(CultureInfo.InvariantCulture)),
+                new("expectedDate", request.ExpectedDate.ToString("o"))
             };
 
-            if (request.InitialDeposit > 0 && !string.IsNullOrEmpty(request.AssetId))
+            if (!string.IsNullOrEmpty(request.Currency))
             {
-                stringFields.Add("initialDeposit", request.InitialDeposit.ToString(CultureInfo.InvariantCulture));
-                stringFields.Add("assetId", request.AssetId);
+                stringFields.Add(new("currency", request.Currency.ToUpperInvariant()));
+            }
+
+            if (!string.IsNullOrEmpty(effectiveAssetId))
+            {
+                stringFields.Add(new("assetId", effectiveAssetId));
             }
 
             if (request.RecurringAmount.HasValue)
             {
-                stringFields.Add("recurringAmount", request.RecurringAmount.Value.ToString(CultureInfo.InvariantCulture));
+                stringFields.Add(new("recurringAmount", request.RecurringAmount.Value.ToString(CultureInfo.InvariantCulture)));
             }
 
             if (!string.IsNullOrEmpty(request.RecurringFrequency))
             {
-                stringFields.Add("recurringFrequency", request.RecurringFrequency.ToUpperInvariant());
+                stringFields.Add(new("recurringFrequency", request.RecurringFrequency.ToUpperInvariant()));
             }
 
             if (!string.IsNullOrEmpty(request.SourceAssetId))
             {
-                stringFields.Add("sourceAssetId", request.SourceAssetId);
+                stringFields.Add(new("sourceAssetId", request.SourceAssetId));
             }
 
             if (!string.IsNullOrEmpty(request.TargetAssetId))
             {
-                stringFields.Add("targetAssetId", request.TargetAssetId);
+                stringFields.Add(new("targetAssetId", request.TargetAssetId));
             }
 
             var files = new List<(string, string)>();
@@ -80,7 +90,8 @@ public class GoalService : IGoalService
                 name = request.Name,
                 targetAmount = request.TargetAmount,
                 initialDeposit = request.InitialDeposit,
-                assetId = request.AssetId,
+                currency = request.Currency?.ToUpperInvariant(),
+                assetId = effectiveAssetId,
                 expectedDate = request.ExpectedDate,
                 recurringAmount = request.RecurringAmount,
                 recurringFrequency = request.RecurringFrequency,
@@ -96,15 +107,24 @@ public class GoalService : IGoalService
     {
         if (imageFilePaths != null && imageFilePaths.Count > 0)
         {
-            var stringFields = new Dictionary<string, string>();
-            if (!string.IsNullOrEmpty(request.Name)) stringFields.Add("name", request.Name);
-            if (request.TargetAmount.HasValue) stringFields.Add("targetAmount", request.TargetAmount.Value.ToString(CultureInfo.InvariantCulture));
-            if (request.ExpectedDate.HasValue) stringFields.Add("expectedDate", request.ExpectedDate.Value.ToString("o"));
-            if (request.RecurringAmount.HasValue) stringFields.Add("recurringAmount", request.RecurringAmount.Value.ToString(CultureInfo.InvariantCulture));
-            if (!string.IsNullOrEmpty(request.RecurringFrequency)) stringFields.Add("recurringFrequency", request.RecurringFrequency.ToUpperInvariant());
-            if (request.IsPinned.HasValue) stringFields.Add("isPinned", request.IsPinned.Value.ToString().ToLowerInvariant());
-            if (!string.IsNullOrEmpty(request.SourceAssetId)) stringFields.Add("sourceAssetId", request.SourceAssetId);
-            if (!string.IsNullOrEmpty(request.TargetAssetId)) stringFields.Add("targetAssetId", request.TargetAssetId);
+            var stringFields = new List<KeyValuePair<string, string>>();
+            if (!string.IsNullOrEmpty(request.Name)) stringFields.Add(new("name", request.Name));
+            if (request.TargetAmount.HasValue) stringFields.Add(new("targetAmount", request.TargetAmount.Value.ToString(CultureInfo.InvariantCulture)));
+            if (!string.IsNullOrEmpty(request.Currency)) stringFields.Add(new("currency", request.Currency.ToUpperInvariant()));
+            if (request.ExpectedDate.HasValue) stringFields.Add(new("expectedDate", request.ExpectedDate.Value.ToString("o")));
+            if (request.RecurringAmount.HasValue) stringFields.Add(new("recurringAmount", request.RecurringAmount.Value.ToString(CultureInfo.InvariantCulture)));
+            if (!string.IsNullOrEmpty(request.RecurringFrequency)) stringFields.Add(new("recurringFrequency", request.RecurringFrequency.ToUpperInvariant()));
+            if (request.IsPinned.HasValue) stringFields.Add(new("isPinned", request.IsPinned.Value.ToString().ToLowerInvariant()));
+            if (!string.IsNullOrEmpty(request.SourceAssetId)) stringFields.Add(new("sourceAssetId", request.SourceAssetId));
+            if (!string.IsNullOrEmpty(request.TargetAssetId)) stringFields.Add(new("targetAssetId", request.TargetAssetId));
+
+            if (request.ImageUrls != null)
+            {
+                foreach (var url in request.ImageUrls)
+                {
+                    stringFields.Add(new("imageUrls", url));
+                }
+            }
 
             var files = new List<(string, string)>();
             foreach (var imgPath in imageFilePaths)
@@ -120,10 +140,19 @@ public class GoalService : IGoalService
         }
     }
 
+    public async Task<ApiResponse<Goal>> AddFundsToGoalAsync(string id, AddGoalFundsRequest request)
+    {
+        var resp = await _apiService.PostAsync<Goal>($"goals/{id}/fund", request);
+        if (!resp.Success && resp.StatusCode == 404)
+        {
+            resp = await _apiService.PutAsync<Goal>($"goals/{id}/funds", request);
+        }
+        return resp;
+    }
+
     public async Task<ApiResponse<Goal>> AddFundsToGoalAsync(string id, double amount, string assetId)
     {
-        var body = new AddGoalFundsRequest { Amount = amount, AssetId = assetId };
-        return await _apiService.PutAsync<Goal>($"goals/{id}/funds", body);
+        return await AddFundsToGoalAsync(id, new AddGoalFundsRequest { Amount = amount, AssetId = assetId });
     }
 
     public async Task<ApiResponse<object>> DeleteGoalAsync(string id, string? refundAssetId = null)

@@ -7,13 +7,13 @@
     xmlns:vm="using:TheRichScript_WinUI.ViewModels"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Background="Transparent">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <Border
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Width="460"
-                Margin="0,40,0,0"
+                Margin="0,30,0,30"
                 Style="{StaticResource FluentCardStyle}"
                 Padding="32,28">
 
@@ -35,63 +35,66 @@
                         Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
                         IsClosable="False" />
 
-                    <!-- Name Row -->
-                    <Grid ColumnSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
+                    <!-- Form Fields -->
+                    <StackPanel Spacing="14">
+                        <!-- Name Row -->
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
 
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="First Name *" Style="{StaticResource StatLabelTextStyle}" />
+                                <TextBox x:Name="FirstNameBox" Text="{x:Bind ViewModel.FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="John" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Spacing="6">
+                                <TextBlock Text="Last Name" Style="{StaticResource StatLabelTextStyle}" />
+                                <TextBox x:Name="LastNameBox" Text="{x:Bind ViewModel.LastName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Doe" />
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Email -->
                         <StackPanel Spacing="6">
-                            <TextBlock Text="First Name *" Style="{StaticResource StatLabelTextStyle}" />
-                            <TextBox x:Name="FirstNameBox" Text="{x:Bind ViewModel.FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="John" />
+                            <TextBlock Text="Email Address *" Style="{StaticResource StatLabelTextStyle}" />
+                            <TextBox x:Name="EmailBox" Text="{x:Bind ViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="john@example.com" />
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1" Spacing="6">
-                            <TextBlock Text="Last Name" Style="{StaticResource StatLabelTextStyle}" />
-                            <TextBox x:Name="LastNameBox" Text="{x:Bind ViewModel.LastName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Doe" />
-                        </StackPanel>
-                    </Grid>
-
-                    <!-- Email -->
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="Email Address *" Style="{StaticResource StatLabelTextStyle}" />
-                        <TextBox x:Name="EmailBox" Text="{x:Bind ViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="john@example.com" />
-                    </StackPanel>
-
-                    <!-- Password -->
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="Password (min 6 chars) *" Style="{StaticResource StatLabelTextStyle}" />
-                        <PasswordBox x:Name="PasswordBox" PlaceholderText="••••••••" PasswordRevealMode="Peek" PasswordChanged="PasswordBox_PasswordChanged" />
-                    </StackPanel>
-
-                    <!-- Country & Currency -->
-                    <Grid ColumnSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
+                        <!-- Password -->
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Country" Style="{StaticResource StatLabelTextStyle}" />
-                            <ComboBox x:Name="CountryComboBox"
-                                      ItemsSource="{x:Bind ViewModel.AvailableCountries}"
-                                      SelectedItem="{x:Bind ViewModel.SelectedCountry, Mode=TwoWay}"
-                                      DisplayMemberPath="DisplayName"
-                                      HorizontalAlignment="Stretch"
-                                      PlaceholderText="Select Country" />
+                            <TextBlock Text="Password (min 6 chars) *" Style="{StaticResource StatLabelTextStyle}" />
+                            <PasswordBox x:Name="PasswordBox" PlaceholderText="••••••••" PasswordRevealMode="Peek" KeyDown="PasswordBox_KeyDown" PasswordChanged="PasswordBox_PasswordChanged" />
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1" Spacing="6">
-                            <TextBlock Text="Currency" Style="{StaticResource StatLabelTextStyle}" />
-                            <ComboBox x:Name="CurrencyComboBox"
-                                      ItemsSource="{x:Bind ViewModel.AvailableCurrencies}"
-                                      SelectedItem="{x:Bind ViewModel.SelectedCurrency, Mode=TwoWay}"
-                                      DisplayMemberPath="DisplayName"
-                                      HorizontalAlignment="Stretch"
-                                      PlaceholderText="Select Currency" />
-                        </StackPanel>
-                    </Grid>
+                        <!-- Country & Currency -->
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="Country" Style="{StaticResource StatLabelTextStyle}" />
+                                <ComboBox x:Name="CountryComboBox"
+                                          ItemsSource="{x:Bind ViewModel.AvailableCountries}"
+                                          SelectedItem="{x:Bind ViewModel.SelectedCountry, Mode=TwoWay}"
+                                          DisplayMemberPath="DisplayName"
+                                          HorizontalAlignment="Stretch"
+                                          PlaceholderText="Select Country" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Spacing="6">
+                                <TextBlock Text="Currency" Style="{StaticResource StatLabelTextStyle}" />
+                                <ComboBox x:Name="CurrencyComboBox"
+                                          ItemsSource="{x:Bind ViewModel.AvailableCurrencies}"
+                                          SelectedItem="{x:Bind ViewModel.SelectedCurrency, Mode=TwoWay}"
+                                          DisplayMemberPath="DisplayName"
+                                          HorizontalAlignment="Stretch"
+                                          PlaceholderText="Select Currency" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
 
                     <!-- Submit Button -->
                     <Button
@@ -99,7 +102,7 @@
                         Style="{StaticResource AccentButtonStyle}"
                         HorizontalAlignment="Stretch"
                         Height="40"
-                        Margin="0,8,0,0"
+                        Margin="0,4,0,0"
                         Click="RegisterButton_Click"
                         Command="{x:Bind ViewModel.RegisterCommand}"
                         IsEnabled="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource InverseBooleanConverter}}">
@@ -109,8 +112,10 @@
                         </StackPanel>
                     </Button>
 
+                    <MenuFlyoutSeparator Margin="0,2" />
+
                     <!-- Back to Login -->
-                    <StackPanel Spacing="10" HorizontalAlignment="Center">
+                    <StackPanel Spacing="8" HorizontalAlignment="Center">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
                             <TextBlock Text="Already registered?" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                             <HyperlinkButton Content="Sign In" Command="{x:Bind ViewModel.NavigateToLoginCommand}" Padding="4,2" />

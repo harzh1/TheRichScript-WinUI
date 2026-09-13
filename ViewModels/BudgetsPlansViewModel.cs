@@ -16,6 +16,7 @@ public partial class BudgetsPlansViewModel : ObservableObject
     private readonly ISettingsService _settingsService;
     private readonly IDataCacheService _dataCacheService;
     private readonly IBusyIndicatorService _busyIndicatorService;
+    private readonly IFxRateService _fxRateService;
 
     [ObservableProperty]
     private bool isLoading;
@@ -61,16 +62,22 @@ public partial class BudgetsPlansViewModel : ObservableObject
         IDialogService dialogService,
         ISettingsService settingsService,
         IDataCacheService dataCacheService,
-        IBusyIndicatorService busyIndicatorService)
+        IBusyIndicatorService busyIndicatorService,
+        IFxRateService fxRateService)
     {
         _planService = planService;
         _dialogService = dialogService;
         _settingsService = settingsService;
         _dataCacheService = dataCacheService;
         _busyIndicatorService = busyIndicatorService;
+        _fxRateService = fxRateService;
 
         CurrencySymbol = _settingsService.Settings.CurrencySymbol;
-        _settingsService.CurrencyChanged += _ => CurrencySymbol = _settingsService.Settings.CurrencySymbol;
+        _settingsService.CurrencyChanged += _ =>
+        {
+            CurrencySymbol = _settingsService.Settings.CurrencySymbol;
+            ApplyCachedData();
+        };
         _dataCacheService.DataUpdated += OnDataUpdated;
     }
 
@@ -91,7 +98,10 @@ public partial class BudgetsPlansViewModel : ObservableObject
             RecurringPlans.Clear();
             ManualPlans.Clear();
 
-            var assetMap = _dataCacheService.CachedAssets?.ToDictionary(a => a.Id, a => a.Name) ?? new();
+            var baseCurrency = _settingsService.Settings.PreferredCurrency ?? "INR";
+            var assets = _dataCacheService.CachedAssets;
+            var assetMap = assets?.ToDictionary(a => a.Id, a => a.Name) ?? new();
+            var assetCurrencyMap = assets?.ToDictionary(a => a.Id, a => a.Currency) ?? new();
 
             double subTotal = 0, transferTotal = 0, recInc = 0;
 
@@ -107,21 +117,30 @@ public partial class BudgetsPlansViewModel : ObservableObject
                     plan.TargetAssetName = tgtName;
                 }
 
+                // Resolve plan currency from associated asset
+                string planCurrency = baseCurrency;
+                if (!string.IsNullOrEmpty(plan.AssetId) && assetCurrencyMap.TryGetValue(plan.AssetId, out var aCurr) && !string.IsNullOrWhiteSpace(aCurr))
+                {
+                    planCurrency = aCurr;
+                }
+
+                var convertedAmount = _fxRateService.ConvertAmount(plan.Amount, planCurrency, baseCurrency);
+
                 if (plan.IsRecurring)
                 {
                     if (plan.IsTransfer)
                     {
                         RecurringPlans.Add(plan);
-                        transferTotal += plan.Amount;
+                        transferTotal += convertedAmount;
                     }
                     else if (plan.IsIncome)
                     {
-                        recInc += plan.Amount;
+                        recInc += convertedAmount;
                     }
                     else
                     {
                         Subscriptions.Add(plan);
-                        subTotal += plan.Amount;
+                        subTotal += convertedAmount;
                     }
                 }
                 else

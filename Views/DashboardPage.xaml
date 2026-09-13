@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:TheRichScript_WinUI.Models"
     xmlns:controls="using:TheRichScript_WinUI.Controls"
+    xmlns:helpers="using:TheRichScript_WinUI.Helpers"
     xmlns:vm="using:TheRichScript_WinUI.ViewModels"
     mc:Ignorable="d">
 
@@ -54,163 +55,147 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Net Worth -->
-                <Border Grid.Column="0" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="TOTAL NET WORTH" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A38BDF8" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE8EC;" FontSize="11" Foreground="#38BDF8" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.Analytics.TotalPortfolioValue, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#38BDF8" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 1. Total Net Worth -->
+                <controls:KpiCardControl
+                    Grid.Column="0"
+                    Title="Total Net Worth"
+                    Value="{x:Bind ViewModel.Analytics.TotalPortfolioValue, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Assets &amp; cash balances"
+                    Glyph="&#xE8EC;"
+                    Command="{x:Bind ViewModel.NavigateToAssetsCommand}" />
 
-                <!-- Monthly Income -->
-                <Border Grid.Column="1" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="MONTHLY INCOME" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1A10B981" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xEAFC;" FontSize="11" Foreground="#10B981" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.Analytics.MonthIncome, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#10B981" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 2. Monthly Income -->
+                <controls:KpiCardControl
+                    Grid.Column="1"
+                    Title="Monthly Income"
+                    Value="{x:Bind ViewModel.Analytics.MonthIncome, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Cash inflows this month"
+                    Glyph="&#xEAFC;"
+                    Command="{x:Bind ViewModel.NavigateToAnalyticsCommand}" />
 
-                <!-- Monthly Expenses -->
-                <Border Grid.Column="2" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="MONTHLY EXPENSES" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1AF43F5E" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xEF42;" FontSize="11" Foreground="#F43F5E" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.Analytics.MonthExpense, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#F43F5E" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 3. Monthly Expenses -->
+                <controls:KpiCardControl
+                    Grid.Column="2"
+                    Title="Monthly Expenses"
+                    Value="{x:Bind ViewModel.Analytics.MonthExpense, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Cash outflows this month"
+                    Glyph="&#xEF42;"
+                    Command="{x:Bind ViewModel.NavigateToTransactionsCommand}" />
 
-                <!-- Net Monthly Savings -->
-                <Border Grid.Column="3" Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                    <StackPanel Spacing="6">
-                        <Grid ColumnSpacing="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="NET MONTH SAVINGS" Style="{StaticResource StatLabelTextStyle}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            <Border Grid.Column="1" Background="#1AF59E0B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <FontIcon Glyph="&#xE809;" FontSize="11" Foreground="#F59E0B" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Text="{x:Bind ViewModel.Analytics.MonthNetSavings, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontSize="22" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display" Foreground="#F59E0B" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </Border>
+                <!-- 4. Net Monthly Savings -->
+                <controls:KpiCardControl
+                    Grid.Column="3"
+                    Title="Net Month Savings"
+                    Value="{x:Bind ViewModel.Analytics.MonthNetSavings, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                    Subtitle="Retained cash flow"
+                    Glyph="&#xE809;"
+                    Command="{x:Bind ViewModel.NavigateToAnalyticsCommand}" />
             </Grid>
 
             <!-- ⚡ Quick Add Templates Section (from Frontend V2) -->
-            <Border Style="{StaticResource FluentCardStyle}" Padding="16,14">
-                <StackPanel Spacing="12">
-                    <Grid>
-                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                            <FontIcon Glyph="&#xE945;" FontSize="15" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                            <TextBlock Text="Quick Add" Style="{StaticResource SectionHeaderTextStyle}" FontSize="15" VerticalAlignment="Center" />
-                        </StackPanel>
+            <StackPanel Spacing="10">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <FontIcon Glyph="&#xE945;" FontSize="15" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text="Quick Add" Style="{StaticResource SectionHeaderTextStyle}" FontSize="15" VerticalAlignment="Center" />
+                    </StackPanel>
 
-                        <HyperlinkButton Content="+ New Template" Click="NewQuickAddTemplate_Click" HorizontalAlignment="Right" Padding="4,0" FontSize="12" VerticalAlignment="Center" />
-                    </Grid>
+                    <HyperlinkButton Content="+ New Template" Click="NewQuickAddTemplate_Click" HorizontalAlignment="Right" Padding="4,0" FontSize="12" VerticalAlignment="Center" />
+                </Grid>
 
-                    <!-- Empty state -->
-                    <TextBlock Text="No Quick Add templates yet."
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               FontSize="12"
-                               Visibility="{x:Bind ViewModel.QuickAddTemplates.Count, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}" />
+                <!-- Empty state -->
+                <TextBlock Text="No Quick Add templates yet."
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           FontSize="12"
+                           Visibility="{x:Bind ViewModel.QuickAddTemplates.Count, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}" />
 
-                    <!-- Quick Add Horizontal Templates -->
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Visibility="{x:Bind ViewModel.QuickAddTemplates.Count, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.QuickAddTemplates, Mode=OneWay}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" Spacing="12" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="models:PlannedExpense">
-                                    <Border Style="{StaticResource FluentSubtleCardStyle}" Width="240" Padding="14,12" CornerRadius="8">
-                                        <StackPanel Spacing="10">
-                                            <!-- Category tag + Actions -->
-                                            <Grid>
-                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                                    <TextBlock Text="{x:Bind Category}" FontSize="9" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                </Border>
+                <!-- Quick Add Horizontal Templates -->
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Padding="1,2,1,4" Visibility="{x:Bind ViewModel.QuickAddTemplates.Count, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.QuickAddTemplates, Mode=OneWay}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="12" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:PlannedExpense">
+                                <Border Style="{StaticResource FluentCardStyle}" Width="240" Padding="14,12" CornerRadius="8">
+                                    <StackPanel Spacing="10">
+                                        <!-- Category tag + Actions -->
+                                        <Grid>
+                                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                <TextBlock Text="{x:Bind Category}" FontSize="9" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            </Border>
 
-                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="2" VerticalAlignment="Center">
-                                                    <Button Padding="3" Background="Transparent" BorderThickness="0" Click="EditQuickAddTemplate_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Edit Template">
-                                                        <FontIcon Glyph="&#xE70F;" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                    </Button>
-                                                    <Button Padding="3" Background="Transparent" BorderThickness="0" Click="DeleteQuickAddTemplate_Click" Tag="{x:Bind}" ToolTipService.ToolTip="Delete Template">
-                                                        <FontIcon Glyph="&#xE74D;" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                    </Button>
-                                                </StackPanel>
-                                            </Grid>
-
-                                            <!-- Template Name -->
-                                            <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-
-                                            <!-- Editable Amount -->
-                                            <StackPanel Spacing="3">
-                                                <TextBlock Text="AMOUNT" Style="{StaticResource StatLabelTextStyle}" FontSize="9" />
-                                                <NumberBox x:Name="QuickAddAmountBox"
-                                                           Value="{x:Bind Amount, Mode=TwoWay}"
-                                                           Minimum="0"
-                                                           SpinButtonPlacementMode="Compact"
-                                                           HorizontalAlignment="Stretch"
-                                                           SmallChange="1"
-                                                           LargeChange="10"
-                                                           PlaceholderText="0.00" />
-                                            </StackPanel>
-
-                                            <!-- Selectable Source Account -->
-                                            <StackPanel Spacing="3">
-                                                <TextBlock Text="ACCOUNT" Style="{StaticResource StatLabelTextStyle}" FontSize="9" />
-                                                <ComboBox x:Name="QuickAddAssetComboBox"
-                                                          ItemsSource="{Binding Path=ViewModel.AvailableAssets, ElementName=ThisDashboardPage}"
-                                                          SelectedValue="{x:Bind AssetId, Mode=TwoWay}"
-                                                          SelectedValuePath="Id"
-                                                          DisplayMemberPath="Name"
-                                                          HorizontalAlignment="Stretch" />
-                                            </StackPanel>
-
-                                            <!-- 1-Click Log Button -->
-                                            <Button Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Stretch" Padding="6,6" Margin="0,2,0,0" Click="LogQuickAdd_Click" Tag="{x:Bind}">
-                                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                                    <FontIcon Glyph="&#xE945;" FontSize="11" />
-                                                    <TextBlock Text="Log Now" FontSize="12" FontWeight="SemiBold" />
-                                                </StackPanel>
+                                            <!-- 3-Dots Options Menu -->
+                                            <Button HorizontalAlignment="Right"
+                                                    Padding="4"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    CornerRadius="4"
+                                                    VerticalAlignment="Center"
+                                                    ToolTipService.ToolTip="Options">
+                                                <FontIcon Glyph="&#xE712;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <Button.Flyout>
+                                                    <MenuFlyout>
+                                                        <MenuFlyoutItem Text="Edit Template" Click="EditQuickAddTemplate_Click" Tag="{x:Bind}">
+                                                            <MenuFlyoutItem.Icon>
+                                                                <FontIcon Glyph="&#xE70F;" />
+                                                            </MenuFlyoutItem.Icon>
+                                                        </MenuFlyoutItem>
+                                                        <MenuFlyoutSeparator />
+                                                        <MenuFlyoutItem Text="Delete Template" Click="DeleteQuickAddTemplate_Click" Tag="{x:Bind}">
+                                                            <MenuFlyoutItem.Icon>
+                                                                <FontIcon Glyph="&#xE74D;" />
+                                                            </MenuFlyoutItem.Icon>
+                                                        </MenuFlyoutItem>
+                                                    </MenuFlyout>
+                                                </Button.Flyout>
                                             </Button>
+                                        </Grid>
+
+                                        <!-- Template Name -->
+                                        <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+
+                                        <!-- Editable Amount -->
+                                        <StackPanel Spacing="3">
+                                            <TextBlock Text="AMOUNT" Style="{StaticResource StatLabelTextStyle}" FontSize="9" />
+                                            <NumberBox x:Name="QuickAddAmountBox"
+                                                       Value="{x:Bind Amount, Mode=TwoWay}"
+                                                       helpers:NumericInputHelper.IsNumericOnly="True"
+                                                       Minimum="0"
+                                                       SpinButtonPlacementMode="Compact"
+                                                       HorizontalAlignment="Stretch"
+                                                       SmallChange="1"
+                                                       LargeChange="10"
+                                                       PlaceholderText="0.00" />
                                         </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </StackPanel>
-            </Border>
+
+                                        <!-- Selectable Source Account -->
+                                        <StackPanel Spacing="3">
+                                            <TextBlock Text="ACCOUNT" Style="{StaticResource StatLabelTextStyle}" FontSize="9" />
+                                            <ComboBox x:Name="QuickAddAssetComboBox"
+                                                      ItemsSource="{Binding Path=ViewModel.AvailableAssets, ElementName=ThisDashboardPage}"
+                                                      SelectedValue="{x:Bind AssetId, Mode=TwoWay}"
+                                                      SelectedValuePath="Id"
+                                                      DisplayMemberPath="Name"
+                                                      HorizontalAlignment="Stretch" />
+                                        </StackPanel>
+
+                                        <!-- 1-Click Log Button -->
+                                        <Button Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Stretch" Padding="6,6" Margin="0,2,0,0" Click="LogQuickAdd_Click" Tag="{x:Bind}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                                <FontIcon Glyph="&#xE945;" FontSize="11" />
+                                                <TextBlock Text="Log Now" FontSize="12" FontWeight="SemiBold" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
 
             <!-- Masonry Staggered Layout for Dashboard Content Cards -->
             <controls:StaggeredPanel ColumnSpacing="16" RowSpacing="16" DesiredColumnWidth="460" MaxColumns="2">
@@ -239,10 +224,10 @@
 
                                         <!-- Title & Category -->
                                         <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="2">
-                                            <TextBlock Text="{x:Bind Description}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{x:Bind DisplayDescription}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <TextBlock Text="{x:Bind Category}" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
-                                                <TextBlock Text="•" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                                <TextBlock Text="{x:Bind DisplayCategory}" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="{x:Bind HasCategory, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                <TextBlock Text="•" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="{x:Bind HasCategory, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                                 <TextBlock Text="{x:Bind Date, Converter={StaticResource DateTimeFormatConverter}}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                                             </StackPanel>
                                         </StackPanel>
@@ -255,10 +240,11 @@
                                             </StackPanel>
                                         </Border>
 
-                                        <!-- Amount -->
-                                        <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="Bold" FontSize="13" Foreground="{x:Bind Type, Converter={StaticResource AmountColorConverter}}">
-                                            <Run Text="{x:Bind FormattedAmountPrefix}" /><Run Text="{x:Bind Amount, Converter={StaticResource CurrencyConverter}}" />
-                                        </TextBlock>
+                                        <!-- Amount (Dual-Currency / Denomination Isolated) -->
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="2">
+                                            <TextBlock HorizontalAlignment="Right" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}" Text="{x:Bind FormattedAmount}" />
+                                            <TextBlock HorizontalAlignment="Right" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="{x:Bind HasConvertedSubtitle, Converter={StaticResource BooleanToVisibilityConverter}}" Text="{x:Bind ConvertedSubtitle}" />
+                                        </StackPanel>
                                     </Grid>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
@@ -319,7 +305,7 @@
                                             <Grid>
                                                 <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
                                                 <TextBlock HorizontalAlignment="Right" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                                                    <Run Text="{x:Bind CurrentAmount, Converter={StaticResource CurrencyConverter}}" /> / <Run Text="{x:Bind TargetAmount, Converter={StaticResource CurrencyConverter}}" />
+                                                    <Run Text="{x:Bind FormattedCurrentAmount}" /> / <Run Text="{x:Bind FormattedTargetAmount}" />
                                                 </TextBlock>
                                             </Grid>
 

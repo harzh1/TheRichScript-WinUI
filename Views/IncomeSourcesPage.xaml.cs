@@ -147,4 +147,23 @@ public sealed partial class IncomeSourcesPage : Page
             await dialogService.ShowErrorAsync($"Unable to open edit dialog: {ex.Message}");
         }
     }
+
+    private async void DeleteIncomeSource_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var source = (sender as FrameworkElement)?.Tag as IncomeSource
+                      ?? (sender as FrameworkElement)?.DataContext as IncomeSource;
+
+            if (source != null)
+            {
+                await ViewModel.DeleteIncomeSourceAsync(source);
+            }
+        }
+        catch (Exception ex)
+        {
+            var dialogService = App.GetService<IDialogService>();
+            await dialogService.ShowErrorAsync($"Unable to delete income source: {ex.Message}");
+        }
+    }
 }

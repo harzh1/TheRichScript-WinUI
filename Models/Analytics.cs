@@ -77,6 +77,9 @@ public partial class DailySpendingCategoryFilter : CommunityToolkit.Mvvm.Compone
 
 public class AnalyticsSummary
 {
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
     [JsonPropertyName("totalPortfolioValue")]
     public double TotalPortfolioValue { get; set; }
 

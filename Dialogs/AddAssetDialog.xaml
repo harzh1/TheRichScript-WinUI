@@ -10,6 +10,9 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="550">
         <StackPanel Spacing="16" Width="400">
+            <!-- Validation Error Bar -->
+            <InfoBar x:Name="DialogErrorBar" Severity="Error" IsOpen="False" IsClosable="True" />
+
             <!-- Asset Name -->
             <StackPanel Spacing="6">
                 <TextBlock Text="Asset / Account Name" Style="{StaticResource StatLabelTextStyle}" />
@@ -23,9 +26,15 @@
                 <TextBox x:Name="NewTypeTextBox" PlaceholderText="Enter new asset type (e.g. STOCKS, COMMODITY)..." Visibility="Collapsed" />
             </StackPanel>
 
+            <!-- Currency Selector (Dropdown with all currencies) -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Currency" Style="{StaticResource StatLabelTextStyle}" />
+                <ComboBox x:Name="CurrencyComboBox" DisplayMemberPath="DisplayName" SelectedValuePath="Code" HorizontalAlignment="Stretch" PlaceholderText="Select Currency..." />
+            </StackPanel>
+
             <!-- Initial Value / Balance -->
             <StackPanel Spacing="6">
-                <TextBlock Text="Current Value / Balance" Style="{StaticResource StatLabelTextStyle}" />
+                <TextBlock x:Name="ValueLabel" Text="Current Value / Balance" Style="{StaticResource StatLabelTextStyle}" />
                 <NumberBox x:Name="ValueNumberBox" PlaceholderText="0.00" SpinButtonPlacementMode="Inline" />
             </StackPanel>
 

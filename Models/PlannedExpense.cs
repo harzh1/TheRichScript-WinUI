@@ -32,6 +32,7 @@ public partial class PlannedExpense : ObservableObject
 
     [ObservableProperty]
     [property: JsonPropertyName("amount")]
+    [property: JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     private double amount;
 
     [JsonPropertyName("type")]
@@ -51,6 +52,9 @@ public partial class PlannedExpense : ObservableObject
 
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }
+
+    [JsonPropertyName("updatedAt")]
+    public DateTime? UpdatedAt { get; set; }
 
     [ObservableProperty]
     [property: JsonPropertyName("sourceAssetName")]
@@ -82,6 +86,14 @@ public partial class PlannedExpense : ObservableObject
 
     [JsonIgnore]
     public string SourceAccountDisplay => !string.IsNullOrEmpty(SourceAssetName) ? $"Paid from: {SourceAssetName}" : "Source Account";
+
+    [JsonIgnore]
+    public bool IsDueNow => NextDueDate.HasValue && NextDueDate.Value.Date <= DateTime.Today;
+
+    [JsonIgnore]
+    public string DueStatusText => NextDueDate.HasValue
+        ? (NextDueDate.Value.Date < DateTime.Today ? "Overdue" : (NextDueDate.Value.Date == DateTime.Today ? "Due Today" : "Scheduled"))
+        : "Not scheduled";
 }
 
 public class CreatePlanRequest

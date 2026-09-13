@@ -131,8 +131,8 @@
 
                                     <!-- 2. Description & Category -->
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                                        <TextBlock Text="{x:Bind Description}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                                        <TextBlock Text="{x:Bind Category}" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                        <TextBlock Text="{x:Bind DisplayDescription}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                        <TextBlock Text="{x:Bind DisplayCategory}" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="{x:Bind HasCategory, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                     </StackPanel>
 
                                     <!-- 3. Type Badge (INCOME / EXPENSE / TRANSFER) with Icon -->
@@ -154,20 +154,37 @@
                                         </StackPanel>
                                     </Button>
 
-                                    <!-- 6. Amount (Colored with + / -) -->
-                                    <TextBlock Grid.Column="5" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="Bold" FontSize="13" Foreground="{x:Bind Type, Converter={StaticResource AmountColorConverter}}">
-                                        <Run Text="{x:Bind FormattedAmountPrefix}" /><Run Text="{x:Bind Amount, Converter={StaticResource CurrencyConverter}}" />
-                                    </TextBlock>
-
-                                    <!-- 7. Actions (Edit & Delete Buttons) -->
-                                    <StackPanel Grid.Column="6" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
-                                        <Button Background="Transparent" BorderThickness="0" Padding="6" VerticalAlignment="Center" ToolTipService.ToolTip="Edit Transaction" Click="EditTx_Click" Tag="{x:Bind}">
-                                            <FontIcon Glyph="&#xE70F;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        </Button>
-                                        <Button Background="Transparent" BorderThickness="0" Padding="6" VerticalAlignment="Center" ToolTipService.ToolTip="Delete Transaction" Click="DeleteTx_Click" Tag="{x:Bind}">
-                                            <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        </Button>
+                                    <!-- 6. Amount (High-contrast neutral) & Dual-Currency Converted Subtitle -->
+                                    <StackPanel Grid.Column="5" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="2">
+                                        <TextBlock HorizontalAlignment="Right" FontWeight="Bold" FontSize="13" Foreground="{ThemeResource TextFillColorPrimaryBrush}" Text="{x:Bind FormattedAmount}" />
+                                        <TextBlock HorizontalAlignment="Right" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="{x:Bind HasConvertedSubtitle, Converter={StaticResource BooleanToVisibilityConverter}}" Text="{x:Bind ConvertedSubtitle}" />
                                     </StackPanel>
+
+                                    <!-- 7. Actions (3-Dots Options Menu) -->
+                                    <Button Grid.Column="6"
+                                            Padding="4"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            CornerRadius="4"
+                                            VerticalAlignment="Center"
+                                            ToolTipService.ToolTip="Options">
+                                        <FontIcon Glyph="&#xE712;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <Button.Flyout>
+                                            <MenuFlyout>
+                                                <MenuFlyoutItem Text="Edit Transaction" Click="EditTx_Click" Tag="{x:Bind}">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE70F;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                                <MenuFlyoutSeparator />
+                                                <MenuFlyoutItem Text="Delete Transaction" Click="DeleteTx_Click" Tag="{x:Bind}">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE74D;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                            </MenuFlyout>
+                                        </Button.Flyout>
+                                    </Button>
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>

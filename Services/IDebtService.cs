@@ -9,6 +9,7 @@ public interface IDebtService
     Task<ApiResponse<List<Debt>>> GetDebtsAsync();
     Task<ApiResponse<Debt>> CreateDebtAsync(CreateDebtRequest request);
     Task<ApiResponse<Debt>> UpdateDebtAsync(string id, UpdateDebtRequest request);
+    Task<ApiResponse<Debt>> SettleDebtAsync(string id, SettleDebtRequest request);
     Task<ApiResponse<Debt>> SettleDebtAsync(string id, double amount, string assetId);
     Task<ApiResponse<object>> WriteOffDebtAsync(string id);
 }
@@ -37,10 +38,19 @@ public class DebtService : IDebtService
         return await _apiService.PutAsync<Debt>($"debts/{id}", request);
     }
 
+    public async Task<ApiResponse<Debt>> SettleDebtAsync(string id, SettleDebtRequest request)
+    {
+        var resp = await _apiService.PutAsync<Debt>($"debts/{id}/settle", request);
+        if (!resp.Success && resp.StatusCode == 404)
+        {
+            resp = await _apiService.PostAsync<Debt>($"debts/{id}/settle", request);
+        }
+        return resp;
+    }
+
     public async Task<ApiResponse<Debt>> SettleDebtAsync(string id, double amount, string assetId)
     {
-        var body = new SettleDebtRequest { Amount = amount, AssetId = assetId };
-        return await _apiService.PutAsync<Debt>($"debts/{id}/settle", body);
+        return await SettleDebtAsync(id, new SettleDebtRequest { Amount = amount, AssetId = assetId });
     }
 
     public async Task<ApiResponse<object>> WriteOffDebtAsync(string id)

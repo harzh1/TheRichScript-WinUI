@@ -19,6 +19,7 @@ public partial class TransactionsViewModel : ObservableObject
     private readonly ISettingsService _settingsService;
     private readonly IDataCacheService _dataCacheService;
     private readonly IBusyIndicatorService _busyIndicatorService;
+    private readonly IFxRateService _fxRateService;
 
     private List<Transaction> _allTransactions = new();
 
@@ -49,7 +50,7 @@ public partial class TransactionsViewModel : ObservableObject
     private ObservableCollection<Transaction> filteredTransactions = new();
 
     [ObservableProperty]
-    private ObservableCollection<string> categories = new() { "ALL" };
+    private ObservableCollection<string> categories = new();
 
     public List<string> TransactionTypes { get; } = new() { "ALL", "EXPENSE", "INCOME", "TRANSFER" };
 
@@ -87,7 +88,8 @@ public partial class TransactionsViewModel : ObservableObject
         IDialogService dialogService,
         ISettingsService settingsService,
         IDataCacheService dataCacheService,
-        IBusyIndicatorService busyIndicatorService)
+        IBusyIndicatorService busyIndicatorService,
+        IFxRateService fxRateService)
     {
         _transactionService = transactionService;
         _categoryService = categoryService;
@@ -96,9 +98,14 @@ public partial class TransactionsViewModel : ObservableObject
         _settingsService = settingsService;
         _dataCacheService = dataCacheService;
         _busyIndicatorService = busyIndicatorService;
+        _fxRateService = fxRateService;
 
         CurrencySymbol = _settingsService.Settings.CurrencySymbol;
-        _settingsService.CurrencyChanged += _ => CurrencySymbol = _settingsService.Settings.CurrencySymbol;
+        _settingsService.CurrencyChanged += _ =>
+        {
+            CurrencySymbol = _settingsService.Settings.CurrencySymbol;
+            UpdateSummaryTotals();
+        };
         _dataCacheService.DataUpdated += OnDataUpdated;
 
         LoadCategories();
@@ -106,6 +113,9 @@ public partial class TransactionsViewModel : ObservableObject
 
     private void OnDataUpdated(DataCacheType types)
     {
+        var authService = App.GetService<IAuthService>();
+        if (authService != null && !authService.IsAuthenticated) return;
+
         if (types.HasFlag(DataCacheType.Categories))
         {
             LoadCategories();
@@ -158,6 +168,9 @@ public partial class TransactionsViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadTransactionsAsync(bool resetPage = true)
     {
+        var authService = App.GetService<IAuthService>();
+        if (authService != null && !authService.IsAuthenticated) return;
+
         if (IsLoading) return;
         IsLoading = true;
 
@@ -289,11 +302,23 @@ public partial class TransactionsViewModel : ObservableObject
 
     private void UpdateSummaryTotals()
     {
+        var baseCurrency = _settingsService.Settings.PreferredCurrency ?? "INR";
         double inc = 0, exp = 0;
         foreach (var tx in FilteredTransactions)
         {
-            if (tx.IsIncome) inc += tx.Amount;
-            else if (tx.IsExpense) exp += tx.Amount;
+            double baseAmt;
+            if (tx.BaseAmount.HasValue && tx.BaseAmount.Value > 0)
+            {
+                baseAmt = tx.BaseAmount.Value;
+            }
+            else
+            {
+                var txCurr = string.IsNullOrWhiteSpace(tx.Currency) ? baseCurrency : tx.Currency;
+                baseAmt = _fxRateService.ConvertAmount(tx.Amount, txCurr, baseCurrency);
+            }
+
+            if (tx.IsIncome) inc += baseAmt;
+            else if (tx.IsExpense) exp += baseAmt;
         }
 
         TotalIncome = inc;

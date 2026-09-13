@@ -64,7 +64,7 @@ public sealed partial class GoalsPage : Page
                 var createResp = await goalService.CreateGoalAsync(dialog.Result);
                 if (createResp.Success)
                 {
-                    dataCache?.Invalidate(DataCacheType.Goals);
+                    dataCache?.Invalidate(DataCacheType.Goals | DataCacheType.Assets | DataCacheType.Transactions | DataCacheType.Analytics);
                     await ViewModel.LoadGoalsAsync();
                 }
                 else
@@ -102,7 +102,7 @@ public sealed partial class GoalsPage : Page
         {
             using (busy?.BeginBusy($"Depositing {ViewModel.CurrencySymbol}{dialog.Result.Amount:N2} to '{goal.Name}'..."))
             {
-                var fundResp = await goalService.AddFundsToGoalAsync(goal.Id, dialog.Result.Amount, dialog.Result.AssetId);
+                var fundResp = await goalService.AddFundsToGoalAsync(goal.Id, dialog.Result);
                 if (fundResp.Success)
                 {
                     dataCache?.Invalidate(DataCacheType.Goals | DataCacheType.Assets | DataCacheType.Transactions | DataCacheType.Analytics);

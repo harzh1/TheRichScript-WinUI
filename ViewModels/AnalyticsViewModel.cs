@@ -245,6 +245,10 @@ public partial class AnalyticsViewModel : ObservableObject
     private void ApplyAnalyticsSummary(AnalyticsSummary data)
     {
         AnalyticsData = data;
+        if (!string.IsNullOrWhiteSpace(data.Currency))
+        {
+            CurrencySymbol = CountryCurrencyData.GetCurrencySymbol(data.Currency);
+        }
 
         // Savings Rate & Total Expense
         if (AnalyticsData.MonthIncome > 0)
